@@ -86,10 +86,10 @@ public interface FormulaPresenter extends DiabelliComponent {
     /**
      * Returns a panel which displays the given goal. The returned panel will
      * be placed in a sub-window in the main GUI of Diabelli.
-     * @param formula the formula to be visualised.
+     * @param goal the formula to be visualised.
      * @return a panel which displays the given goal.
      */
-    JPanel createVisualiserFor(Goal formula);
+    JPanel createVisualiserFor(Goal goal);
     
     /**
      * Returns a panel which displays the given goal. The returned panel will

@@ -196,7 +196,7 @@ public final class ReasonersListTopComponent extends TopComponent implements Exp
         protected Collection<Node> initCollection() {
             Collection<? extends DiabelliComponent> allReasoners = reasonersLookupResult.allInstances();
 
-            ArrayList<Node> reasonerNodes = new ArrayList<Node>();
+            ArrayList<Node> reasonerNodes = new ArrayList<>();
             if (allReasoners != null) {
                 for (DiabelliComponent reasoner : allReasoners) {
                     if (reasoner instanceof Reasoner) {

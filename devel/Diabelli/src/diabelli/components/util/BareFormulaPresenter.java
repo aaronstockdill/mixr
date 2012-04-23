@@ -29,6 +29,7 @@ import diabelli.logic.Formula;
 import diabelli.logic.FormulaFormat;
 import diabelli.logic.FormulaRepresentation;
 import diabelli.logic.Goal;
+import javax.swing.JPanel;
 
 /**
  * Provides a basic partial implementation of the {@link FormulaPresenter formula presenter
@@ -65,5 +66,26 @@ public abstract class BareFormulaPresenter implements FormulaPresenter {
             return false;
         }
         return canPresent(formula.getFormat());
+    }
+
+    @Override
+    public JPanel createVisualiserFor(Goal goal) {
+        if (goal == null) {
+            return null;
+        }
+        return createVisualiserFor(goal.asFormula());
+    }
+
+    @Override
+    public JPanel createVisualiserFor(Formula<?> formula) {
+        if (formula == null) {
+            return null;
+        }
+        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
+            if (canPresent(formulaFormat)) {
+                return createVisualiserFor(formula.getRepresentation(formulaFormat));
+            }
+        }
+        return null;
     }
 }

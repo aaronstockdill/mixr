@@ -62,10 +62,10 @@ import org.openide.util.Utilities;
 import org.openide.windows.TopComponent;
 
 /**
- * This window gives the user the option to select particular representations (formats) of
- * a formula. This selection may then consequently be displayed with the help
- * of {@link FormulaPresenter formula presenters}. Additionally, the user may
- * request additional translations through this window.
+ * This window gives the user the option to select particular representations
+ * (formats) of a formula. This selection may then consequently be displayed
+ * with the help of {@link FormulaPresenter formula presenters}. Additionally,
+ * the user may request additional translations through this window.
  */
 @ConvertAsProperties(dtd = "-//diabelli.ui//CurrentFormula//EN",
 autostore = false)
@@ -176,19 +176,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
         @Override
         public void resultChanged(LookupEvent ev) {
-            Collection<? extends GeneralGoalNode> allInstances = goalSelection.allInstances();
-            for (GeneralGoalNode generalGoalNode : allInstances) {
-                if (generalGoalNode instanceof GoalsTopComponent.PremisesNode) {
-                    showPremises((GoalsTopComponent.PremisesNode) generalGoalNode);
-                } else if (generalGoalNode instanceof GoalsTopComponent.ConclusionNode) {
-                    showConclusion((GoalsTopComponent.ConclusionNode) generalGoalNode);
-                } else if (generalGoalNode instanceof GoalsTopComponent.PremiseNode) {
-                    showPremise((GoalsTopComponent.PremiseNode) generalGoalNode);
-                } else {
-                    showGoal(generalGoalNode);
-                }
-                break;
-            }
+            repopulateCurrentSelection();
         }
     }
     //</editor-fold>
@@ -208,6 +196,23 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
     private void showGoal(GeneralGoalNode generalGoalNode) {
         this.em.setRootContext(new CurrentGoalNode(generalGoalNode));
+    }
+
+    private void repopulateCurrentSelection() {
+        Collection<? extends GeneralGoalNode> allInstances = goalSelection.allInstances();
+        for (GeneralGoalNode generalGoalNode : allInstances) {
+            if (generalGoalNode instanceof GoalsTopComponent.PremisesNode) {
+                showPremises((GoalsTopComponent.PremisesNode) generalGoalNode);
+            } else if (generalGoalNode instanceof GoalsTopComponent.ConclusionNode) {
+                showConclusion((GoalsTopComponent.ConclusionNode) generalGoalNode);
+            } else if (generalGoalNode instanceof GoalsTopComponent.PremiseNode) {
+                showPremise((GoalsTopComponent.PremiseNode) generalGoalNode);
+            } else {
+                showGoal(generalGoalNode);
+            }
+            return;
+        }
+        this.em.setRootContext(Node.EMPTY);
     }
     //</editor-fold>
 
@@ -285,7 +290,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         CurrentPremiseNode(PremiseNode premise) {
             super(premise, Children.LEAF);
             setDisplayName(Bundle.CurrentPremiseNode_display_name(premise.premiseIndex + 1, premise.goalIndex + 1));
-            setChildren(Children.create(new FormulaFormatsChildren<PremiseNode>(this), false));
+            setChildren(Children.create(new FormulaFormatsChildren<>(this), false));
         }
 
         @Override
@@ -302,7 +307,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         CurrentConclusionNode(ConclusionNode conclusion) {
             super(conclusion, Children.LEAF);
             setDisplayName(Bundle.CurrentConclusionNode_display_name(conclusion.goalIndex + 1));
-            setChildren(Children.create(new FormulaFormatsChildren<ConclusionNode>(this), false));
+            setChildren(Children.create(new FormulaFormatsChildren<>(this), false));
         }
 
         @Override
@@ -319,7 +324,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         CurrentGoalNode(GeneralGoalNode goal) {
             super(goal, Children.LEAF);
             setDisplayName(Bundle.CurrentGoalNode_display_name(goal.goalIndex + 1));
-            setChildren(Children.create(new FormulaFormatsChildren<GeneralGoalNode>(this), false));
+            setChildren(Children.create(new FormulaFormatsChildren<>(this), false));
         }
     }
 
@@ -354,7 +359,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
             super(selection, Children.LEAF);
             this.toFormat = toFormat;
             setDisplayName(Bundle.FormatNode_displayName(toFormat.getPrettyName()));
-            setChildren(Children.create(new FormulaRepresentationsChildren<T>(this), true));
+            setChildren(Children.create(new FormulaRepresentationsChildren<>(this), true));
         }
 
         @Override
@@ -406,7 +411,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
             FormulaFormatManager formatManager = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager();
             Collection<FormulaFormat<?>> formats = formatManager.getFormulaFormats();
             for (FormulaFormat<?> format : formats) {
-                toPopulate.add(new FormatNode<T>(source, format));
+                toPopulate.add(new FormatNode<>(source, format));
             }
             return true;
         }
@@ -432,7 +437,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
             FormulaRepresentation[] representations = source.getSelectedFormula().fetchRepresentations(source.toFormat);
             if (representations != null && representations.length != 0) {
                 for (int i = 0; i < representations.length; i++) {
-                    toPopulate.add(new FormulaRepresentationNode<T>(source, representations, i));
+                    toPopulate.add(new FormulaRepresentationNode<>(source, representations, i));
                 }
             }
             return true;

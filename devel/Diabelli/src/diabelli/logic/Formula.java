@@ -116,7 +116,7 @@ public class Formula<T> {
             throw new IllegalArgumentException(Bundle.F_role_null());
         }
         // Initialise the fields:
-        this.representations = new HashMap<String, HashSet<FormulaRepresentation<?>>>();
+        this.representations = new HashMap<>();
         this.mainRepresentation = mainRepresentation;
         // Add the main representation to the registry too:
         putRepresentation(mainRepresentation.getFormat(), mainRepresentation);
@@ -193,7 +193,7 @@ public class Formula<T> {
     @NonNull
     public ArrayList<FormulaFormat<?>> getFormats() {
         synchronized (representations) {
-            ArrayList<FormulaFormat<?>> formats = new ArrayList<FormulaFormat<?>>();
+            ArrayList<FormulaFormat<?>> formats = new ArrayList<>();
             FormulaFormatManager formatManager = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager();
             for (Map.Entry<String, HashSet<FormulaRepresentation<?>>> formatEntry : representations.entrySet()) {
                 if (formatEntry.getValue() != null && formatEntry.getValue().size() > 0) {
@@ -255,6 +255,28 @@ public class Formula<T> {
         synchronized (representations) {
             HashSet<FormulaRepresentation<?>> formatReps = representations.get(format.getFormatName());
             return (FormulaRepresentation<TRepresentation>[]) (formatReps == null || formatReps.isEmpty() ? null : formatReps.toArray(new FormulaRepresentation<?>[formatReps.size()]));
+        }
+    }
+    
+    /**
+     * Returns a representation of this formula in the given format.
+     * 
+     * <p>There may be more than one representation of this formula in the given
+     * format. If so, an arbitrary one is returned.</p>
+     * 
+     * @param <TRep> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
+     * carried by the returned representation.
+     * @param format the desired format in which to get this formula.
+     * @return the translation of the {@link Formula#getMainRepresentation()
+     * formula} in the given format.
+     */
+    public <TRep> FormulaRepresentation<TRep> getRepresentation(FormulaFormat<TRep> format) {
+        if (format == null) {
+            throw new IllegalArgumentException(Bundle.F_toFormat_null());
+        }
+        synchronized (representations) {
+            HashSet<FormulaRepresentation<?>> formatReps = representations.get(format.getFormatName());
+            return (FormulaRepresentation<TRep>) (formatReps == null || formatReps.isEmpty() ? null : formatReps.iterator().next());
         }
     }
 
@@ -404,7 +426,7 @@ public class Formula<T> {
         synchronized (representations) {
             HashSet<FormulaRepresentation<?>> formatReps = representations.get(format.getFormatName());
             if (formatReps == null) {
-                formatReps = new HashSet<FormulaRepresentation<?>>();
+                formatReps = new HashSet<>();
                 representations.put(format.getFormatName(), formatReps);
             }
             if (representation != null) {

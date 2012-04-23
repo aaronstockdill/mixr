@@ -60,8 +60,8 @@ public final class DiabelliImpl implements Diabelli {
     private final InstanceContent instanceContent;
     private Result<DiabelliComponent> lookupResult;
     private final AbstractLookup componentsLookup;
-    private final HashSet<DiabelliComponent> components = new HashSet<DiabelliComponent>();
-    private final ArrayList<ManagerInternals> managers = new ArrayList<ManagerInternals>();
+    private final HashSet<DiabelliComponent> components = new HashSet<>();
+    private final ArrayList<ManagerInternals> managers = new ArrayList<>();
     // </editor-fold>
     // <editor-fold defaultstate="collapsed" desc="Managers Fields">
     private final ReasonersManagerImpl reasonersManager;

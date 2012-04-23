@@ -57,8 +57,8 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
             throw new IllegalArgumentException(Bundle.Manager_diabelli_null());
         }
         this.diabelli = diabelli;
-        this.formulaFormats = new HashMap<String, FormulaFormat<?>>();
-        this.formulaTranslators = new HashMap<String, FormulaTranslator<?, ?>>();
+        this.formulaFormats = new HashMap<>();
+        this.formulaTranslators = new HashMap<>();
     }
     //</editor-fold>
 
