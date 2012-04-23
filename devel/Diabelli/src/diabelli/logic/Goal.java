@@ -44,7 +44,7 @@ import org.openide.util.NbBundle;
 public class Goal {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
-    private final ArrayList<Formula<?>> premises;
+    private final ArrayList<? extends Formula<?>> premises;
     private final Formula<?> conclusion;
 //    private final Formula premisesFormula;
     private final Formula<?> goalAsformula;
@@ -59,7 +59,7 @@ public class Goal {
      * @param conclusion the conclusion of the goal.
      * @param goalAsformula the goal represented with a formula.
      */
-    public Goal(ArrayList<Formula<?>> premises, Formula<?> conclusion,/*
+    public Goal(ArrayList<? extends Formula<?>> premises, Formula<?> conclusion,/*
              * Formula premisesFormula,
              */ Formula<?> goalAsformula) {
         this.premises = premises;

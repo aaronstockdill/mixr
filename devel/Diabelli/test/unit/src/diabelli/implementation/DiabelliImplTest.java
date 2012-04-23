@@ -24,6 +24,8 @@
  */
 package diabelli.implementation;
 
+import diabelli.logic.Formula;
+import java.util.ArrayList;
 import org.junit.*;
 import static org.junit.Assert.*;
 
