@@ -63,7 +63,7 @@ public interface FormulaPresenter extends DiabelliComponent {
      * @return {@code true} if this presenter can produce a visualisation
      * of the given formula.
      */
-    boolean canPresent(Formula formula);
+    boolean canPresent(Formula<?> formula);
     
     /**
      * Should return {@code true} if this presenter can produce a visualisation
@@ -81,7 +81,7 @@ public interface FormulaPresenter extends DiabelliComponent {
      * @return {@code true} if this presenter can produce a visualisation
      * of formulae in the given format.
      */
-    boolean canPresent(FormulaFormat format);
+    boolean canPresent(FormulaFormat<?> format);
     
     /**
      * Returns a panel which displays the given goal. The returned panel will
@@ -97,7 +97,7 @@ public interface FormulaPresenter extends DiabelliComponent {
      * @param formula the formula to be visualised.
      * @return a panel which displays the given goal.
      */
-    JPanel createVisualiserFor(Formula formula);
+    JPanel createVisualiserFor(Formula<?> formula);
     
     /**
      * Returns a panel which displays the given goal. The returned panel will

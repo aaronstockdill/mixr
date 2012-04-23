@@ -1,5 +1,5 @@
 /*
- * File name: VariableReferencingFormulaFormat.java
+ * File name: DiabelliImplTest.java
  *    Author: Matej Urbas [matej.urbas@gmail.com]
  * 
  *  Copyright © 2012 Matej Urbas
@@ -22,30 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package diabelli.logic;
+package diabelli.implementation;
 
-import java.util.Set;
+import org.junit.*;
+import static org.junit.Assert.*;
 
 /**
- * Formulae of this format may contain free variables (or variables that are
- * bound outside of the scope of the formula).
- *
- * @param <T> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}.
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface VariableReferencingFormulaFormat<T> extends FormulaFormat<T> {
+public class DiabelliImplTest {
+    
+    public DiabelliImplTest() {
+    }
 
-    /**
-     * Returns the names of variables that are free in the formula (or that are
-     * bound outside of the scope of the formula). The context goal may be used
-     * to determine the names of globally bound variables.
-     *
-     * @param formula the formula from which we want to extract free variables.
-     * @param context the context which the variable extraction algorithm may
-     * use to find the proper names.
-     * @return the names of variables that are free in the formula (or that are
-     * bound outside of the scope of the formula).
-     */
-    Set<String> getFreeVariables(Formula<T> formula, Goal context);
+    @BeforeClass
+    public static void setUpClass() throws Exception {
+    }
+
+    @AfterClass
+    public static void tearDownClass() throws Exception {
+    }
+    
+    @Before
+    public void setUp() {
+    }
+    
+    @After
+    public void tearDown() {
+    }
+
+    @Test
+    public void testSomeMethod() {
+    }
+    
 }

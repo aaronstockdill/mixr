@@ -27,50 +27,58 @@ package diabelli.logic;
 /**
  * Formula formats of this type may be represented by a Unicode string. This
  * interface provides methods that perform the conversion.
+ *
+ * @param <T> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}.
+ *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface TextEncodedFormulaFormat extends FormulaFormat {
+public interface TextEncodedFormulaFormat<T> extends FormulaFormat<T> {
+
     /**
      * Encodes the given formula into a Unicode string.
+     *
      * @param formula the formula to be encoded as a string.
      * @return the Unicode string that encodes the given formula.
      * @throws diabelli.logic.TextEncodedFormulaFormat.FormulaEncodingException
      * thrown if the encoding failed for any reason (for example, if the given
-     * formula is not of this format).
-     *  <p>The message in this exception will be shown to the user in the GUI,
-     * it is therefore desired that the message be localised and human-readable.</p>
+     * formula is not of this format). <p>The message in this exception will be
+     * shown to the user in the GUI, it is therefore desired that the message be
+     * localised and human-readable.</p>
      */
-    String encodeAsString(Formula formula) throws FormulaEncodingException;
+    String encodeAsString(Formula<T> formula) throws FormulaEncodingException;
+
     /**
      * Decodes a formula from the given string.
+     *
      * @param encodedFormula the string that contains the formula
      * @return the decoded formula.
      * @throws diabelli.logic.TextEncodedFormulaFormat.FormulaEncodingException
-     * thrown if the decoding failed for any reason.
-     *  <p>The message in this exception will be shown to the user in the GUI,
-     * it is therefore desired that the message be localised and human-readable.</p>
+     * thrown if the decoding failed for any reason. <p>The message in this
+     * exception will be shown to the user in the GUI, it is therefore desired
+     * that the message be localised and human-readable.</p>
      */
-    Formula decodeFromString(String encodedFormula) throws FormulaEncodingException;
+    Formula<T> decodeFromString(String encodedFormula) throws FormulaEncodingException;
 
     //<editor-fold defaultstate="collapsed" desc="Exception Class">
     /**
      * This exception is thrown if the text encoding or decoding of a formula
-     * failed. The message in this exception will be shown to the user in the GUI,
-     * it is therefore desired that the message be localised and human-readable.
+     * failed. The message in this exception will be shown to the user in the
+     * GUI, it is therefore desired that the message be localised and
+     * human-readable.
      */
     public static class FormulaEncodingException extends Exception {
-        
+
         public FormulaEncodingException() {
         }
-        
+
         public FormulaEncodingException(Throwable cause) {
             super(cause);
         }
-        
+
         public FormulaEncodingException(String message, Throwable cause) {
             super(message, cause);
         }
-        
+
         public FormulaEncodingException(String message) {
             super(message);
         }

@@ -47,11 +47,11 @@ public abstract class BareFormulaPresenter implements FormulaPresenter {
     }
 
     @Override
-    public boolean canPresent(Formula formula) {
+    public boolean canPresent(Formula<?> formula) {
         if (formula == null) {
             return false;
         }
-        for (FormulaFormat formulaFormat : formula.getFormats()) {
+        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
             if (canPresent(formulaFormat)) {
                 return true;
             }

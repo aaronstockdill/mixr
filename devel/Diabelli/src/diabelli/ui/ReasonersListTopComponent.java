@@ -27,7 +27,6 @@ package diabelli.ui;
 import diabelli.Diabelli;
 import diabelli.components.DiabelliComponent;
 import diabelli.components.Reasoner;
-import static diabelli.ui.Bundle.ReasonersNode_reasoner_null;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,9 +60,7 @@ autostore = false)
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "navigator", openAtStartup = true)
 @ActionID(category = "Window", id = "diabelli.ui.ReasonersListTopComponent")
-@ActionReference(path = "Menu/Window" /*
- * , position = 333
- */)
+@ActionReference(path = "Menu/Window/Diabelli", position = 300)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_ReasonersListAction",
 preferredID = "ReasonersListTopComponent")
 @Messages({
@@ -162,7 +159,7 @@ public final class ReasonersListTopComponent extends TopComponent implements Exp
         public ReasonersNode(Reasoner reasoner) {
             super(Children.LEAF, Lookups.singleton(reasoner));
             if (reasoner == null) {
-                throw new IllegalArgumentException(ReasonersNode_reasoner_null());
+                throw new IllegalArgumentException(Bundle.ReasonersNode_reasoner_null());
             }
             this.reasoner = reasoner;
             setName(reasoner.toString());

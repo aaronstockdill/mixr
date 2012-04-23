@@ -44,10 +44,10 @@ import org.openide.util.NbBundle;
 public class Goal {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
-    private final ArrayList<Formula> premises;
-    private final Formula conclusion;
+    private final ArrayList<Formula<?>> premises;
+    private final Formula<?> conclusion;
 //    private final Formula premisesFormula;
-    private final Formula goalAsformula;
+    private final Formula<?> goalAsformula;
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Constructor">
@@ -57,12 +57,11 @@ public class Goal {
      *
      * @param premises the premises of the goal.
      * @param conclusion the conclusion of the goal.
-     * @param premisesFormula the premises expressed as a single formula.
      * @param goalAsformula the goal represented with a formula.
      */
-    public Goal(ArrayList<Formula> premises, Formula conclusion,/*
+    public Goal(ArrayList<Formula<?>> premises, Formula<?> conclusion,/*
              * Formula premisesFormula,
-             */ Formula goalAsformula) {
+             */ Formula<?> goalAsformula) {
         this.premises = premises;
         this.conclusion = conclusion;
 //        this.premisesFormula = premisesFormula;
@@ -77,7 +76,7 @@ public class Goal {
      *
      * @return the list of premises in this goal.
      */
-    public List<Formula> getPremises() {
+    public List<Formula<?>> getPremises() {
         return premises == null || premises.isEmpty() ? null : Collections.unmodifiableList(premises);
     }
 
@@ -98,7 +97,7 @@ public class Goal {
     @NbBundle.Messages({
         "G_premise_index_out_of_bounds=Could not fetch the premise at index '{0}'. There are '{1}' premises in this goal."
     })
-    public Formula getPremiseAt(int index) {
+    public Formula<?> getPremiseAt(int index) {
         int count = getPremisesCount();
         if (index >= count || index < 0) {
             throw new IndexOutOfBoundsException(Bundle.G_premise_index_out_of_bounds(index, count));
@@ -107,21 +106,13 @@ public class Goal {
         }
     }
 
-//    /**
-//     * Returns the premises represented as a single formula. This function
-//     * can return {@code null} even though there are some premises present.
-//     * @return the premises represented as a single formula.
-//     */
-//    public Formula getPremisesFormula() {
-//        return premisesFormula;
-//    }
     /**
      * Returns the conclusion of this goal. This method may return {@code
      * null} if this goal has no conclusion.
      *
      * @return the conclusion of this goal.
      */
-    public Formula getConclusion() {
+    public Formula<?> getConclusion() {
         return conclusion;
     }
 
@@ -132,7 +123,7 @@ public class Goal {
      *
      * @return a formula that represents the whole goal.
      */
-    public Formula asFormula() {
+    public Formula<?> asFormula() {
         return goalAsformula;
     }
     // </editor-fold>

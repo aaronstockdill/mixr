@@ -32,14 +32,15 @@ import org.openide.util.NbBundle;
  * Contains meta-information about the format in which {@link
  * FormulaRepresentation#getFormula() formulae} may be encoded.
  * 
+ * @param <T> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public class FormulaFormatDescriptor implements FormulaFormat {
+public class FormulaFormatDescriptor<T> implements FormulaFormat<T> {
     
     //<editor-fold defaultstate="collapsed" desc="Fields">
     private final String formatName;
     private final String prettyName;
-    private final Class<?> rawFormulaType;
+    private final Class<T> rawFormulaType;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -57,7 +58,7 @@ public class FormulaFormatDescriptor implements FormulaFormat {
         "FFD_pretty_name_null_or_empty=The human-readable name of the format must not be null or empty.",
         "FFD_raw_formula_type_null=The type of the raw formula for this format must not be null."
     })
-    public FormulaFormatDescriptor(@NonNull String formatName, @NonNull String prettyName, @NonNull Class<?> rawFormulaType) {
+    public FormulaFormatDescriptor(@NonNull String formatName, @NonNull String prettyName, @NonNull Class<T> rawFormulaType) {
         if (formatName == null || formatName.isEmpty()) {
             throw new IllegalArgumentException(Bundle.FFD_format_name_null_or_empty());
         }
@@ -123,7 +124,7 @@ public class FormulaFormatDescriptor implements FormulaFormat {
      * formula} for this format.
      */
     @Override
-    public Class<?> getRawFormulaType() {
+    public Class<T> getRawFormulaType() {
         return rawFormulaType;
     }
     // </editor-fold>

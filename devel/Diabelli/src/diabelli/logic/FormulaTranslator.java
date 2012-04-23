@@ -42,13 +42,15 @@ import org.openide.util.NbBundle;
  * <p>Diabelli will try to automatically translate all goals, premises, and
  * conclusions, that the user deliberately inspects.</p>
  *
+ * @param <TFrom> the {@link FormulaFormat#getRawFormulaType() type of the raw formula} which this translator can translate to another type.
+ * @param <TTo> the {@link FormulaFormat#getRawFormulaType() type of the raw formula} to which this translator can translate a formula.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public abstract class FormulaTranslator {
+public abstract class FormulaTranslator<TFrom, TTo> {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
-    private final FormulaFormat fromFormat;
-    private final FormulaFormat toFormat;
+    private final FormulaFormat<TFrom> fromFormat;
+    private final FormulaFormat<TTo> toFormat;
     private final TranslationType type;
     private final String name;
     //</editor-fold>
@@ -76,7 +78,7 @@ public abstract class FormulaTranslator {
         "FT_type_null=The type of the translation is not specified.",
         "FT_name_null=The name of this translator is not specified."
     })
-    protected FormulaTranslator(@NonNull FormulaFormat fromFormat, @NonNull FormulaFormat toFormat, @NonNull TranslationType type, @NonNull String name) {
+    protected FormulaTranslator(@NonNull FormulaFormat<TFrom> fromFormat, @NonNull FormulaFormat<TTo> toFormat, @NonNull TranslationType type, @NonNull String name) {
         if (fromFormat == null) {
             throw new IllegalArgumentException(Bundle.FT_fromFormat_null());
         }
@@ -105,7 +107,7 @@ public abstract class FormulaTranslator {
      * formulae.
      */
     @NonNull
-    public FormulaFormat getFromFormat() {
+    public FormulaFormat<TFrom> getFromFormat() {
         return fromFormat;
     }
 
@@ -117,7 +119,7 @@ public abstract class FormulaTranslator {
      * formulae.
      */
     @NonNull
-    public FormulaFormat getToFormat() {
+    public FormulaFormat<TTo> getToFormat() {
         return toFormat;
     }
 
@@ -177,7 +179,7 @@ public abstract class FormulaTranslator {
      * exception is thrown whenever the translation didn't succeed for any
      * reason. A detailed explanation might be given for the user.
      */
-    public abstract Formula translate(Formula formula) throws TranslationException;
+    public abstract Formula<TTo> translate(Formula<TFrom> formula) throws TranslationException;
 
     /**
      * Translates the given formulae (in the {@link
@@ -190,7 +192,7 @@ public abstract class FormulaTranslator {
      * exception is thrown whenever the translation didn't succeed for any
      * reason. A detailed explanation might be given for the user.
      */
-    public abstract ArrayList<Formula> translate(List<Formula> formulae) throws TranslationException;
+    public abstract ArrayList<Formula<TTo>> translate(List<Formula<TFrom>> formulae) throws TranslationException;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Helper Classes">

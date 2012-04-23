@@ -50,14 +50,14 @@ public interface FormulaFormatManager {
      * @return all registered formula formats.
      */
     @NonNull
-    Collection<FormulaFormat> getFormulaFormats();
+    Collection<FormulaFormat<?>> getFormulaFormats();
 
     /**
      * Returns the formula format with the given name.
      * @param formatName the name of the format to look up.
      * @return the formula format with the given name.
      */
-    FormulaFormat getFormulaFormat(String formatName);
+    FormulaFormat<?> getFormulaFormat(String formatName);
     
     /**
      * Returns the number of registered formula formats.
@@ -70,14 +70,14 @@ public interface FormulaFormatManager {
      * @return all registered formula translators.
      */
     @NonNull
-    Collection<FormulaTranslator> getFormulaTranslators();
+    Collection<FormulaTranslator<?,?>> getFormulaTranslators();
 
     /**
      * Returns the formula translator with the given name.
      * @param formatName the name of the formula translator to look up.
      * @return the formula translator with the given name.
      */
-    FormulaTranslator getFormulaTranslator(String formatName);
+    FormulaTranslator<?,?> getFormulaTranslator(String formatName);
     
     /**
      * Returns the number of registered formula translators.

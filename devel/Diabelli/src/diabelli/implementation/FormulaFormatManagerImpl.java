@@ -46,8 +46,8 @@ import org.openide.util.NbBundle;
 class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
-    private final HashMap<String, FormulaFormat> formulaFormats;
-    private final HashMap<String, FormulaTranslator> formulaTranslators;
+    private final HashMap<String, FormulaFormat<?>> formulaFormats;
+    private final HashMap<String, FormulaTranslator<?, ?>> formulaTranslators;
     private final Diabelli diabelli;
     //</editor-fold>
 
@@ -57,19 +57,19 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
             throw new IllegalArgumentException(Bundle.Manager_diabelli_null());
         }
         this.diabelli = diabelli;
-        this.formulaFormats = new HashMap<String, FormulaFormat>();
-        this.formulaTranslators = new HashMap<String, FormulaTranslator>();
+        this.formulaFormats = new HashMap<String, FormulaFormat<?>>();
+        this.formulaTranslators = new HashMap<String, FormulaTranslator<?, ?>>();
     }
     //</editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Formula Formats">
     @Override
-    public Collection<FormulaFormat> getFormulaFormats() {
+    public Collection<FormulaFormat<?>> getFormulaFormats() {
         return Collections.unmodifiableCollection(formulaFormats.values());
     }
 
     @Override
-    public FormulaFormat getFormulaFormat(String formatName) {
+    public FormulaFormat<?> getFormulaFormat(String formatName) {
         return formulaFormats.get(formatName);
     }
 
@@ -87,11 +87,11 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
         "FFM_formats_empty=The Diabelli component '{0}' advertises itself as a formula format provider, however, it provides no formats.",
         "FFM_format_null=The Diabelli component '{0}' tried to register a 'null' format."
     })
-    void registerFormulaFormats(Collection<FormulaFormat> formats, FormulaFormatsProvider providingComponent) {
+    void registerFormulaFormats(Collection<FormulaFormat<?>> formats, FormulaFormatsProvider providingComponent) {
         if (formats == null || formats.isEmpty()) {
             throw new IllegalArgumentException(Bundle.FFM_formats_empty(providingComponent.getName()));
         } else {
-            for (FormulaFormat format : formats) {
+            for (FormulaFormat<?> format : formats) {
                 if (format == null) {
                     throw new IllegalArgumentException(Bundle.FFM_format_null(providingComponent.getName()));
                 }
@@ -106,7 +106,7 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
     
     // <editor-fold defaultstate="collapsed" desc="Formula Translators">
     @Override
-    public Collection<FormulaTranslator> getFormulaTranslators() {
+    public Collection<FormulaTranslator<?, ?>> getFormulaTranslators() {
         return Collections.unmodifiableCollection(formulaTranslators.values());
     }
 
@@ -116,7 +116,7 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
     }
 
     @Override
-    public FormulaTranslator getFormulaTranslator(String formatName) {
+    public FormulaTranslator<?, ?> getFormulaTranslator(String formatName) {
         return formulaTranslators.get(formatName);
     }
 
@@ -129,11 +129,11 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
         "FFM_translators_empty=The Diabelli component '{0}' advertises itself as a formula translator provider, however, it provides no formula translators.",
         "FFM_translator_null=The Diabelli component '{0}' tried to register a 'null' formula translator."
     })
-    void registerFormulaTranslators(Collection<FormulaTranslator> translators, FormulaTranslationsProvider providingComponent) {
+    void registerFormulaTranslators(Collection<FormulaTranslator<?, ?>> translators, FormulaTranslationsProvider providingComponent) {
         if (translators == null || translators.isEmpty()) {
             throw new IllegalArgumentException(Bundle.FFM_translators_empty(providingComponent.getName()));
         } else {
-            for (FormulaTranslator translator : translators) {
+            for (FormulaTranslator<?, ?> translator : translators) {
                 if (translator == null) {
                     throw new IllegalArgumentException(Bundle.FFM_translator_null(providingComponent.getName()));
                 }

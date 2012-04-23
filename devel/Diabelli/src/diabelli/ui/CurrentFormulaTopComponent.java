@@ -27,7 +27,10 @@ package diabelli.ui;
 import diabelli.Diabelli;
 import diabelli.FormulaFormatManager;
 import diabelli.components.FormulaPresenter;
-import diabelli.logic.*;
+import diabelli.logic.Formula;
+import diabelli.logic.FormulaFormat;
+import diabelli.logic.FormulaRepresentation;
+import diabelli.logic.Goal;
 import diabelli.ui.GoalsTopComponent.ConclusionNode;
 import diabelli.ui.GoalsTopComponent.GeneralGoalNode;
 import diabelli.ui.GoalsTopComponent.PremiseNode;
@@ -54,9 +57,9 @@ import org.openide.util.Lookup;
 import org.openide.util.Lookup.Result;
 import org.openide.util.LookupEvent;
 import org.openide.util.LookupListener;
-import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
+import org.openide.windows.TopComponent;
 
 /**
  * This window gives the user the option to select particular representations (formats) of
@@ -71,9 +74,7 @@ autostore = false)
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "navigator", openAtStartup = true)
 @ActionID(category = "Window", id = "diabelli.ui.CurrentFormulaTopComponent")
-@ActionReference(path = "Menu/Window" /*
- * , position = 333
- */)
+@ActionReference(path = "Menu/Window/Diabelli", position = 300)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_CurrentFormulaAction",
 preferredID = "CurrentFormulaTopComponent")
 @Messages({
@@ -241,7 +242,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
          *
          * @return the selected formula that this node represents.
          */
-        public Formula getSelectedFormula() {
+        public Formula<?> getSelectedFormula() {
             return getSelectedGoal().asFormula();
         }
 
@@ -288,7 +289,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         }
 
         @Override
-        public Formula getSelectedFormula() {
+        public Formula<?> getSelectedFormula() {
             return goal.goal.getPremiseAt(goal.premiseIndex);
         }
     }
@@ -305,7 +306,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         }
 
         @Override
-        public Formula getSelectedFormula() {
+        public Formula<?> getSelectedFormula() {
             return goal.goal.getConclusion();
         }
     }
@@ -332,7 +333,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         }
 
         @Override
-        public Formula getSelectedFormula() {
+        public Formula<?> getSelectedFormula() {
             return delegate.getSelectedFormula();
         }
 
@@ -344,12 +345,12 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
     public static class FormatNode<T extends GeneralGoalNode> extends CurrentGoalSelectionDelegateNode<T> {
 
-        final FormulaFormat toFormat;
+        final FormulaFormat<?> toFormat;
 
         @Messages({
             "FormatNode_displayName=Format: {0}"
         })
-        FormatNode(CurrentGoalSelectionNode<T> selection, FormulaFormat toFormat) {
+        FormatNode(CurrentGoalSelectionNode<T> selection, FormulaFormat<?> toFormat) {
             super(selection, Children.LEAF);
             this.toFormat = toFormat;
             setDisplayName(Bundle.FormatNode_displayName(toFormat.getPrettyName()));
@@ -358,7 +359,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
         @Override
         public FormulaRepresentation<?> getSelectedFormulaRepresentation() {
-            FormulaRepresentation[] representations = getSelectedFormula().fetchRepresentations(toFormat);
+            FormulaRepresentation<?>[] representations = getSelectedFormula().fetchRepresentations(toFormat);
             return representations == null || representations.length == 0 ? null : representations[0];
         }
     }
@@ -403,8 +404,8 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
             // Go through all known formats and try to translate the selected
             // formula into all the formats.
             FormulaFormatManager formatManager = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager();
-            Collection<FormulaFormat> formats = formatManager.getFormulaFormats();
-            for (FormulaFormat format : formats) {
+            Collection<FormulaFormat<?>> formats = formatManager.getFormulaFormats();
+            for (FormulaFormat<?> format : formats) {
                 toPopulate.add(new FormatNode<T>(source, format));
             }
             return true;

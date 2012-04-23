@@ -44,5 +44,5 @@ public interface FormulaTranslationsProvider extends DiabelliComponent {
      * @return a list of formula translators provided by this Diabelli
      * component.
      */
-    Collection<FormulaTranslator> getFormulaTranslators();
+    Collection<FormulaTranslator<?, ?>> getFormulaTranslators();
 }

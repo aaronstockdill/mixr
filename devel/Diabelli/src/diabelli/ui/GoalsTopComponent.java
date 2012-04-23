@@ -62,9 +62,7 @@ autostore = false)
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "output", openAtStartup = true)
 @ActionID(category = "Window", id = "diabelli.ui.GoalsTopComponent")
-@ActionReference(path = "Menu/Window" /*
- * , position = 333
- */)
+@ActionReference(path = "Menu/Window/Diabelli", position = 300)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_GoalsAction",
 preferredID = "GoalsTopComponent")
 @Messages({

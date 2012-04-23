@@ -27,9 +27,10 @@ package diabelli.logic;
 /**
  * Formulae of this format support encoding of foreign embedded formulae within
  * its language.
+ * @param <T> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface CarrierFormulaFormat extends FormulaFormat {
+public interface CarrierFormulaFormat<T> extends FormulaFormat<T> {
 
     // <editor-fold defaultstate="collapsed" desc="Public Abstract Methods">
     /**
@@ -47,7 +48,7 @@ public interface CarrierFormulaFormat extends FormulaFormat {
      * message of this exception will be shown to the user in the GUI, it is 
      * therefore desired that the message is human-readable.
      */
-    public abstract Formula encodePlaceholder(Placeholder placeholder, Goal context) throws PlaceholderEmbeddingException;
+    public abstract Formula<T> encodePlaceholder(Placeholder placeholder, Goal context) throws PlaceholderEmbeddingException;
     /**
      * Looks at the formula, recognises whether it encodes a placeholder, and
      * extracts it if so.
@@ -62,7 +63,7 @@ public interface CarrierFormulaFormat extends FormulaFormat {
      * message of this exception will be shown to the user in the GUI, it is 
      * therefore desired that the message is human-readable.
      */
-    public abstract Placeholder decodePlaceholder(Formula formula, Goal context) throws PlaceholderEmbeddingException;
+    public abstract Placeholder decodePlaceholder(Formula<T> formula, Goal context) throws PlaceholderEmbeddingException;
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Exception Classes">

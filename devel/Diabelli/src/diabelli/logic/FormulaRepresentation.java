@@ -38,7 +38,7 @@ public final class FormulaRepresentation<T> {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
     private final T formula;
-    private final FormulaFormat format;
+    private final FormulaFormat<T> format;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -57,7 +57,7 @@ public final class FormulaRepresentation<T> {
         "FP_formula_null=A valid, non-null formula object must be provided.",
         "FP_format_null=A valid, non-null format description of the formula must be provided."
     })
-    public FormulaRepresentation(@NonNull T formula, @NonNull FormulaFormat format) {
+    public FormulaRepresentation(@NonNull T formula, @NonNull FormulaFormat<T> format) {
         if (formula == null) {
             throw new IllegalArgumentException(Bundle.FP_formula_null());
         }
@@ -89,7 +89,7 @@ public final class FormulaRepresentation<T> {
      * formula} is encoded.
      */
     @NonNull
-    public FormulaFormat getFormat() {
+    public FormulaFormat<T> getFormat() {
         return format;
     }
     //</editor-fold>
