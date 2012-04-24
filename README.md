@@ -16,4 +16,4 @@ Diabelli is an open source project. It's sources are freely available under the 
 
 The full text of the licence is in the following file:
 
->   `LICENSE`
+>   `<repository root>/LICENSE`
