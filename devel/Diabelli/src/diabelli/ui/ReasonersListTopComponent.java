@@ -60,7 +60,7 @@ autostore = false)
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "navigator", openAtStartup = true)
 @ActionID(category = "Window", id = "diabelli.ui.ReasonersListTopComponent")
-@ActionReference(path = "Menu/Window/Diabelli", position = 300)
+@ActionReference(path = "Menu/Window/Diabelli", position = 2000)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_ReasonersListAction",
 preferredID = "ReasonersListTopComponent")
 @Messages({

@@ -355,7 +355,7 @@ public class Formula<T> {
                         break;
                     }
                 } catch (TranslationException ex) {
-                    Logger.getLogger(Formula.class.getName()).log(Level.INFO, String.format("Translation with '%s' failed. Translation error message: %s", translator.getPrettyName(), ex.getMessage()), ex);
+                    Logger.getLogger(Formula.class.getName()).log(Level.FINEST, String.format("Translation with '%s' failed. Translation error message: %s", translator.getPrettyName(), ex.getMessage()), ex);
                 }
             }
         }

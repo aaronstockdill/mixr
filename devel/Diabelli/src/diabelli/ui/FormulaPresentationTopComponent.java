@@ -24,11 +24,17 @@
  */
 package diabelli.ui;
 
+import diabelli.ui.CurrentFormulaTopComponent.CurrentGoalSelectionNode;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
-import org.openide.windows.TopComponent;
+import org.openide.explorer.ExplorerManager;
+import org.openide.nodes.Node;
 import org.openide.util.NbBundle.Messages;
+import org.openide.windows.TopComponent;
+import org.openide.windows.WindowManager;
 
 /**
  * Listens to the currently selected formula in the {@link
@@ -36,30 +42,37 @@ import org.openide.util.NbBundle.Messages;
  */
 @ConvertAsProperties(dtd = "-//diabelli.ui//FormulaPresentation//EN",
 autostore = false)
-@TopComponent.Description(preferredID = "FormulaPresentationTopComponent",
+@TopComponent.Description(preferredID = FormulaPresentationTopComponent.PreferredId,
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "output", openAtStartup = true)
 @ActionID(category = "Window", id = "diabelli.ui.FormulaPresentationTopComponent")
-@ActionReference(path = "Menu/Window" /*
- * , position = 333
- */)
+@ActionReference(path = "Menu/Window/Diabelli", position = 300)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_FormulaPresentationAction",
-preferredID = "FormulaPresentationTopComponent")
+preferredID = FormulaPresentationTopComponent.PreferredId)
 @Messages({
     "CTL_FormulaPresentationAction=FormulaPresentation",
-    "CTL_FormulaPresentationTopComponent=FormulaPresentation Window",
-    "HINT_FormulaPresentationTopComponent=This is a FormulaPresentation window"
+    "CTL_FormulaPresentationTopComponent=Diabelli Visualisation",
+    "HINT_FormulaPresentationTopComponent=This window displays selected formulae in all supported formats.",
+    "FPTC_CurrentFormulaTopComponent_notFound=Could not find the CurrentFormulaTopComponent. This is a bug and should never happen."
 })
 public final class FormulaPresentationTopComponent extends TopComponent {
 
+    //<editor-fold defaultstate="collapsed" desc="Fields">
+    public static final String PreferredId = "FormulaPresentationTopComponent";
+    private final FormulaSelectionListener selectedFormulaListener = new FormulaSelectionListener();
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Constructors">
     public FormulaPresentationTopComponent() {
         initComponents();
         setName(Bundle.CTL_FormulaPresentationTopComponent());
         setToolTipText(Bundle.HINT_FormulaPresentationTopComponent());
 
     }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Generated Code">
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -82,14 +95,27 @@ public final class FormulaPresentationTopComponent extends TopComponent {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables
+    //</editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="TopComponent Stuff">
     @Override
     public void componentOpened() {
-        // TODO add custom code on component opening
+        CurrentFormulaTopComponent currentFormulaWindow = (CurrentFormulaTopComponent) WindowManager.getDefault().findTopComponent(CurrentFormulaTopComponent.PreferredID);
+        if (currentFormulaWindow != null) {
+            currentFormulaWindow.getExplorerManager().addPropertyChangeListener(selectedFormulaListener);
+            updateSelectionFrom(currentFormulaWindow.getExplorerManager());
+        } else {
+            throw new IllegalStateException(Bundle.FPTC_CurrentFormulaTopComponent_notFound());
+        }
     }
 
     @Override
     public void componentClosed() {
-        // TODO add custom code on component closing
+        CurrentFormulaTopComponent currentFormulaWindow = (CurrentFormulaTopComponent) WindowManager.getDefault().findTopComponent(CurrentFormulaTopComponent.PreferredID);
+        if (currentFormulaWindow != null) {
+            currentFormulaWindow.getExplorerManager().removePropertyChangeListener(selectedFormulaListener);
+        } else {
+            throw new IllegalStateException(Bundle.FPTC_CurrentFormulaTopComponent_notFound());
+        }
     }
 
     void writeProperties(java.util.Properties p) {
@@ -103,4 +129,37 @@ public final class FormulaPresentationTopComponent extends TopComponent {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
     }
+    //</editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Current Selection Update">
+    private void updateSelectionFrom(ExplorerManager em) {
+        Node[] selectedNodes = em.getSelectedNodes();
+        if (selectedNodes != null && selectedNodes.length > 0 && selectedNodes[0] instanceof CurrentGoalSelectionNode) {
+            updateSelection((CurrentGoalSelectionNode) selectedNodes[0]);
+        } else {
+            updateSelection(null);
+        }
+    }
+
+    private void updateSelection(CurrentGoalSelectionNode currentlySelectedFormula) {
+        if (currentlySelectedFormula == null) {
+            // TODO: Clear the panel.
+        } else {
+            // TODO: Show the formula with all possible presenters.
+        }
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Selected Formula Changed Listener">
+    private class FormulaSelectionListener implements PropertyChangeListener {
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            if ("selectedNodes".equals(evt.getPropertyName())) {
+                ExplorerManager em = (ExplorerManager) evt.getSource();
+                updateSelectionFrom(em);
+            }
+        }
+    }
+    // </editor-fold>
 }

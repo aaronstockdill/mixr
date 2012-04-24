@@ -26,7 +26,6 @@ package diabelli.ui;
 
 import diabelli.Diabelli;
 import diabelli.GoalsManager;
-import diabelli.logic.Formula;
 import diabelli.logic.Goal;
 import diabelli.logic.Goals;
 import java.beans.PropertyChangeEvent;
@@ -42,33 +41,33 @@ import org.openide.awt.ActionReference;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.TreeTableView;
-import org.openide.explorer.view.TreeView;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
-import org.openide.windows.TopComponent;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.lookup.Lookups;
+import org.openide.windows.TopComponent;
 
 /**
  * Top component which displays something.
  */
 @ConvertAsProperties(dtd = "-//diabelli.ui//Goals//EN",
 autostore = false)
-@TopComponent.Description(preferredID = "GoalsTopComponent",
+@TopComponent.Description(preferredID = GoalsTopComponent.PreferredID,
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "output", openAtStartup = true)
 @ActionID(category = "Window", id = "diabelli.ui.GoalsTopComponent")
-@ActionReference(path = "Menu/Window/Diabelli", position = 300)
+@ActionReference(path = "Menu/Window/Diabelli", position = 100)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_GoalsAction",
-preferredID = "GoalsTopComponent")
+preferredID = GoalsTopComponent.PreferredID)
 @Messages({
     "CTL_GoalsAction=Diabelli Goals",
     "CTL_GoalsTopComponent=Diabelli Goals",
-    "HINT_GoalsTopComponent=This window displays the list of current Diabelli goals."
+    "HINT_GoalsTopComponent=This window displays the list of current Diabelli goals.",
+    "GTC_root_node_display_name=Diabelli list of goals"
 })
 public final class GoalsTopComponent extends TopComponent implements ExplorerManager.Provider {
 
@@ -76,6 +75,10 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
     private ExplorerManager em;
     private Lookup lookup;
     private GoalsChangedListenerImpl goalsChangedListener;
+    /**
+     * The ID used to register this top component.
+     */
+    public static final String PreferredID = "GoalsTopComponent";
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -328,7 +331,8 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         Children children = Children.create(new GoalChildrenFactory(goals), false);
         Node root = new AbstractNode(children);
         this.em.setRootContext(root);
-        this.em.getRootContext().setDisplayName("Diabelli Goals List");
+        this.em.getRootContext().setDisplayName(Bundle.GTC_root_node_display_name());
+        // TODO: Maybe select the first non-mainrepresentation formula?
     }
 
     private void updateGoalsList() {

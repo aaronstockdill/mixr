@@ -35,6 +35,8 @@ import diabelli.ui.GoalsTopComponent.ConclusionNode;
 import diabelli.ui.GoalsTopComponent.GeneralGoalNode;
 import diabelli.ui.GoalsTopComponent.PremiseNode;
 import diabelli.ui.GoalsTopComponent.PremisesNode;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
@@ -60,6 +62,7 @@ import org.openide.util.LookupListener;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.Utilities;
 import org.openide.windows.TopComponent;
+import org.openide.windows.WindowManager;
 
 /**
  * This window gives the user the option to select particular representations
@@ -69,24 +72,25 @@ import org.openide.windows.TopComponent;
  */
 @ConvertAsProperties(dtd = "-//diabelli.ui//CurrentFormula//EN",
 autostore = false)
-@TopComponent.Description(preferredID = "CurrentFormulaTopComponent",
+@TopComponent.Description(preferredID = CurrentFormulaTopComponent.PreferredID,
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode = "navigator", openAtStartup = true)
 @ActionID(category = "Window", id = "diabelli.ui.CurrentFormulaTopComponent")
-@ActionReference(path = "Menu/Window/Diabelli", position = 300)
+@ActionReference(path = "Menu/Window/Diabelli", position = 200)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_CurrentFormulaAction",
-preferredID = "CurrentFormulaTopComponent")
+preferredID = CurrentFormulaTopComponent.PreferredID)
 @Messages({
     "CTL_CurrentFormulaAction=Current Formula",
     "CTL_CurrentFormulaTopComponent=Current Formula",
-    "HINT_CurrentFormulaTopComponent=Shows details for the currently selected formula in the 'Diabelli Goals' window."
+    "HINT_CurrentFormulaTopComponent=Shows details for the currently selected formula in the 'Diabelli Goals' window.",
+    "CFTC_root_node_display_name=Formula formats list:"
 })
 public final class CurrentFormulaTopComponent extends TopComponent implements ExplorerManager.Provider {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
-    private Result<GeneralGoalNode> goalSelection;
-    private final GoalSelectionListenerImpl goalSelectionListenerImpl;
+    public static final String PreferredID = "CurrentFormulaTopComponent";
+    private final GoalSelectionListener goalSelectionListener;
     private ExplorerManager em;
     private Lookup lookup;
     //</editor-fold>
@@ -104,12 +108,16 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         this.associateLookup(this.lookup);
 
         // Make the root node invisible in the view:
-//        ((TreeTableView) goalSelectionView).setRootVisible(false);
+        ((TreeTableView) goalSelectionView).setRootVisible(false);
+        // Only one formula may be selected at a time:
         ((TreeTableView) goalSelectionView).setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
         // Create the listener that will tell us when the user has changed the
         // focused goal.
-        goalSelectionListenerImpl = new GoalSelectionListenerImpl();
+        goalSelectionListener = new GoalSelectionListener();
+
+        // Let the initially displayed thing be an empty node:
+        resetRootNode(Node.EMPTY);
     }
     //</editor-fold>
 
@@ -133,19 +141,29 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="TopComponent Overrides">
+    @Messages({
+        "CFTC_goalsTopComponent_notFound=Could not find the GoalsTopComponent. This is a bug and should never happen."
+    })
     @Override
     public void componentOpened() {
-        if (goalSelection == null) {
-            goalSelection = Utilities.actionsGlobalContext().lookupResult(GoalsTopComponent.GeneralGoalNode.class);
+        GoalsTopComponent goalsTopComponent = (GoalsTopComponent) WindowManager.getDefault().findTopComponent(GoalsTopComponent.PreferredID);
+        if (goalsTopComponent != null) {
+            goalsTopComponent.getExplorerManager().addPropertyChangeListener(goalSelectionListener);
+            updateSelectionFrom(goalsTopComponent.getExplorerManager());
+        } else {
+            throw new IllegalStateException(Bundle.CFTC_goalsTopComponent_notFound());
         }
-        goalSelection.addLookupListener(goalSelectionListenerImpl);
     }
 
     @Override
     public void componentClosed() {
-        if (goalSelection != null) {
-            goalSelection.removeLookupListener(goalSelectionListenerImpl);
+        GoalsTopComponent goalsTopComponent = (GoalsTopComponent) WindowManager.getDefault().findTopComponent(GoalsTopComponent.PreferredID);
+        if (goalsTopComponent != null) {
+            goalsTopComponent.getExplorerManager().removePropertyChangeListener(goalSelectionListener);
+        } else {
+            throw new IllegalStateException(Bundle.CFTC_goalsTopComponent_notFound());
         }
+        resetRootNode(Node.EMPTY);
     }
 
     void writeProperties(java.util.Properties p) {
@@ -169,14 +187,14 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Goal Selection Change Listener">
-    private class GoalSelectionListenerImpl implements LookupListener {
-
-        public GoalSelectionListenerImpl() {
-        }
+    private class GoalSelectionListener implements PropertyChangeListener {
 
         @Override
-        public void resultChanged(LookupEvent ev) {
-            repopulateCurrentSelection();
+        public void propertyChange(PropertyChangeEvent evt) {
+            if ("selectedNodes".equals(evt.getPropertyName())) {
+                ExplorerManager em = (ExplorerManager) evt.getSource();
+                updateSelectionFrom(em);
+            }
         }
     }
     //</editor-fold>
@@ -186,33 +204,72 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         Logger.getLogger(CurrentFormulaTopComponent.class.getName()).log(Level.INFO, "Showing whole premises not yet supported.");
     }
 
+    private static class WrapperChildFactory<T extends Node> extends ChildFactory<T> {
+
+        private final T node;
+
+        public WrapperChildFactory(T node) {
+            this.node = node;
+        }
+
+        @Override
+        protected boolean createKeys(List<T> toPopulate) {
+            toPopulate.add(node);
+            return true;
+        }
+
+        @Override
+        protected Node createNodeForKey(T key) {
+            return key;
+        }
+    }
+
+    private void resetRootContextTitle() {
+        this.em.getRootContext().setDisplayName(Bundle.CFTC_root_node_display_name());
+    }
+
+    private void resetRootNode(final Node rootNode) {
+        this.em.setRootContext(rootNode);
+        resetRootContextTitle();
+    }
+
+    private <T extends Node> void wrapAndSetRootNode(final T aNode) {
+        resetRootNode(new AbstractNode(Children.create(new WrapperChildFactory<>(aNode), false)));
+    }
+
     private void showConclusion(ConclusionNode conclusionNode) {
-        this.em.setRootContext(new CurrentConclusionNode(conclusionNode));
+        wrapAndSetRootNode(new CurrentConclusionNode(conclusionNode));
     }
 
     private void showPremise(PremiseNode premiseNode) {
-        this.em.setRootContext(new CurrentPremiseNode(premiseNode));
+        wrapAndSetRootNode(new CurrentPremiseNode(premiseNode));
     }
 
     private void showGoal(GeneralGoalNode generalGoalNode) {
-        this.em.setRootContext(new CurrentGoalNode(generalGoalNode));
+        wrapAndSetRootNode(new CurrentGoalNode(generalGoalNode));
     }
 
-    private void repopulateCurrentSelection() {
-        Collection<? extends GeneralGoalNode> allInstances = goalSelection.allInstances();
-        for (GeneralGoalNode generalGoalNode : allInstances) {
-            if (generalGoalNode instanceof GoalsTopComponent.PremisesNode) {
-                showPremises((GoalsTopComponent.PremisesNode) generalGoalNode);
-            } else if (generalGoalNode instanceof GoalsTopComponent.ConclusionNode) {
-                showConclusion((GoalsTopComponent.ConclusionNode) generalGoalNode);
-            } else if (generalGoalNode instanceof GoalsTopComponent.PremiseNode) {
-                showPremise((GoalsTopComponent.PremiseNode) generalGoalNode);
-            } else {
-                showGoal(generalGoalNode);
-            }
-            return;
+    private void updateSelection(GeneralGoalNode generalGoalNode) {
+        if (generalGoalNode == null) {
+            resetRootNode(Node.EMPTY);
+        } else if (generalGoalNode instanceof GoalsTopComponent.PremisesNode) {
+            showPremises((GoalsTopComponent.PremisesNode) generalGoalNode);
+        } else if (generalGoalNode instanceof GoalsTopComponent.ConclusionNode) {
+            showConclusion((GoalsTopComponent.ConclusionNode) generalGoalNode);
+        } else if (generalGoalNode instanceof GoalsTopComponent.PremiseNode) {
+            showPremise((GoalsTopComponent.PremiseNode) generalGoalNode);
+        } else {
+            showGoal(generalGoalNode);
         }
-        this.em.setRootContext(Node.EMPTY);
+    }
+
+    private void updateSelectionFrom(ExplorerManager em) {
+        Node[] selectedNodes = em.getSelectedNodes();
+        if (selectedNodes != null && selectedNodes.length > 0 && selectedNodes[0] instanceof GeneralGoalNode) {
+            updateSelection((GeneralGoalNode) selectedNodes[0]);
+        } else {
+            updateSelection(null);
+        }
     }
     //</editor-fold>
 

@@ -24,18 +24,78 @@
  */
 package diabelli.logic;
 
+import org.openide.util.NbBundle;
+
 /**
  * Contains a formula of a specific format and tracks the outwardly referenced
- * variables that appear in the formula. Placeholders are used to insert
- * arbitrary different representations into another formula. <p>The language
- * into which we want to insert placeholders must support the insertion of
- * uninterpreted terms of the following form:<div style="padding-left: 2em;"><pre><span style="font-style:italic;">P<sub>uninterpreted</sub></span>("<span style="font-style:italic;">formatName</span>", [<span style="font-style:italic;">listOfVariables</span>], "<span style="font-style:italic;">encodedFormula</span>")</pre></div>
- * </p>
+ * variables that appear in the formula. {@link Placeholder Placeholders} are
+ * used to insert arbitrary different representations into another formula.
  *
+ * <p> The language into which we want to insert placeholders must support the
+ * insertion of uninterpreted terms of the following form:
+ *
+ * <div style="padding-left: 2em;">
+ * <pre><span style="font-style:italic;">P<sub>uninterpreted</sub></span>("<span
+ * style="font-style:italic;">formatName</span>", [<span
+ * style="font-style:italic;">listOfVariables</span>], "<span
+ * style="font-style:italic;">encodedFormula</span>")</pre> </div>
+ *
+ * The <span style="font-style:italic;">formatName</span> may be included in the
+ * <span style="font-style:italic;">encodedFormula</span>. It is up to the
+ * {@link CarrierFormulaFormat carrier language driver} how to encode a
+ * placeholder. </p>
+ *
+ * @param <THost> the {@link FormulaFormat#getRawFormulaType() type of raw formulae}
+ * of the host language (this language supports embedding of other formulae
+ * through {@link Placeholder placeholders}).
+ * @param <TEmbedded>
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public class Placeholder {
-    
-    public Placeholder() {
+public class Placeholder<THost, TEmbedded> {
+
+    //<editor-fold defaultstate="collapsed" desc="Fields">
+    private final CarrierFormulaFormat<THost> hostingFormat;
+    private final EmbeddableFormulaFormat<TEmbedded> embeddedFormat;
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Constructors">
+    /**
+     * Creates a fully initialised placeholder. It contains enough information
+     * to be embedded in the {@link Placeholder#getHostingFormat() hosting language}.
+     * @param hostingFormat the format of the hosting sentence.
+     * @param embeddedFormat the format of the sentence that is to be embedded.
+     */
+    @NbBundle.Messages({
+        "PH_null_hosting_format=A valid hosting format must be provided.",
+        "PH_null_embedded_format=A valid format of the embedded formula must be provided."
+    })
+    public Placeholder(CarrierFormulaFormat<THost> hostingFormat, EmbeddableFormulaFormat<TEmbedded> embeddedFormat) {
+        if (embeddedFormat == null) {
+            throw new IllegalArgumentException(Bundle.PH_null_embedded_format());
+        }
+        if (hostingFormat == null) {
+            throw new IllegalArgumentException(Bundle.PH_null_hosting_format());
+        }
+        this.embeddedFormat = embeddedFormat;
+        this.hostingFormat = hostingFormat;
     }
+    //</editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Public Properties">
+    public EmbeddableFormulaFormat<TEmbedded> getEmbeddedFormat() {
+        return embeddedFormat;
+    }
+    
+    public CarrierFormulaFormat<THost> getHostingFormat() {
+        return hostingFormat;
+    }
+    
+    public FormulaRepresentation<THost> asFormula() {
+        throw new UnsupportedOperationException();
+    }
+    
+    public FormulaRepresentation<TEmbedded> getEmbeddedFormula() {
+        throw new UnsupportedOperationException();
+    }
+    // </editor-fold>
 }

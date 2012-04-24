@@ -46,6 +46,19 @@ public interface TextEncodedFormulaFormat<T> extends FormulaFormat<T> {
      * localised and human-readable.</p>
      */
     String encodeAsString(Formula<T> formula) throws FormulaEncodingException;
+    
+    /**
+     * Encodes the given formula into a Unicode string.
+     *
+     * @param formula the formula to be encoded as a string.
+     * @return the Unicode string that encodes the given formula.
+     * @throws diabelli.logic.TextEncodedFormulaFormat.FormulaEncodingException
+     * thrown if the encoding failed for any reason (for example, if the given
+     * formula is not of this format). <p>The message in this exception will be
+     * shown to the user in the GUI, it is therefore desired that the message be
+     * localised and human-readable.</p>
+     */
+    String encodeAsString(FormulaRepresentation<T> formula) throws FormulaEncodingException;
 
     /**
      * Decodes a formula from the given string.
