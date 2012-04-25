@@ -37,6 +37,8 @@ public interface CarrierFormulaFormat<T> extends FormulaFormat<T> {
      * Encodes the formula in the placeholder (i.e., the foreign formula to be
      * embedded into the given goal).
      * 
+     * @param <TPayload> The raw type of the {@link FormulaRepresentation formula}
+     * to be put into the placeholder as payload.
      * @param placeholder the foreign formula we want to encode in this format.
      * @param context the goal into which we want to encode the formula. There
      * may be no context, in which case this parameter may be {@code null}.
@@ -48,7 +50,7 @@ public interface CarrierFormulaFormat<T> extends FormulaFormat<T> {
      * message of this exception will be shown to the user in the GUI, it is 
      * therefore desired that the message is human-readable.
      */
-    public abstract Formula<T> encodePlaceholder(Placeholder placeholder, Goal context) throws PlaceholderEmbeddingException;
+    public abstract <TPayload> Formula<T> encodePlaceholder(Placeholder<T, TPayload> placeholder, Goal context) throws PlaceholderEmbeddingException;
     /**
      * Looks at the formula, recognises whether it encodes a placeholder, and
      * extracts it if so.
@@ -63,7 +65,7 @@ public interface CarrierFormulaFormat<T> extends FormulaFormat<T> {
      * message of this exception will be shown to the user in the GUI, it is 
      * therefore desired that the message is human-readable.
      */
-    public abstract Placeholder decodePlaceholder(Formula<T> formula, Goal context) throws PlaceholderEmbeddingException;
+    public abstract Placeholder<T, ?> decodePlaceholder(Formula<T> formula, Goal context) throws PlaceholderEmbeddingException;
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Exception Classes">

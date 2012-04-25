@@ -270,6 +270,7 @@ public class Formula<T> {
      * @return the translation of the {@link Formula#getMainRepresentation()
      * formula} in the given format.
      */
+    @SuppressWarnings("unchecked")
     public <TRep> FormulaRepresentation<TRep> getRepresentation(FormulaFormat<TRep> format) {
         if (format == null) {
             throw new IllegalArgumentException(Bundle.F_toFormat_null());

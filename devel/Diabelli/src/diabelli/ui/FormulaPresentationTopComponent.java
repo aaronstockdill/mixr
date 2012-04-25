@@ -134,14 +134,14 @@ public final class FormulaPresentationTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Current Selection Update">
     private void updateSelectionFrom(ExplorerManager em) {
         Node[] selectedNodes = em.getSelectedNodes();
-        if (selectedNodes != null && selectedNodes.length > 0 && selectedNodes[0] instanceof CurrentGoalSelectionNode) {
-            updateSelection((CurrentGoalSelectionNode) selectedNodes[0]);
+        if (selectedNodes != null && selectedNodes.length > 0 && selectedNodes[0] instanceof CurrentGoalSelectionNode<?>) {
+            updateSelection((CurrentGoalSelectionNode<?>) selectedNodes[0]);
         } else {
             updateSelection(null);
         }
     }
 
-    private void updateSelection(CurrentGoalSelectionNode currentlySelectedFormula) {
+    private void updateSelection(CurrentGoalSelectionNode<?> currentlySelectedFormula) {
         if (currentlySelectedFormula == null) {
             // TODO: Clear the panel.
         } else {
