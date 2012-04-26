@@ -203,20 +203,35 @@ public class Formula<T> {
             return formats;
         }
     }
+    
+    /**
+     * This method returns all the names of {@link FormulaFormat formula formats}
+     * for which we have at least tried to get a representation of this formula.
+     * This means that even if a format's name is listed in the returned collection,
+     * there might be no {@link Formula#getRepresentation(diabelli.logic.FormulaFormat) representation}
+     * in that formal of this formula.
+     * 
+     * @return all the names of {@link FormulaFormat formula formats}
+     * for which we have at least tried to get a representation of this formula.
+     */
+    public String[] getFetchedFormatNames() {
+        synchronized (representations) {
+            Set<String> formatNames = representations.keySet();
+            return formatNames.toArray(new String[formatNames.size()]);
+        }
+    }
 
     /**
-     * Returns the number of formats this formula has representations in. The
-     * minimum this function can return is {@code 1}.
-     *
-     * <p><span style="font-weight:bold">Note</span>: it might be that there is
-     * no representation of this formula in a format, even though the format is
-     * listed in {@link Formula#getFormats()}. This means that an attempt on
-     * translating the formula to the format has been made via {@link Formula#fetchRepresentations(diabelli.logic.FormulaFormatDescriptor)}
-     * but it yielded no results──the translation did not succeed.</p>
-     *
+     * Returns the number of {@link FormulaFormat formats} this formula has been tried to be
+     * translated to. The minimum this function can return is {@code 1} (because
+     * there is always the {@link Formula#getRepresentation(diabelli.logic.FormulaFormat) format} of the {@link Formula#getMainRepresentation() main
+     * representation}).
+     * 
+     * <p>This function returns the length of the array returned by {@link Formula#getFetchedFormatNames() }.</p>
+     * 
      * @return the number of representations this formula has.
      */
-    public int getFormatsCount() {
+    public int getFetchedFormatsCount() {
         synchronized (representations) {
             return representations.size();
         }

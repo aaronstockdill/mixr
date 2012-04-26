@@ -64,18 +64,20 @@ public final class DiabelliImpl implements Diabelli {
     private final ArrayList<ManagerInternals> managers = new ArrayList<>();
     // </editor-fold>
     // <editor-fold defaultstate="collapsed" desc="Managers Fields">
-    private final ReasonersManagerImpl reasonersManager;
-    private final GoalsManagerImpl goalManager;
-    private final FormulaFormatManagerImpl formulaFormatManager;
+    final ReasonersManagerImpl reasonersManager;
+    final GoalsManagerImpl goalManager;
+    final FormulaFormatManagerImpl formulaFormatManager;
+    final PresentationManagerImpl presentationManager;
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Constructor">
     public DiabelliImpl() {
 
         // Initialise all managers:
-        managers.add(reasonersManager = new ReasonersManagerImpl(this));
-        managers.add(goalManager = new GoalsManagerImpl(this, reasonersManager));
-        managers.add(formulaFormatManager = new FormulaFormatManagerImpl(this));
+        managers.add(reasonersManager = new ReasonersManagerImpl());
+        managers.add(goalManager = new GoalsManagerImpl());
+        managers.add(formulaFormatManager = new FormulaFormatManagerImpl());
+        managers.add(presentationManager = new PresentationManagerImpl());
 
         // First create an empty list of components (then wait for them to
         // register or deregister).
@@ -84,7 +86,7 @@ public final class DiabelliImpl implements Diabelli {
 
         // Initialise the particular managers:
         for (ManagerInternals manager : managers) {
-            manager.initialise();
+            manager.initialise(this);
         }
 
         // Find all Diabelli components and register them.

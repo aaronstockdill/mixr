@@ -25,6 +25,7 @@
 package diabelli;
 
 import diabelli.components.DiabelliComponent;
+import diabelli.components.FormulaFormatsProvider;
 import diabelli.logic.FormulaFormat;
 import diabelli.logic.FormulaRepresentation;
 import diabelli.logic.FormulaTranslator;
@@ -40,7 +41,7 @@ import org.netbeans.api.annotations.common.NonNull;
  * provides a solution for ease of translation between the reasoners.
  * <p>Formula formats are registered when {@link DiabelliComponent Diabelli components}
  * are loaded. The components which want to register new formula formats must 
- * implement the {@link FormulaFormatProvider} interface.</p>
+ * implement the {@link FormulaFormatsProvider} interface.</p>
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public interface FormulaFormatManager {

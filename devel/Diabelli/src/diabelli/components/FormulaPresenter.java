@@ -34,7 +34,7 @@ import javax.swing.JPanel;
 /**
  * Formula presenters take a {@link Formula Diabelli formula} and return a
  * visual component that displays the formula. For example, a formula with a
- * spider-diagrammatic {@link Formula#getRepresentations(diabelli.logic.FormulaFormatDescriptor) representation}
+ * spider-diagrammatic {@link Formula#getRepresentations(diabelli.logic.FormulaFormat) representation}
  * could be visualised with a spider diagram. Diabelli components (like
  * Speedith for Diabelli) provides visual representations through this
  * interface.

@@ -1,5 +1,5 @@
 /*
- * File name: PresentationManager.java
+ * File name: PresentationManagerImpl.java
  *    Author: Matej Urbas [matej.urbas@gmail.com]
  * 
  *  Copyright © 2012 Matej Urbas
@@ -22,37 +22,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package diabelli;
+package diabelli.implementation;
 
+import diabelli.PresentationManager;
+import diabelli.components.DiabelliComponent;
 import diabelli.components.FormulaPresenter;
-import diabelli.logic.Formula;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Provides a central mechanism for handling visualisation of {@link Formula Diabelli formulae}.
- * 
- * <p>This manager keeps track of all </p>
- * 
+ * Keeps a list of all registered {@link FormulaPresenter formula presenters} in
+ * the current Diabelli instance.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface PresentationManager {
-    
-    /**
-     * Returns a collection of all registered {@link FormulaPresenter formula
-     * presenters}. These Diabelli components are used to visualise currently
-     * selected formulae in Diabelli's user interface.
-     * @return a collection of all registered {@link FormulaPresenter formula
-     * presenters}.
-     */
-    Set<FormulaPresenter> getPresenters();
-    
-    /**
-     * Returns the number of {@link PresentationManager#getPresenters() registered
-     * formula presenters}.
-     * @return the number of {@link PresentationManager#getPresenters() registered
-     * formula presenters}.
-     */
-    int getPresentersCount();
-    
+class PresentationManagerImpl implements ManagerInternals, PresentationManager {
+
+    // <editor-fold defaultstate="collapsed" desc="Fields">
+    private DiabelliImpl host;
+    private final HashSet<FormulaPresenter> presenters = new HashSet<>();
+    // </editor-fold>
+
+    @Override
+    public void initialise(DiabelliImpl host) {
+        this.host = host;
+    }
+
+    @Override
+    public void onAfterComponentsLoaded() {
+        // Set the first goal providing reasoner as the active one:
+        for (DiabelliComponent diabelliComponent : host.getRegisteredComponents()) {
+            if (diabelliComponent instanceof FormulaPresenter) {
+                presenters.add((FormulaPresenter)diabelliComponent);
+            }
+        }
+    }
+
+    @Override
+    public Set<FormulaPresenter> getPresenters() {
+        return Collections.unmodifiableSet(presenters);
+    }
+
+    @Override
+    public int getPresentersCount() {
+        return presenters.size();
+    }
 }

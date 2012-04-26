@@ -24,6 +24,7 @@
  */
 package diabelli.logic;
 
+import diabelli.FormulaFormatManager;
 import org.netbeans.api.annotations.common.NonNull;
 
 /**

@@ -24,6 +24,8 @@
  */
 package diabelli.components;
 
+import diabelli.Diabelli;
+import diabelli.FormulaFormatManager;
 import diabelli.logic.FormulaTranslator;
 import java.util.Collection;
 

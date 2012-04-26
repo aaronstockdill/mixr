@@ -46,6 +46,7 @@ public class TermGoal extends Goal {
     //<editor-fold defaultstate="collapsed" desc="Constructor">
     TermGoal(ArrayList<Free> variables, ArrayList<Term> premises, Term conclusion, Term term) {
         super(TermsToDiabelli.toFormulae(premises, Formula.FormulaRole.Premise),
+                null,
                 TermsToDiabelli.toFormula(conclusion, Formula.FormulaRole.Conclusion),
                 TermsToDiabelli.toFormula(term, Formula.FormulaRole.Goal));
         this.variables = variables;

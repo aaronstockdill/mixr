@@ -46,19 +46,13 @@ import org.openide.util.NbBundle;
 class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
-    private final HashMap<String, FormulaFormat<?>> formulaFormats;
-    private final HashMap<String, FormulaTranslator<?, ?>> formulaTranslators;
-    private final Diabelli diabelli;
+    private HashMap<String, FormulaFormat<?>> formulaFormats;
+    private HashMap<String, FormulaTranslator<?, ?>> formulaTranslators;
+    private Diabelli diabelli;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
-    FormulaFormatManagerImpl(Diabelli diabelli) {
-        if (diabelli == null) {
-            throw new IllegalArgumentException(Bundle.Manager_diabelli_null());
-        }
-        this.diabelli = diabelli;
-        this.formulaFormats = new HashMap<>();
-        this.formulaTranslators = new HashMap<>();
+    FormulaFormatManagerImpl() {
     }
     //</editor-fold>
 
@@ -148,7 +142,13 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
 
     // <editor-fold defaultstate="collapsed" desc="Package Private Implementation Specifics">
     @Override
-    public void initialise() {
+    public void initialise(DiabelliImpl host) {
+        if (host == null) {
+            throw new IllegalArgumentException(Bundle.Manager_diabelli_null());
+        }
+        this.diabelli = host;
+        this.formulaFormats = new HashMap<>();
+        this.formulaTranslators = new HashMap<>();
     }
 
     @Override

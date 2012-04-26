@@ -45,9 +45,9 @@ public class Goal {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
     private final ArrayList<? extends Formula<?>> premises;
+    private final Formula<?> premisesFormula;
     private final Formula<?> conclusion;
-//    private final Formula premisesFormula;
-    private final Formula<?> goalAsformula;
+    private final Formula<?> goalFormula;
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Constructor">
@@ -56,16 +56,19 @@ public class Goal {
      * that represents the whole goal. <p>Any of the parameters may be {@code null}.</p>
      *
      * @param premises the premises of the goal.
+     * @param premisesFormula the premises as a single formula.
      * @param conclusion the conclusion of the goal.
-     * @param goalAsformula the goal represented with a formula.
+     * @param goalFormula the goal represented with a formula.
      */
-    public Goal(ArrayList<? extends Formula<?>> premises, Formula<?> conclusion,/*
-             * Formula premisesFormula,
-             */ Formula<?> goalAsformula) {
+    public Goal(
+            ArrayList<? extends Formula<?>> premises,
+             Formula<?> premisesFormula,
+            Formula<?> conclusion,
+             Formula<?> goalFormula) {
         this.premises = premises;
         this.conclusion = conclusion;
-//        this.premisesFormula = premisesFormula;
-        this.goalAsformula = goalAsformula;
+        this.goalFormula = goalFormula;
+        this.premisesFormula = premisesFormula;
     }
     // </editor-fold>
 
@@ -78,6 +81,15 @@ public class Goal {
      */
     public List<Formula<?>> getPremises() {
         return premises == null || premises.isEmpty() ? null : Collections.unmodifiableList(premises);
+    }
+
+    /**
+     * Returns the premises represented as a single formula. This function
+     * can return {@code null} even though there are some premises present.
+     * @return the premises represented as a single formula.
+     */
+    public Formula<?> getPremisesFormula() {
+        return premisesFormula;
     }
 
     /**
@@ -124,7 +136,7 @@ public class Goal {
      * @return a formula that represents the whole goal.
      */
     public Formula<?> asFormula() {
-        return goalAsformula;
+        return goalFormula;
     }
     // </editor-fold>
 }

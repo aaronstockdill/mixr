@@ -49,11 +49,7 @@ class ReasonersManagerImpl implements ReasonersManager, ManagerInternals {
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
-    ReasonersManagerImpl(Diabelli diabelli) {
-        if (diabelli == null) {
-            throw new IllegalArgumentException(Bundle.Manager_diabelli_null());
-        }
-        this.diabelli = diabelli;
+    ReasonersManagerImpl() {
     }
     //</editor-fold>
 
@@ -111,7 +107,11 @@ class ReasonersManagerImpl implements ReasonersManager, ManagerInternals {
     
     // <editor-fold defaultstate="collapsed" desc="Implementation Specifics">
     @Override
-    public void initialise() {
+    public void initialise(DiabelliImpl host) {
+        if (host == null) {
+            throw new IllegalArgumentException(Bundle.Manager_diabelli_null());
+        }
+        this.diabelli = host;
     }
 
     @Override

@@ -25,10 +25,10 @@
 package diabelli.implementation;
 
 /**
- *
+ * All Diabelli managers use this interface for proper initialisation.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface ManagerInternals {
+interface ManagerInternals {
 
     /**
      * This method is called by {@link DiabelliImpl} just after all managers
@@ -37,8 +37,10 @@ public interface ManagerInternals {
      * <p><span
      * style="font-weight:bold">Note</span>: this method is called before
      * Diabelli components are loaded.</p>
+     * 
+     * @param host the host Diabelli hub that owns this manager.
      */
-    void initialise();
+    void initialise(DiabelliImpl host);
     
     /**
      * This method is called by {@link DiabelliImpl} just after all components
