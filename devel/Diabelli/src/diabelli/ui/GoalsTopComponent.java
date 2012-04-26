@@ -181,7 +181,7 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         protected boolean createKeys(List<GoalNode> toPopulate) {
             if (goals != null && !goals.isEmpty()) {
                 for (int i = 0; i < goals.size(); i++) {
-                    toPopulate.add(new GoalNode(goals.get(i), i));
+                    toPopulate.add(new GoalNode(goals, i));
                 }
             }
             return true;
@@ -194,25 +194,23 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
     }
 
     private static class GoalPremisesConclusionFactory extends ChildFactory<AbstractNode> {
+        private final GeneralGoalNode goalNode;
 
-        private final Goal goal;
-        private final int goalIndex;
 
-        public GoalPremisesConclusionFactory(Goal goal, int goalIndex) {
-            this.goal = goal;
-            this.goalIndex = goalIndex;
+        public GoalPremisesConclusionFactory(GeneralGoalNode goalNode) {
+            this.goalNode = goalNode;
         }
 
         @Override
         protected boolean createKeys(List<AbstractNode> toPopulate) {
-            if (goal != null) {
-                if (goal.getPremisesCount() > 0) {
-                    toPopulate.add(new PremisesNode(goal, goalIndex));
+//            if (goalNode != null) {
+                if (goalNode.getGoal().getPremisesCount() > 0) {
+                    toPopulate.add(new PremisesNode(goalNode));
                 }
-                if (goal.getConclusion() != null) {
-                    toPopulate.add(new ConclusionNode(goal, goalIndex));
+                if (goalNode.getGoal().getConclusion() != null) {
+                    toPopulate.add(new ConclusionNode(goalNode));
                 }
-            }
+//            }
             return true;
         }
 
@@ -224,19 +222,17 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
 
     private static class PremisesFactory extends ChildFactory<AbstractNode> {
 
-        private final Goal goal;
-        private final int goalIndex;
+        private final PremisesNode premisesNode;
 
-        public PremisesFactory(Goal goal, int goalIndex) {
-            this.goal = goal;
-            this.goalIndex = goalIndex;
+        public PremisesFactory(PremisesNode premiseNode) {
+            this.premisesNode = premiseNode;
         }
 
         @Override
         protected boolean createKeys(List<AbstractNode> toPopulate) {
-            int premisesCount = goal.getPremisesCount();
+            int premisesCount = premisesNode.getGoal().getPremisesCount();
             for (int premiseIndex = 0; premiseIndex < premisesCount; premiseIndex++) {
-                toPopulate.add(new PremiseNode(goal, goalIndex, premiseIndex));
+                toPopulate.add(new PremiseNode(premisesNode, premiseIndex));
             }
             return true;
         }
@@ -250,28 +246,51 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
 
     //<editor-fold defaultstate="collapsed" desc="Explorer Nodes">
     public abstract static class GeneralGoalNode extends AbstractNode {
-        public final Goal goal;
-        public final int goalIndex;
+        private final Goals goals;
+        private final int goalIndex;
         
-        public GeneralGoalNode(Goal goal, int goalIndex, Children children, Lookup lookup) {
+        GeneralGoalNode(Goals goals, int goalIndex, Children children, Lookup lookup) {
             super(children, lookup);
-            this.goal = goal;
+            this.goals = goals;
             this.goalIndex = goalIndex;
         }
 
-        public GeneralGoalNode(Goal goal, int goalIndex, Children children) {
+        GeneralGoalNode(Goals goals, int goalIndex, Children children) {
             super(children);
-            this.goal = goal;
+            this.goals = goals;
             this.goalIndex = goalIndex;
+        }
+        
+        /**
+         * Returns the goals that contain the {@link GeneralGoalNode#getGoal() goal}
+         * connected to this node.
+         * @return the goals that contain the {@link GeneralGoalNode#getGoal() goal}
+         * connected to this node.
+         */
+        public final Goals getGoals() {
+            return goals;
+        }
+        
+        /**
+         * Returns the goal connected to this node.
+         * @return the goal connected to this node.
+         */
+        public final Goal getGoal() {
+            return goals.get(goalIndex);
+        }
+        
+        public final int getGoalIndex() {
+            return goalIndex;
         }
         
     }
     
     public static class GoalNode extends GeneralGoalNode {
 
-        private GoalNode(Goal goal, int goalIndex) {
-            super(goal, goalIndex, Children.create(new GoalPremisesConclusionFactory(goal, goalIndex), false), Lookups.singleton(goal));
+        GoalNode(Goals goals, int goalIndex) {
+            super(goals, goalIndex, Children.LEAF, Lookups.singleton(goals));
             setDisplayName("Goal #" + (goalIndex + 1));
+            setChildren(Children.create(new GoalPremisesConclusionFactory(this), false));
         }
     }
 
@@ -280,8 +299,8 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
     })
     public static class ConclusionNode extends GeneralGoalNode {
 
-        private ConclusionNode(Goal parentGoal, int goalIndex) {
-            super(parentGoal, goalIndex, Children.LEAF);
+        private ConclusionNode(GeneralGoalNode parentGoal) {
+            super(parentGoal.getGoals(), parentGoal.getGoalIndex(), Children.LEAF);
             setDisplayName(Bundle.FN_conclusion_display_name());
         }
     }
@@ -291,9 +310,10 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
     })
     public static class PremisesNode extends GeneralGoalNode {
 
-        private PremisesNode(Goal parentGoal, int goalIndex) {
-            super(parentGoal, goalIndex, Children.create(new PremisesFactory(parentGoal, goalIndex), false));
+        private PremisesNode(GeneralGoalNode parentGoal) {
+            super(parentGoal.getGoals(), parentGoal.getGoalIndex(), Children.LEAF);
             setDisplayName(Bundle.PN_premises_display_name());
+            setChildren(Children.create(new PremisesFactory(this), false));
         }
     }
 
@@ -302,12 +322,16 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
     })
     public static class PremiseNode extends GeneralGoalNode {
 
-        public final int premiseIndex;
+        private final int premiseIndex;
 
-        private PremiseNode(Goal goal, int goalIndex, int premiseIndex){
-            super(goal, goalIndex, Children.LEAF);
+        private PremiseNode(GeneralGoalNode parentGoal, int premiseIndex){
+            super(parentGoal.getGoals(), parentGoal.getGoalIndex(), Children.LEAF);
             this.premiseIndex = premiseIndex;
             this.setDisplayName(Bundle.PN_premise_display_name(premiseIndex + 1));
+        }
+
+        public int getPremiseIndex() {
+            return premiseIndex;
         }
     }
     //</editor-fold>

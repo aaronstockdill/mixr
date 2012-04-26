@@ -27,10 +27,7 @@ package diabelli.ui;
 import diabelli.Diabelli;
 import diabelli.FormulaFormatManager;
 import diabelli.components.FormulaPresenter;
-import diabelli.logic.Formula;
-import diabelli.logic.FormulaFormat;
-import diabelli.logic.FormulaRepresentation;
-import diabelli.logic.Goal;
+import diabelli.logic.*;
 import diabelli.ui.GoalsTopComponent.ConclusionNode;
 import diabelli.ui.GoalsTopComponent.GeneralGoalNode;
 import diabelli.ui.GoalsTopComponent.PremiseNode;
@@ -56,11 +53,7 @@ import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
-import org.openide.util.Lookup.Result;
-import org.openide.util.LookupEvent;
-import org.openide.util.LookupListener;
 import org.openide.util.NbBundle.Messages;
-import org.openide.util.Utilities;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
@@ -291,9 +284,9 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
         protected final T goal;
 
-        CurrentGoalSelectionNode(T goal, Children children) {
+        CurrentGoalSelectionNode(T goalNode, Children children) {
             super(children);
-            this.goal = goal;
+            this.goal = goalNode;
         }
 
         /**
@@ -326,7 +319,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
          * @return the selected goal that this node represents.
          */
         public final Goal getSelectedGoal() {
-            return goal.goal;
+            return goal.getGoal();
         }
 
         /**
@@ -335,7 +328,17 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
          * @return the index of the selected goal that this node represents.
          */
         public final int getSelectedGoalIndex() {
-            return goal.goalIndex;
+            return goal.getGoalIndex();
+        }
+        
+        /**
+         * Returns the {@link Goals goals object} that hosts the formula selection
+         * represented by this node.
+         * @return the {@link Goals goals object} that hosts the formula selection
+         * represented by this node.
+         */
+        public final Goals getHostingGoals() {
+            return goal.getGoals();
         }
     }
 
@@ -346,13 +349,13 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
         CurrentPremiseNode(PremiseNode premise) {
             super(premise, Children.LEAF);
-            setDisplayName(Bundle.CurrentPremiseNode_display_name(premise.premiseIndex + 1, premise.goalIndex + 1));
+            setDisplayName(Bundle.CurrentPremiseNode_display_name(premise.getPremiseIndex() + 1, premise.getGoalIndex() + 1));
             setChildren(Children.create(new FormulaFormatsChildren<>(this), false));
         }
 
         @Override
         public Formula<?> getSelectedFormula() {
-            return goal.goal.getPremiseAt(goal.premiseIndex);
+            return goal.getGoal().getPremiseAt(goal.getPremiseIndex());
         }
     }
 
@@ -363,13 +366,13 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
         CurrentConclusionNode(ConclusionNode conclusion) {
             super(conclusion, Children.LEAF);
-            setDisplayName(Bundle.CurrentConclusionNode_display_name(conclusion.goalIndex + 1));
+            setDisplayName(Bundle.CurrentConclusionNode_display_name(conclusion.getGoalIndex() + 1));
             setChildren(Children.create(new FormulaFormatsChildren<>(this), false));
         }
 
         @Override
         public Formula<?> getSelectedFormula() {
-            return goal.goal.getConclusion();
+            return goal.getGoal().getConclusion();
         }
     }
 
@@ -380,7 +383,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
         CurrentGoalNode(GeneralGoalNode goal) {
             super(goal, Children.LEAF);
-            setDisplayName(Bundle.CurrentGoalNode_display_name(goal.goalIndex + 1));
+            setDisplayName(Bundle.CurrentGoalNode_display_name(goal.getGoalIndex() + 1));
             setChildren(Children.create(new FormulaFormatsChildren<>(this), false));
         }
     }

@@ -24,11 +24,7 @@
  */
 package speedith.diabelli;
 
-import diabelli.components.DiabelliComponent;
-import diabelli.components.FormulaFormatsProvider;
-import diabelli.components.FormulaPresenter;
-import diabelli.components.FormulaTranslationsProvider;
-import diabelli.components.GoalAcceptingReasoner;
+import diabelli.components.*;
 import diabelli.components.util.BareGoalProvidingReasoner;
 import diabelli.logic.*;
 import java.util.*;

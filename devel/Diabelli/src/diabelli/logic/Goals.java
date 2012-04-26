@@ -40,6 +40,7 @@ public class Goals implements Iterable<Goal> {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
     private final ArrayList<Goal> goals;
+    private final GoalProvidingReasoner owner;
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Constructors">
@@ -48,11 +49,14 @@ public class Goals implements Iterable<Goal> {
      * is (i.e., it stores the reference and does not make a copy before storing
      * it).
      *
+     * @param owner the {@link GoalProvidingReasoner goal-providing reasoner} that
+     * provided and owns this set of goals.
      * @param goals the {@link Goals#getGoals() goals} contained in this
      * collection.
      */
-    public Goals(ArrayList<Goal> goals) {
+    public Goals(GoalProvidingReasoner owner, ArrayList<Goal> goals) {
         this.goals = goals;
+        this.owner = owner;
     }
     // </editor-fold>
 
@@ -65,6 +69,16 @@ public class Goals implements Iterable<Goal> {
      */
     public List<Goal> getGoals() {
         return isEmpty() ? null : Collections.unmodifiableList(goals);
+    }
+
+    /**
+     * Returns the {@link GoalProvidingReasoner goal-providing reasoner} that
+     * provided and owns this set of goals.
+     * @return the {@link GoalProvidingReasoner goal-providing reasoner} that
+     * provided and owns this set of goals.
+     */
+    public GoalProvidingReasoner getOwner() {
+        return owner;
     }
     // </editor-fold>
 

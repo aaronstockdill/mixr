@@ -47,50 +47,6 @@ import javax.swing.JPanel;
 public interface FormulaPresenter extends DiabelliComponent {
 
     /**
-     * This exception is thrown if the visualisation failed unexpectedly. If the
-     * failure to visualise is due to the formula being in the right format but
-     * not formed exactly right for proper visualisation. If, however, all
-     * formulae of the given format should be visualisable, but the given
-     * formula somehow isn't, then this exception should be thrown.
-     *
-     * <p>Here are some fail conditions that merit a visualisation exception:
-     *
-     * <ul>
-     *
-     * <li>If the formula is in the right format and all such formulae should be
-     * visualisable, but somehow this one isn't. For example, Speedith should
-     * never translate formulae into invalid spider diagrams. Invalid spider
-     * diagrams cannot be visualised. If the visualiser gets an invalid spider
-     * diagram, this indicates that the translation procedure is buggy. Thus, an
-     * exception should be thrown.</li>
-     *
-     * </ul>
-     *
-     * </p>
-     */
-    public static class VisualisationException extends Exception {
-
-        public VisualisationException() {
-        }
-
-        public VisualisationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-            super(message, cause, enableSuppression, writableStackTrace);
-        }
-
-        public VisualisationException(Throwable cause) {
-            super(cause);
-        }
-
-        public VisualisationException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public VisualisationException(String message) {
-            super(message);
-        }
-    }
-
-    /**
      * Should return {@code true} if this presenter can produce a visualisation
      * of the given goal.
      *
@@ -175,4 +131,50 @@ public interface FormulaPresenter extends DiabelliComponent {
      * for info on when this exception is thrown.
      */
     JPanel createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException;
+
+    /**
+     * This exception is thrown if the visualisation failed unexpectedly. If the
+     * failure to visualise is due to the formula being in the right format but
+     * not formed exactly right for proper visualisation. If, however, all
+     * formulae of the given format should be visualisable, but the given
+     * formula somehow isn't, then this exception should be thrown.
+     *
+     * <p>Here are some fail conditions that merit a visualisation exception:
+     *
+     * <ul>
+     *
+     * <li>If the formula is in the right format and all such formulae should be
+     * visualisable, but somehow this one isn't. For example, Speedith should
+     * never translate formulae into invalid spider diagrams. Invalid spider
+     * diagrams cannot be visualised. If the visualiser gets an invalid spider
+     * diagram, this indicates that the translation procedure is buggy. Thus, an
+     * exception should be thrown.</li>
+     *
+     * </ul>
+     *
+     * </p>
+     */
+    public static class VisualisationException extends Exception {
+
+        private static final long serialVersionUID = 0x7914fce3aa85859eL;
+
+        public VisualisationException() {
+        }
+
+        public VisualisationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+            super(message, cause, enableSuppression, writableStackTrace);
+        }
+
+        public VisualisationException(Throwable cause) {
+            super(cause);
+        }
+
+        public VisualisationException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public VisualisationException(String message) {
+            super(message);
+        }
+    }
 }

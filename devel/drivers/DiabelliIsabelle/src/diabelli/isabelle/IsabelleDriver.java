@@ -85,16 +85,17 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements Formula
         return org.openide.util.NbBundle.getBundle(IsabelleDriver.class).getString("ISA_DRIVER_NAME");
     }
     //</editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="Formula Format Provider">
     @Override
     public Collection<FormulaFormat<?>> getFormulaFormats() {
         return FormulaFormatsContainer.IsabelleFormats;
     }
-    
+
     private static class FormulaFormatsContainer {
+
         private static final List<FormulaFormat<?>> IsabelleFormats;
-        
+
         static {
             ArrayList<FormulaFormat<?>> tmp = new ArrayList<>();
             tmp.add(TermFormatDescriptor.getInstance());
@@ -222,7 +223,7 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements Formula
                             goals.add(TermsToDiabelli.toGoal(term));
                         }
                     }
-                    setGoals(new Goals(goals));
+                    setGoals(goals);
                 }
             } catch (InterruptedException ex) {
                 throw new RuntimeException(Bundle.ID_isabelle_goals_not_obtained(), ex);
@@ -271,6 +272,10 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements Formula
         } catch (UnsupportedOperationException uoex) {
             Exceptions.attachSeverity(uoex, Level.INFO);
         }
+    }
+
+    private void setGoals(ArrayList<Goal> goals) {
+        setGoals(new Goals(this, goals));
     }
     // </editor-fold>
 }
