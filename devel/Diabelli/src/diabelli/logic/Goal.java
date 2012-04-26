@@ -62,9 +62,9 @@ public class Goal {
      */
     public Goal(
             ArrayList<? extends Formula<?>> premises,
-             Formula<?> premisesFormula,
+            Formula<?> premisesFormula,
             Formula<?> conclusion,
-             Formula<?> goalFormula) {
+            Formula<?> goalFormula) {
         this.premises = premises;
         this.conclusion = conclusion;
         this.goalFormula = goalFormula;
@@ -84,8 +84,9 @@ public class Goal {
     }
 
     /**
-     * Returns the premises represented as a single formula. This function
-     * can return {@code null} even though there are some premises present.
+     * Returns the premises represented as a single formula. This function can
+     * return {@code null} even though there are some premises present.
+     *
      * @return the premises represented as a single formula.
      */
     public Formula<?> getPremisesFormula() {
@@ -103,6 +104,7 @@ public class Goal {
 
     /**
      * Returns the premise at the given index.
+     *
      * @param index the index of the premise to return.
      * @return the premise at the given index.
      */

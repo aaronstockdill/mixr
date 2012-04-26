@@ -35,6 +35,7 @@ import javax.swing.JPanel;
  * Provides a basic partial implementation of the {@link FormulaPresenter formula presenter
  * interface}. This class provides implementations of some methods which can be
  * implemented through using others.
+ *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public abstract class BareFormulaPresenter implements FormulaPresenter {
@@ -69,7 +70,7 @@ public abstract class BareFormulaPresenter implements FormulaPresenter {
     }
 
     @Override
-    public JPanel createVisualiserFor(Goal goal) {
+    public JPanel createVisualiserFor(Goal goal) throws VisualisationException {
         if (goal == null) {
             return null;
         }
@@ -77,7 +78,7 @@ public abstract class BareFormulaPresenter implements FormulaPresenter {
     }
 
     @Override
-    public JPanel createVisualiserFor(Formula<?> formula) {
+    public JPanel createVisualiserFor(Formula<?> formula) throws VisualisationException {
         if (formula == null) {
             return null;
         }

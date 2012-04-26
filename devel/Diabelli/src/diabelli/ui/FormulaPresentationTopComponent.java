@@ -24,14 +24,24 @@
  */
 package diabelli.ui;
 
+import diabelli.Diabelli;
+import diabelli.components.FormulaPresenter;
+import diabelli.logic.FormulaRepresentation;
 import diabelli.ui.CurrentFormulaTopComponent.CurrentGoalSelectionNode;
+import diabelli.ui.CurrentFormulaTopComponent.FormulaRepresentationNode;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JPanel;
+import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.explorer.ExplorerManager;
 import org.openide.nodes.Node;
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
@@ -81,22 +91,23 @@ public final class FormulaPresentationTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
-        );
-    }// </editor-fold>//GEN-END:initComponents
+        scrlVisualisationsPanel = new javax.swing.JScrollPane();
+        visualisationsPanel = new javax.swing.JPanel();
 
+        setLayout(new java.awt.BorderLayout());
+
+        visualisationsPanel.setLayout(new java.awt.GridLayout(0, 1));
+        scrlVisualisationsPanel.setViewportView(visualisationsPanel);
+
+        add(scrlVisualisationsPanel, java.awt.BorderLayout.CENTER);
+    }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JScrollPane scrlVisualisationsPanel;
+    private javax.swing.JPanel visualisationsPanel;
     // End of variables declaration//GEN-END:variables
     //</editor-fold>
     //<editor-fold defaultstate="collapsed" desc="TopComponent Stuff">
+
     @Override
     public void componentOpened() {
         CurrentFormulaTopComponent currentFormulaWindow = (CurrentFormulaTopComponent) WindowManager.getDefault().findTopComponent(CurrentFormulaTopComponent.PreferredID);
@@ -131,6 +142,48 @@ public final class FormulaPresentationTopComponent extends TopComponent {
     }
     //</editor-fold>
 
+    // <editor-fold defaultstate="collapsed" desc="Visualisation Methods">
+    private void showVisualisationsOf(FormulaRepresentation<?> formula) {
+        clearVisualisations();
+        // Don't display anything if null is given. Just clear the panel.
+        if (formula != null) {
+            // Add the visualisations of this representation:
+            addVisualisationsOf(formula, null);
+        }
+        // This has to be called to refresh the newly added visualisations. Swing
+        // does not show the newly added components otherwise.
+        validate();
+    }
+
+    @Messages({
+        "FPTC_visualiser_failed=The formula presenter '{0}' unexpectedly failed while visualising a formula of the format '{1}'."
+    })
+    private void addVisualisationsOf(@NonNull FormulaRepresentation<?> formula, Set<FormulaPresenter> withPresenters) {
+        if (withPresenters == null) {
+            withPresenters = getAllPresenters();
+        }
+        // Find all presenters that are able to display this formula and put
+        // their panels onto this panel:
+        for (FormulaPresenter presenter : withPresenters) {
+            try {
+                if (presenter.canPresent(formula)) {
+                    JPanel visualisationPanel = presenter.createVisualiserFor(formula);
+                    if (visualisationPanel != null) {
+                        // Now put the panel onto this panel:
+                        visualisationsPanel.add(visualisationPanel);
+                    }
+                }
+            } catch (Exception e) {
+                Logger.getLogger(FormulaPresentationTopComponent.class.getName()).log(Level.WARNING, Bundle.FPTC_visualiser_failed(presenter.getName(), formula.getFormat().getPrettyName()), e);
+            }
+        }
+    }
+
+    private void clearVisualisations() {
+        visualisationsPanel.removeAll();
+    }
+    // </editor-fold>
+
     // <editor-fold defaultstate="collapsed" desc="Current Selection Update">
     private void updateSelectionFrom(ExplorerManager em) {
         Node[] selectedNodes = em.getSelectedNodes();
@@ -143,8 +196,16 @@ public final class FormulaPresentationTopComponent extends TopComponent {
 
     private void updateSelection(CurrentGoalSelectionNode<?> currentlySelectedFormula) {
         if (currentlySelectedFormula == null) {
-            // TODO: Clear the panel.
+            clearVisualisations();
         } else {
+            Logger.getLogger(FormulaPresentationTopComponent.class.getName()).log(Level.INFO, "Presenting: {0}", currentlySelectedFormula.getClass().getCanonicalName());
+            if (currentlySelectedFormula instanceof FormulaRepresentationNode<?>) {
+                FormulaRepresentationNode<?> formulaRep = (FormulaRepresentationNode<?>) currentlySelectedFormula;
+                // Display just visualisation of this representation (there will
+                // usually be just one (the one for this particular format's
+                // representation), but we still look all of visualisations:
+                showVisualisationsOf(currentlySelectedFormula.getSelectedFormulaRepresentation());
+            }
             // TODO: Show the formula with all possible presenters.
         }
     }
@@ -160,6 +221,12 @@ public final class FormulaPresentationTopComponent extends TopComponent {
                 updateSelectionFrom(em);
             }
         }
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Private Helper Methods">
+    private static Set<FormulaPresenter> getAllPresenters() {
+        return Lookup.getDefault().lookup(Diabelli.class).getPresentationManager().getPresenters();
     }
     // </editor-fold>
 }

@@ -42,7 +42,11 @@ import org.openide.util.lookup.ServiceProvider;
 public interface DiabelliComponent {
     /**
      * Returns a human-readable name of this component.
+     * 
      * <p>This name will be displayed to users in the GUI.</p>
+     * 
+     * <p>This name should be as short and as pretty as possible. :)</p>
+     * 
      * @return a human-readable name of this component.
      */
     String getName();

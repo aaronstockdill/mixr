@@ -25,6 +25,7 @@
 package diabelli;
 
 import diabelli.components.DiabelliComponent;
+import diabelli.components.FormulaPresenter;
 import diabelli.components.GoalProvidingReasoner;
 import diabelli.components.Reasoner;
 import diabelli.components.RuleApplicationReasoner;
@@ -85,11 +86,17 @@ public interface Diabelli extends Provider {
     
     /**
      * Returns the manager which keeps track of all {@link
-     * FormulaFormat formula formats} known to Diabelli. (or rather:
-     * known to various components of Diabelli).
+     * FormulaFormat formula formats} known to Diabelli.
      * @return the manager which keeps track of all {@link
-     * FormulaFormat formula formats} known to Diabelli. (or rather:
-     * known to various components of Diabelli).
+     * FormulaFormat formula formats} known to Diabelli.
      */
     FormulaFormatManager getFormulaFormatManager();
+    
+    /**
+     * Returns the manager that keeps track of all {@link
+     * FormulaPresenter formula presenters} known to Diabelli.
+     * @return the manager that keeps track of all {@link
+     * FormulaPresenter formula presenters} known to Diabelli.
+     */
+    PresentationManager getPresentationManager();
 }

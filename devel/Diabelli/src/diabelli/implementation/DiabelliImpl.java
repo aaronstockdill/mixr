@@ -24,10 +24,7 @@
  */
 package diabelli.implementation;
 
-import diabelli.Diabelli;
-import diabelli.FormulaFormatManager;
-import diabelli.GoalsManager;
-import diabelli.ReasonersManager;
+import diabelli.*;
 import diabelli.components.DiabelliComponent;
 import java.util.*;
 import java.util.logging.Level;
@@ -128,6 +125,11 @@ public final class DiabelliImpl implements Diabelli {
     @Override
     public Set<? extends DiabelliComponent> getRegisteredComponents() {
         return Collections.unmodifiableSet(components);
+    }
+
+    @Override
+    public PresentationManager getPresentationManager() {
+        return presentationManager;
     }
     // </editor-fold>
 

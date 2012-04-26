@@ -24,22 +24,20 @@
  */
 package speedith.diabelli;
 
-import speedith.diabelli.logic.IsabelleToSpidersTranslator;
-import speedith.diabelli.logic.SpeedithFormatDescriptor;
 import diabelli.components.DiabelliComponent;
 import diabelli.components.FormulaFormatsProvider;
+import diabelli.components.FormulaPresenter;
 import diabelli.components.FormulaTranslationsProvider;
 import diabelli.components.GoalAcceptingReasoner;
 import diabelli.components.util.BareGoalProvidingReasoner;
-import diabelli.logic.FormulaFormat;
-import diabelli.logic.FormulaFormatDescriptor;
-import diabelli.logic.FormulaTranslator;
-import diabelli.logic.Goal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import diabelli.logic.*;
+import java.util.*;
+import javax.swing.JPanel;
 import org.openide.util.lookup.ServiceProvider;
+import speedith.core.lang.SpiderDiagram;
+import speedith.diabelli.logic.IsabelleToSpidersTranslator;
+import speedith.diabelli.logic.SpeedithFormatDescriptor;
+import speedith.ui.SpiderDiagramPanel;
 
 /**
  * This is the main class of the Speedith driver for Diabelli. It provides
@@ -55,26 +53,30 @@ import org.openide.util.lookup.ServiceProvider;
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 @ServiceProvider(service = DiabelliComponent.class)
-public class SpeedithDriver extends BareGoalProvidingReasoner implements FormulaFormatsProvider, FormulaTranslationsProvider {
+public class SpeedithDriver extends BareGoalProvidingReasoner implements
+        FormulaFormatsProvider,
+        FormulaTranslationsProvider,
+        FormulaPresenter {
 
     @Override
     public String getName() {
         return "Speedith";
     }
-    
+
     // <editor-fold defaultstate="collapsed" desc="Formula Format Provider">
     @Override
     public Collection<FormulaFormat<?>> getFormulaFormats() {
         return FormulaFormatsContainer.SpeedithFormats;
     }
-    
+
     private static class FormulaFormatsContainer {
-        private static final List<FormulaFormat<?>> SpeedithFormats;
-        
+
+        private static final Set<FormulaFormat<?>> SpeedithFormats;
+
         static {
-            ArrayList<FormulaFormat<?>> tmp = new ArrayList<>();
+            HashSet<FormulaFormat<?>> tmp = new HashSet<>();
             tmp.add(SpeedithFormatDescriptor.getInstance());
-            SpeedithFormats = Collections.unmodifiableList(tmp);
+            SpeedithFormats = Collections.unmodifiableSet(tmp);
         }
     }
     // </editor-fold>
@@ -84,10 +86,11 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements Formula
     public Collection<FormulaTranslator<?, ?>> getFormulaTranslators() {
         return FormulaTranslatorsContainer.SpeedithTranslator;
     }
-    
+
     private static class FormulaTranslatorsContainer {
+
         private static final List<FormulaTranslator<?, ?>> SpeedithTranslator;
-        
+
         static {
             ArrayList<FormulaTranslator<?, ?>> tmp = new ArrayList<>();
             tmp.add(IsabelleToSpidersTranslator.getInstance());
@@ -95,4 +98,75 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements Formula
         }
     }
     //</editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Formula Presenter Interface">
+    @Override
+    public boolean canPresent(Goal goal) {
+        if (goal == null) {
+            return false;
+        }
+        return canPresent(goal.asFormula());
+    }
+
+    @Override
+    public boolean canPresent(Formula<?> formula) {
+        if (formula == null) {
+            return false;
+        }
+        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
+            if (canPresent(formulaFormat)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean canPresent(FormulaRepresentation<?> formula) {
+        if (formula == null) {
+            return false;
+        }
+        return canPresent(formula.getFormat());
+    }
+
+    @Override
+    public JPanel createVisualiserFor(Goal goal) throws VisualisationException {
+        if (goal == null) {
+            return null;
+        }
+        return createVisualiserFor(goal.asFormula());
+    }
+
+    @Override
+    public JPanel createVisualiserFor(Formula<?> formula) throws VisualisationException {
+        if (formula == null) {
+            return null;
+        }
+        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
+            if (canPresent(formulaFormat)) {
+                return createVisualiserFor(formula.getRepresentation(formulaFormat));
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean canPresent(FormulaFormat<?> format) {
+        return FormulaFormatsContainer.SpeedithFormats.contains(format);
+    }
+
+    @Override
+    public JPanel createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException {
+        if (formula.getFormula() instanceof SpiderDiagram) {
+            SpiderDiagram spiderDiagram = (SpiderDiagram) formula.getFormula();
+            if (spiderDiagram.isValid()) {
+                return new SpiderDiagramPanel(spiderDiagram);
+            } else {
+                throw new VisualisationException();
+            }
+        } else {
+            return null;
+        }
+    }
+    // </editor-fold>
 }
