@@ -41,26 +41,27 @@ import org.openide.util.NbBundle;
  * than one representation of this formula). This class can thus carry many
  * representations, or formats, of the same formula. For example, a formula can
  * be represented with many strings (using syntaxes of many theorem provers),
- * with term trees (abstract syntax trees), or similar. However, there is always
- * {@link Formula#getMainRepresentation() one main representation}. Other
- * representations should be equivalent to it, or at least have the proper
- * logical relation to it (i.e., if this formula is {@link Goal#getPremises() a
- * premise}, then all other representations of it must be logically entailed by
- * the {@link Formula#getMainRepresentation() main representation}; on the other
- * hand, when the formula is {@link Goal#getConclusion() a conclusion}, then the
- * other direction of entailment must hold; the representations can be logically
- * equivalent, i.e., mutually entailed, which is always allowed).
+ * with term trees (abstract syntax trees), or similar.
  *
- * <p><span style="font-weight:bold">Note</span>: a formula may have only one
- * representation in a particular {@link FormulaFormatDescriptor format}.</p>
+ * <p>A formula may also have the optional {@link Formula#getMainRepresentation()
+ * main representation}. This representation is the original one as produced by
+ * the {@link GoalProvidingReasoner goal-providing reasoner} that {@link
+ * Goals#getOwner() owns} this formula. What it exactly means for a particular
+ * goal-providing reasoner to have an <span style="font-style:italic;">original
+ * representation</span> is up to the reasoner itself. However, the main
+ * representation must logically entail (if it acts as a {@link Goal#getPremises() premise})
+ * or be entailed (if it acts as a {@link Goal#getConclusion() conclusion}) by
+ * all other representations.</p>
+ *
+ * <p><span style="font-weight:bold">Note</span>: a formula may have more than
+ * one representation in a particular {@link FormulaFormatDescriptor format}.</p>
  *
  * @param <T> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
- * of {@link Formula#getMainRepresentation() the main representation} of this formula.
+ * of {@link Formula#getMainRepresentation() the main representation} of this
+ * formula.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-@NbBundle.Messages({
-    "Formula_null_main_representation=The formula must have a main representation."
-})
+@NbBundle.Messages({})
 public class Formula<T> {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
@@ -108,18 +109,17 @@ public class Formula<T> {
     @NbBundle.Messages({
         "F_role_null=A role must be provided for this formula."
     })
-    public Formula(@NonNull FormulaRepresentation<T> mainRepresentation, @NonNull FormulaRole role, Collection<FormulaRepresentation<?>> otherRepresentations) {
-        if (mainRepresentation == null) {
-            throw new IllegalArgumentException(Bundle.Formula_null_main_representation());
-        }
+    public Formula(FormulaRepresentation<T> mainRepresentation, @NonNull FormulaRole role, Collection<FormulaRepresentation<?>> otherRepresentations) {
         if (role == null) {
             throw new IllegalArgumentException(Bundle.F_role_null());
         }
         // Initialise the fields:
         this.representations = new HashMap<>();
         this.mainRepresentation = mainRepresentation;
-        // Add the main representation to the registry too:
-        putRepresentation(mainRepresentation.getFormat(), mainRepresentation);
+        if (mainRepresentation != null) {
+            // Add the main representation to the registry:
+            putRepresentation(mainRepresentation.getFormat(), mainRepresentation);
+        }
         // Now add the other representations:
         if (otherRepresentations != null && !otherRepresentations.isEmpty()) {
             for (FormulaRepresentation<?> otherRepresentation : otherRepresentations) {
@@ -169,8 +169,18 @@ public class Formula<T> {
      * reasoner} that provided this formula.
      *
      * <p>Other representations must be either entailed by this representation
-     * (if this formula acts as a premise) or they must entail the main
-     * representation (if this formula acts as a conclusion).</p>
+     * (if this formula acts as a premise) or they must entail
+     * representationsthe main representation (if this formula acts as a
+     * conclusion).</p>
+     *
+     * <p><span style="font-weight:bold">Note</span>: this value may be {@code
+     * null}. A formula may be without a main representation. This is useful,
+     * for example, in {@link Goal#getPremises() premises} of a goal. Say that
+     * the premises can be represented separately, but not together in the
+     * native format. However, some translations might still produce a premise
+     * formula that is entailed by a subset of conjunctively connected premises.
+     * This representation may be added to {@link Goal#getPremisesFormula()
+     * }.</p>
      *
      * @return the main representation of this formula.
      */
@@ -180,13 +190,15 @@ public class Formula<T> {
 
     /**
      * Returns the formats of all currently present/calculated representations
-     * of this formula. This collection includes the main representation.
+     * of this formula. This collection includes the main representation (if
+     * present).
      *
      * <p><span style="font-weight:bold">Note</span>: this method returns only
      * those formats for which there is an actual representation of this formula
      * present.</p>
-     * 
-     * <p>This method always returns a non-{@code null} value.</p>
+     *
+     * <p>This method always returns a non-{@code null} value but it may be
+     * empty.</p>
      *
      * @return all formats into which we translated the formula.
      */
@@ -203,16 +215,16 @@ public class Formula<T> {
             return formats;
         }
     }
-    
+
     /**
      * This method returns all the names of {@link FormulaFormat formula formats}
      * for which we have at least tried to get a representation of this formula.
-     * This means that even if a format's name is listed in the returned collection,
-     * there might be no {@link Formula#getRepresentation(diabelli.logic.FormulaFormat) representation}
+     * This means that even if a format's name is listed in the returned
+     * collection, there might be no {@link Formula#getRepresentation(diabelli.logic.FormulaFormat) representation}
      * in that formal of this formula.
-     * 
-     * @return all the names of {@link FormulaFormat formula formats}
-     * for which we have at least tried to get a representation of this formula.
+     *
+     * @return all the names of {@link FormulaFormat formula formats} for which
+     * we have at least tried to get a representation of this formula.
      */
     public String[] getFetchedFormatNames() {
         synchronized (representations) {
@@ -222,13 +234,12 @@ public class Formula<T> {
     }
 
     /**
-     * Returns the number of {@link FormulaFormat formats} this formula has been tried to be
-     * translated to. The minimum this function can return is {@code 1} (because
-     * there is always the {@link Formula#getRepresentation(diabelli.logic.FormulaFormat) format} of the {@link Formula#getMainRepresentation() main
-     * representation}).
-     * 
-     * <p>This function returns the length of the array returned by {@link Formula#getFetchedFormatNames() }.</p>
-     * 
+     * Returns the number of {@link FormulaFormat formats} this formula has been
+     * tried to be translated to.
+     *
+     * <p>This function returns the length of the array returned by {@link Formula#getFetchedFormatNames()
+     * }.</p>
+     *
      * @return the number of representations this formula has.
      */
     public int getFetchedFormatsCount() {
@@ -253,8 +264,10 @@ public class Formula<T> {
      * a representation of this formula in the given format, use {@link Formula#fetchRepresentations(diabelli.logic.FormulaFormat)
      * }.
      *
-     * <p>This function returns {@code null} if there is no translation of the
-     * formula to the given format.</p>
+     * <p>This function returns {@code null} if there are no representations of
+     * this formula in the given format. Also, if this method returns a non-{@code null}
+     * collection then all elements of the returned collection will be non-{@code null}
+     * too.</p>
      *
      * @param <TRepresentation> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
      * carried by the returned representations.
@@ -263,22 +276,31 @@ public class Formula<T> {
      * formula} in the given format.
      */
     @SuppressWarnings("unchecked")
-    public <TRepresentation> FormulaRepresentation<TRepresentation>[] getRepresentations(FormulaFormat<TRepresentation> format) {
+    public <TRepresentation> ArrayList<? extends FormulaRepresentation<TRepresentation>> getRepresentations(FormulaFormat<TRepresentation> format) {
         if (format == null) {
             throw new IllegalArgumentException(Bundle.F_toFormat_null());
         }
         synchronized (representations) {
             HashSet<FormulaRepresentation<?>> formatReps = representations.get(format.getFormatName());
-            return (FormulaRepresentation<TRepresentation>[]) (formatReps == null || formatReps.isEmpty() ? null : formatReps.toArray(new FormulaRepresentation<?>[formatReps.size()]));
+            if (formatReps == null || formatReps.isEmpty()) {
+                return null;
+            }
+            ArrayList<FormulaRepresentation<TRepresentation>> reps = new ArrayList<>();
+            for (FormulaRepresentation<?> formulaRep : formatReps) {
+                if (formulaRep != null) {
+                    reps.add((FormulaRepresentation<TRepresentation>) formulaRep);
+                }
+            }
+            return reps;
         }
     }
-    
+
     /**
      * Returns a representation of this formula in the given format.
-     * 
+     *
      * <p>There may be more than one representation of this formula in the given
      * format. If so, an arbitrary one is returned.</p>
-     * 
+     *
      * @param <TRep> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
      * carried by the returned representation.
      * @param format the desired format in which to get this formula.
@@ -316,20 +338,20 @@ public class Formula<T> {
     }
 
     /**
-     * Tries to convert this formula into the given format and returns the
-     * translated representation if the translation succeeded.
+     * First looks up if there already is a representation of this formula in
+     * the given format or if it has already been attempted to convert this
+     * formula to the given format. If so, then the existing list of
+     * representations are returned (which might be {@code null} or empty).
      *
-     * <p>This function returns {@code null} if there is no translation of the
-     * formula to the given format.</p>
-     *
-     * <p><span style="font-weight:bold">Note</span>: if a translation of this
-     * format doesn't exist yet, this method will try and translate it with the
-     * help of the {@link FormulaFormatManager#getFormulaTranslators() registered translators}
-     * in the {@link Diabelli#getFormulaFormatManager() formula format manager}.</p>
+     * <p>However, if there was no attempt to translate this formula into the
+     * given format, then an attempt will be made. If the translation was
+     * successful the resulting representation will be returned, otherwise
+     * {@code null} is returned.</p>
      *
      * <p>This method is thread-safe.</p>
      *
-     * <p>This method is quite expensive.</p>
+     * <p>This method is quite expensive if called for the first time,
+     * successive calls will be as expensive as calls to {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
      *
      * @param <TRepresentation> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
      * carried by the returned representations.
@@ -341,7 +363,7 @@ public class Formula<T> {
         "F_toFormat_null=A target format has to be specified."
     })
     @SuppressWarnings("unchecked")
-    public <TRepresentation> FormulaRepresentation<TRepresentation>[] fetchRepresentations(FormulaFormat<TRepresentation> format) {
+    public <TRepresentation> ArrayList<? extends FormulaRepresentation<TRepresentation>> fetchRepresentations(FormulaFormat<TRepresentation> format) {
         if (format == null) {
             throw new IllegalArgumentException(Bundle.F_toFormat_null());
         }
@@ -379,7 +401,13 @@ public class Formula<T> {
         // In case the translation didn't succeed, null will indicate that in the
         // future no automatic translation attempts need to be made.
         putRepresentation(format, representation);
-        return (FormulaRepresentation<TRepresentation>[])(representation == null ? null : new FormulaRepresentation<?>[]{representation});
+        if (representation == null) {
+            return null;
+        } else {
+            ArrayList<FormulaRepresentation<TRepresentation>> rep = new ArrayList<>();
+            rep.add(representation);
+            return rep;
+        }
     }
     // </editor-fold>
 

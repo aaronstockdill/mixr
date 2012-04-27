@@ -27,8 +27,8 @@ package diabelli.ui;
 import diabelli.Diabelli;
 import diabelli.components.FormulaPresenter;
 import diabelli.logic.FormulaRepresentation;
-import diabelli.ui.CurrentFormulaTopComponent.CurrentGoalSelectionNode;
-import diabelli.ui.CurrentFormulaTopComponent.FormulaRepresentationNode;
+import diabelli.ui.CurrentFormulaTopComponent.GeneralFormulaNode;
+import diabelli.ui.CurrentFormulaTopComponent.RepresentationFormulaNode;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Set;
@@ -61,12 +61,12 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_FormulaPresentationAction",
 preferredID = FormulaPresentationTopComponent.PreferredId)
 @Messages({
-    "CTL_FormulaPresentationAction=FormulaPresentation",
+    "CTL_FormulaPresentationAction=Diabelli Visualisation",
     "CTL_FormulaPresentationTopComponent=Diabelli Visualisation",
     "HINT_FormulaPresentationTopComponent=This window displays selected formulae in all supported formats.",
     "FPTC_CurrentFormulaTopComponent_notFound=Could not find the CurrentFormulaTopComponent. This is a bug and should never happen."
 })
-public final class FormulaPresentationTopComponent extends TopComponent {
+public final class FormulaPresentationTopComponent extends TopComponent implements ExplorerManager.Provider {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
     public static final String PreferredId = "FormulaPresentationTopComponent";
@@ -106,8 +106,8 @@ public final class FormulaPresentationTopComponent extends TopComponent {
     private javax.swing.JPanel visualisationsPanel;
     // End of variables declaration//GEN-END:variables
     //</editor-fold>
-    //<editor-fold defaultstate="collapsed" desc="TopComponent Stuff">
 
+    //<editor-fold defaultstate="collapsed" desc="TopComponent Stuff">
     @Override
     public void componentOpened() {
         CurrentFormulaTopComponent currentFormulaWindow = (CurrentFormulaTopComponent) WindowManager.getDefault().findTopComponent(CurrentFormulaTopComponent.PreferredID);
@@ -139,6 +139,11 @@ public final class FormulaPresentationTopComponent extends TopComponent {
     void readProperties(java.util.Properties p) {
         String version = p.getProperty("version");
         // TODO read your settings according to their version
+    }
+
+    @Override
+    public ExplorerManager getExplorerManager() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     //</editor-fold>
 
@@ -187,20 +192,20 @@ public final class FormulaPresentationTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Current Selection Update">
     private void updateSelectionFrom(ExplorerManager em) {
         Node[] selectedNodes = em.getSelectedNodes();
-        if (selectedNodes != null && selectedNodes.length > 0 && selectedNodes[0] instanceof CurrentGoalSelectionNode<?>) {
-            updateSelection((CurrentGoalSelectionNode<?>) selectedNodes[0]);
+        if (selectedNodes != null && selectedNodes.length > 0 && selectedNodes[0] instanceof GeneralFormulaNode<?>) {
+            updateSelection((GeneralFormulaNode<?>) selectedNodes[0]);
         } else {
             updateSelection(null);
         }
     }
 
-    private void updateSelection(CurrentGoalSelectionNode<?> currentlySelectedFormula) {
+    private void updateSelection(GeneralFormulaNode<?> currentlySelectedFormula) {
         if (currentlySelectedFormula == null) {
             clearVisualisations();
         } else {
             Logger.getLogger(FormulaPresentationTopComponent.class.getName()).log(Level.INFO, "Presenting: {0}", currentlySelectedFormula.getClass().getCanonicalName());
-            if (currentlySelectedFormula instanceof FormulaRepresentationNode<?>) {
-                FormulaRepresentationNode<?> formulaRep = (FormulaRepresentationNode<?>) currentlySelectedFormula;
+            if (currentlySelectedFormula instanceof RepresentationFormulaNode<?>) {
+                RepresentationFormulaNode<?> formulaRep = (RepresentationFormulaNode<?>) currentlySelectedFormula;
                 // Display just visualisation of this representation (there will
                 // usually be just one (the one for this particular format's
                 // representation), but we still look all of visualisations:
@@ -216,7 +221,7 @@ public final class FormulaPresentationTopComponent extends TopComponent {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            if ("selectedNodes".equals(evt.getPropertyName())) {
+            if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName())) {
                 ExplorerManager em = (ExplorerManager) evt.getSource();
                 updateSelectionFrom(em);
             }

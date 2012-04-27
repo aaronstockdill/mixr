@@ -85,12 +85,12 @@ public class IsabelleToSpidersTranslator extends FormulaTranslator<Term.Term, Sp
         "ISAtoSDTrans_translation_error_null_sd_returned=The translation failed to produce a valid spider diagram."
     })
     public Formula<SpiderDiagram> translate(Formula<Term.Term> formula) throws TranslationException {
-        FormulaRepresentation[] isaRepresentations = formula.fetchRepresentations(TermFormatDescriptor.getInstance());
-        if (isaRepresentations == null || isaRepresentations.length == 0) {
+        ArrayList<? extends FormulaRepresentation<Term.Term>> isaReps = formula.fetchRepresentations(TermFormatDescriptor.getInstance());
+        if (isaReps == null || isaReps.isEmpty()) {
             throw new TranslationException(Bundle.ISAtoSDTrans_translation_error_no_isa_term());
         }
-        if (isaRepresentations[0].getFormula() instanceof Term.Term) {
-            Term.Term term = (Term.Term) isaRepresentations[0].getFormula();
+        if (isaReps.get(0).getFormula() instanceof Term.Term) {
+            Term.Term term = isaReps.get(0).getFormula();
             try {
                 SpiderDiagram sd = speedith.diabelli.isabelle.Translations.termToSpiderDiagram(term);
                 if (sd == null || !sd.isValid()) {

@@ -66,9 +66,9 @@ public class Goal {
             Formula<?> conclusion,
             Formula<?> goalFormula) {
         this.premises = premises;
-        this.conclusion = conclusion;
-        this.goalFormula = goalFormula;
-        this.premisesFormula = premisesFormula;
+        this.conclusion = conclusion == null ? new Formula<>(null, Formula.FormulaRole.Conclusion) : conclusion;
+        this.goalFormula = goalFormula == null ? new Formula<>(null, Formula.FormulaRole.Goal) : goalFormula;
+        this.premisesFormula = premisesFormula == null ? new Formula<>(null, Formula.FormulaRole.Premise) : premisesFormula;
     }
     // </editor-fold>
 
@@ -84,8 +84,9 @@ public class Goal {
     }
 
     /**
-     * Returns the premises represented as a single formula. This function can
-     * return {@code null} even though there are some premises present.
+     * Returns the premises represented as a single formula. This function will
+     * never return {@code null} even though there are no premises present. It
+     * will simply be without a main representation.
      *
      * @return the premises represented as a single formula.
      */
@@ -121,7 +122,7 @@ public class Goal {
     }
 
     /**
-     * Returns the conclusion of this goal. This method may return {@code
+     * Returns the conclusion of this goal. This method will never return {@code
      * null} if this goal has no conclusion.
      *
      * @return the conclusion of this goal.

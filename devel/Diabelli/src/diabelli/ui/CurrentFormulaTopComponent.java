@@ -34,6 +34,7 @@ import diabelli.ui.GoalsTopComponent.PremiseNode;
 import diabelli.ui.GoalsTopComponent.PremisesNode;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
@@ -59,9 +60,19 @@ import org.openide.windows.WindowManager;
 
 /**
  * This window gives the user the option to select particular representations
- * (formats) of a formula. This selection may then consequently be displayed
- * with the help of {@link FormulaPresenter formula presenters}. Additionally,
+ * (formats) of a formula selected in the {@link GoalsTopComponent}. This
+ * selection may then consequently be displayed with the help of {@link
+ * FormulaPresenter formula presenters}. In fact, the window {@link FormulaPresentationTopComponent}
+ * displays the current selection automatically. Additionally,
  * the user may request additional translations through this window.
+ * 
+ * 
+ * User's selection of the contents of this component is managed by the provided
+ * {@link CurrentFormulaTopComponent#getExplorerManager() explorer manager}
+ * and the {@link CurrentFormulaTopComponent#getLookup() associated lookup}.
+ *
+ * <p>The nodes that can be found in the explorer manager of this component are
+ * of type {@link GeneralFormulaNode}.</p>
  */
 @ConvertAsProperties(dtd = "-//diabelli.ui//CurrentFormula//EN",
 autostore = false)
@@ -83,6 +94,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
     public static final String PreferredID = "CurrentFormulaTopComponent";
+    private static final long serialVersionUID = 0xf15aa95a16c4e69aL;
     private final GoalSelectionListener goalSelectionListener;
     private ExplorerManager em;
     private Lookup lookup;
@@ -184,7 +196,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            if ("selectedNodes".equals(evt.getPropertyName())) {
+            if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName())) {
                 ExplorerManager em = (ExplorerManager) evt.getSource();
                 updateSelectionFrom(em);
             }
@@ -231,15 +243,15 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
     }
 
     private void showConclusion(ConclusionNode conclusionNode) {
-        wrapAndSetRootNode(new CurrentConclusionNode(conclusionNode));
+        wrapAndSetRootNode(new ConclusionFormulaNode(conclusionNode));
     }
 
     private void showPremise(PremiseNode premiseNode) {
-        wrapAndSetRootNode(new CurrentPremiseNode(premiseNode));
+        wrapAndSetRootNode(new PremiseFormulaNode(premiseNode));
     }
 
     private void showGoal(GeneralGoalNode generalGoalNode) {
-        wrapAndSetRootNode(new CurrentGoalNode(generalGoalNode));
+        wrapAndSetRootNode(new GoalFormulaNode(generalGoalNode));
     }
 
     private void updateSelection(GeneralGoalNode generalGoalNode) {
@@ -280,11 +292,11 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
      *
      * @param <T> The type of the node as selected in the {@link GoalsTopComponent current Diabelli goals window}.
      */
-    public abstract static class CurrentGoalSelectionNode<T extends GeneralGoalNode> extends AbstractNode {
+    public abstract static class GeneralFormulaNode<T extends GeneralGoalNode> extends AbstractNode {
 
         protected final T goal;
 
-        CurrentGoalSelectionNode(T goalNode, Children children) {
+        GeneralFormulaNode(T goalNode, Children children) {
             super(children);
             this.goal = goalNode;
         }
@@ -292,7 +304,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         /**
          * Returns the selected formula that this node represents.
          *
-         * <p>The default implementation calls {@link CurrentGoalSelectionNode#getSelectedGoal()}
+         * <p>The default implementation calls {@link GeneralFormulaNode#getSelectedGoal()}
          * and returns its {@link Goal#asFormula() formula}.</p>
          *
          * @return the selected formula that this node represents.
@@ -304,7 +316,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         /**
          * Returns the selected representation of the selected formula.
          *
-         * <p>The default implementation calls {@link CurrentGoalSelectionNode#getSelectedFormula()}
+         * <p>The default implementation calls {@link GeneralFormulaNode#getSelectedFormula()}
          * and returns its main representation.</p>
          *
          * @return the selected representation of the selected formula.
@@ -345,9 +357,9 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
     @Messages({
         "CurrentPremiseNode_display_name=Premise {0} of goal {1}"
     })
-    public static class CurrentPremiseNode extends CurrentGoalSelectionNode<PremiseNode> {
+    public static class PremiseFormulaNode extends GeneralFormulaNode<PremiseNode> {
 
-        CurrentPremiseNode(PremiseNode premise) {
+        PremiseFormulaNode(PremiseNode premise) {
             super(premise, Children.LEAF);
             setDisplayName(Bundle.CurrentPremiseNode_display_name(premise.getPremiseIndex() + 1, premise.getGoalIndex() + 1));
             setChildren(Children.create(new FormulaFormatsChildren<>(this), false));
@@ -357,14 +369,35 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         public Formula<?> getSelectedFormula() {
             return goal.getGoal().getPremiseAt(goal.getPremiseIndex());
         }
+        
+        public final int getPremiseIndex() {
+            return goal.getPremiseIndex();
+        }
+    }
+
+    @Messages({
+        "PremisesFormulaNode_display_name=All premises of goal {0}"
+    })
+    public static class PremisesFormulaNode extends GeneralFormulaNode<PremisesNode> {
+
+        PremisesFormulaNode(PremisesNode premises) {
+            super(premises, Children.LEAF);
+            setDisplayName(Bundle.PremisesFormulaNode_display_name(premises.getGoalIndex() + 1));
+            setChildren(Children.create(new FormulaFormatsChildren<>(this), false));
+        }
+
+        @Override
+        public Formula<?> getSelectedFormula() {
+            return goal.getGoal().getPremisesFormula();
+        }
     }
 
     @Messages({
         "CurrentConclusionNode_display_name=Conclusion of goal {0}"
     })
-    public static class CurrentConclusionNode extends CurrentGoalSelectionNode<ConclusionNode> {
+    public static class ConclusionFormulaNode extends GeneralFormulaNode<ConclusionNode> {
 
-        CurrentConclusionNode(ConclusionNode conclusion) {
+        ConclusionFormulaNode(ConclusionNode conclusion) {
             super(conclusion, Children.LEAF);
             setDisplayName(Bundle.CurrentConclusionNode_display_name(conclusion.getGoalIndex() + 1));
             setChildren(Children.create(new FormulaFormatsChildren<>(this), false));
@@ -379,20 +412,20 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
     @Messages({
         "CurrentGoalNode_display_name=The entire goal {0}"
     })
-    public static class CurrentGoalNode extends CurrentGoalSelectionNode<GeneralGoalNode> {
+    public static class GoalFormulaNode extends GeneralFormulaNode<GeneralGoalNode> {
 
-        CurrentGoalNode(GeneralGoalNode goal) {
+        GoalFormulaNode(GeneralGoalNode goal) {
             super(goal, Children.LEAF);
             setDisplayName(Bundle.CurrentGoalNode_display_name(goal.getGoalIndex() + 1));
             setChildren(Children.create(new FormulaFormatsChildren<>(this), false));
         }
     }
 
-    static class CurrentGoalSelectionDelegateNode<T extends GeneralGoalNode> extends CurrentGoalSelectionNode<T> {
+    public static abstract class FormulaDelegateNode<T extends GeneralGoalNode> extends GeneralFormulaNode<T> {
 
-        private final CurrentGoalSelectionNode<T> delegate;
+        private final GeneralFormulaNode<T> delegate;
 
-        CurrentGoalSelectionDelegateNode(CurrentGoalSelectionNode<T> selection, Children children) {
+        FormulaDelegateNode(GeneralFormulaNode<T> selection, Children children) {
             super(selection.goal, children);
             this.delegate = selection;
         }
@@ -406,16 +439,20 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         public FormulaRepresentation<?> getSelectedFormulaRepresentation() {
             return delegate.getSelectedFormulaRepresentation();
         }
+        
+        public final GeneralFormulaNode<T> getUnderlyingNode() {
+            return delegate;
+        }
     }
 
-    public static class FormatNode<T extends GeneralGoalNode> extends CurrentGoalSelectionDelegateNode<T> {
+    public static class FormatFormulaNode<T extends GeneralGoalNode> extends FormulaDelegateNode<T> {
 
         final FormulaFormat<?> toFormat;
 
         @Messages({
             "FormatNode_displayName=Format: {0}"
         })
-        FormatNode(CurrentGoalSelectionNode<T> selection, FormulaFormat<?> toFormat) {
+        FormatFormulaNode(GeneralFormulaNode<T> selection, FormulaFormat<?> toFormat) {
             super(selection, Children.LEAF);
             this.toFormat = toFormat;
             setDisplayName(Bundle.FormatNode_displayName(toFormat.getPrettyName()));
@@ -424,25 +461,25 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
         @Override
         public FormulaRepresentation<?> getSelectedFormulaRepresentation() {
-            FormulaRepresentation<?>[] representations = getSelectedFormula().fetchRepresentations(toFormat);
-            return representations == null || representations.length == 0 ? null : representations[0];
+            ArrayList<? extends FormulaRepresentation<?>> representations = getSelectedFormula().fetchRepresentations(toFormat);
+            return representations == null || representations.isEmpty() ? null : representations.get(0);
         }
     }
 
-    public static class FormulaRepresentationNode<T extends GeneralGoalNode> extends CurrentGoalSelectionDelegateNode<T> {
+    public static class RepresentationFormulaNode<T extends GeneralGoalNode> extends FormulaDelegateNode<T> {
 
-        final FormulaRepresentation[] representations;
+        final ArrayList<? extends FormulaRepresentation<?>> representations;
         final int representationIndex;
 
         @Messages({
             "FormatRepresentationNode_displayName=Translation {0}",
             "FormatRepresentationNode_displayName_main_representation=Main representation"
         })
-        FormulaRepresentationNode(FormatNode<T> selection, FormulaRepresentation[] representations, int representationIndex) {
+        RepresentationFormulaNode(FormatFormulaNode<T> selection, ArrayList<? extends FormulaRepresentation<?>> representations, int representationIndex) {
             super(selection, Children.LEAF);
             this.representations = representations;
             this.representationIndex = representationIndex;
-            if (selection.getSelectedFormula().getMainRepresentation() == representations[representationIndex]) {
+            if (selection.getSelectedFormula().getMainRepresentation() == representations.get(representationIndex)) {
                 setDisplayName(Bundle.FormatRepresentationNode_displayName_main_representation());
             } else {
                 setDisplayName(Bundle.FormatRepresentationNode_displayName(representationIndex + 1));
@@ -451,60 +488,60 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
         @Override
         public FormulaRepresentation<?> getSelectedFormulaRepresentation() {
-            return representations[representationIndex];
+            return representations.get(representationIndex);
         }
     }
 
     // <editor-fold defaultstate="collapsed" desc="Formula Format Node Factories">
-    private static class FormulaFormatsChildren<T extends GeneralGoalNode> extends ChildFactory<FormatNode<T>> {
+    private static class FormulaFormatsChildren<T extends GeneralGoalNode> extends ChildFactory<FormatFormulaNode<T>> {
 
-        private final CurrentGoalSelectionNode<T> source;
+        private final GeneralFormulaNode<T> source;
 
-        private FormulaFormatsChildren(CurrentGoalSelectionNode<T> source) {
+        private FormulaFormatsChildren(GeneralFormulaNode<T> source) {
             this.source = source;
         }
 
         @Override
-        protected boolean createKeys(List<FormatNode<T>> toPopulate) {
+        protected boolean createKeys(List<FormatFormulaNode<T>> toPopulate) {
             // Go through all known formats and try to translate the selected
             // formula into all the formats.
             FormulaFormatManager formatManager = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager();
             Collection<FormulaFormat<?>> formats = formatManager.getFormulaFormats();
             for (FormulaFormat<?> format : formats) {
-                toPopulate.add(new FormatNode<>(source, format));
+                toPopulate.add(new FormatFormulaNode<>(source, format));
             }
             return true;
         }
 
         @Override
-        protected Node createNodeForKey(FormatNode<T> formatNode) {
+        protected Node createNodeForKey(FormatFormulaNode<T> formatNode) {
             return formatNode;
         }
     }
 
-    private static class FormulaRepresentationsChildren<T extends GeneralGoalNode> extends ChildFactory<FormulaRepresentationNode<T>> {
+    private static class FormulaRepresentationsChildren<T extends GeneralGoalNode> extends ChildFactory<RepresentationFormulaNode<T>> {
 
-        private final FormatNode<T> source;
+        private final FormatFormulaNode<T> source;
 
-        FormulaRepresentationsChildren(FormatNode<T> source) {
+        FormulaRepresentationsChildren(FormatFormulaNode<T> source) {
             this.source = source;
         }
 
         @Override
-        protected boolean createKeys(List<FormulaRepresentationNode<T>> toPopulate) {
+        protected boolean createKeys(List<RepresentationFormulaNode<T>> toPopulate) {
             // Go through all known formats and try to translate the selected
             // formula into all the formats.
-            FormulaRepresentation[] representations = source.getSelectedFormula().fetchRepresentations(source.toFormat);
-            if (representations != null && representations.length != 0) {
-                for (int i = 0; i < representations.length; i++) {
-                    toPopulate.add(new FormulaRepresentationNode<>(source, representations, i));
+            ArrayList<? extends FormulaRepresentation<?>> representations = source.getSelectedFormula().fetchRepresentations(source.toFormat);
+            if (representations != null && !representations.isEmpty()) {
+                for (int i = 0; i < representations.size(); i++) {
+                    toPopulate.add(new RepresentationFormulaNode<>(source, representations, i));
                 }
             }
             return true;
         }
 
         @Override
-        protected Node createNodeForKey(FormulaRepresentationNode<T> key) {
+        protected Node createNodeForKey(RepresentationFormulaNode<T> key) {
             return key;
         }
     }

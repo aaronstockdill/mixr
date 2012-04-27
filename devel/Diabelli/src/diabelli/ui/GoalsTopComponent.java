@@ -51,7 +51,12 @@ import org.openide.util.lookup.Lookups;
 import org.openide.windows.TopComponent;
 
 /**
- * Top component which displays something.
+ * This window displays currently active goals and allows the user to select a
+ * particular goal or parts of it. User's selection is managed by the provided {@link GoalsTopComponent#getExplorerManager() explorer manager}
+ * and the {@link GoalsTopComponent#getLookup() associated lookup}.
+ *
+ * <p>The nodes that can be found in the explorer manager of this component are
+ * of type {@link GeneralGoalNode}.</p>
  */
 @ConvertAsProperties(dtd = "-//diabelli.ui//Goals//EN",
 autostore = false)
@@ -194,8 +199,8 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
     }
 
     private static class GoalPremisesConclusionFactory extends ChildFactory<AbstractNode> {
-        private final GeneralGoalNode goalNode;
 
+        private final GeneralGoalNode goalNode;
 
         public GoalPremisesConclusionFactory(GeneralGoalNode goalNode) {
             this.goalNode = goalNode;
@@ -204,12 +209,12 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         @Override
         protected boolean createKeys(List<AbstractNode> toPopulate) {
 //            if (goalNode != null) {
-                if (goalNode.getGoal().getPremisesCount() > 0) {
-                    toPopulate.add(new PremisesNode(goalNode));
-                }
-                if (goalNode.getGoal().getConclusion() != null) {
-                    toPopulate.add(new ConclusionNode(goalNode));
-                }
+            if (goalNode.getGoal().getPremisesCount() > 0) {
+                toPopulate.add(new PremisesNode(goalNode));
+            }
+            if (goalNode.getGoal().getConclusion() != null) {
+                toPopulate.add(new ConclusionNode(goalNode));
+            }
 //            }
             return true;
         }
@@ -245,10 +250,14 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Explorer Nodes">
+    /**
+     * The base type of all explorer nodes in the {@link GoalsTopComponent}.
+     */
     public abstract static class GeneralGoalNode extends AbstractNode {
+
         private final Goals goals;
         private final int goalIndex;
-        
+
         GeneralGoalNode(Goals goals, int goalIndex, Children children, Lookup lookup) {
             super(children, lookup);
             this.goals = goals;
@@ -260,31 +269,36 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
             this.goals = goals;
             this.goalIndex = goalIndex;
         }
-        
+
         /**
          * Returns the goals that contain the {@link GeneralGoalNode#getGoal() goal}
          * connected to this node.
+         *
          * @return the goals that contain the {@link GeneralGoalNode#getGoal() goal}
          * connected to this node.
          */
         public final Goals getGoals() {
             return goals;
         }
-        
+
         /**
          * Returns the goal connected to this node.
+         *
          * @return the goal connected to this node.
          */
         public final Goal getGoal() {
             return goals.get(goalIndex);
         }
-        
+
         public final int getGoalIndex() {
             return goalIndex;
         }
-        
     }
-    
+
+    /**
+     * This node corresponds directly to a particular {@link Goal goal} in the
+     * displayed {@link GoalsManager#getCurrentGoals() currently active goals}.
+     */
     public static class GoalNode extends GeneralGoalNode {
 
         GoalNode(Goals goals, int goalIndex) {
@@ -294,6 +308,10 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         }
     }
 
+    /**
+     * This node corresponds directly to the {@link Goal#getConclusion() conclusion}
+     * of a particular {@link Goal goal} in the displayed {@link GoalsManager#getCurrentGoals() currently active goals}.
+     */
     @Messages({
         "FN_conclusion_display_name=Conclusion"
     })
@@ -305,6 +323,10 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         }
     }
 
+    /**
+     * This node corresponds directly to the {@link Goal#getPremises() premises}
+     * of a particular {@link Goal goal} in the displayed {@link GoalsManager#getCurrentGoals() currently active goals}.
+     */
     @Messages({
         "PN_premises_display_name=Premises"
     })
@@ -317,6 +339,10 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         }
     }
 
+    /**
+     * This node corresponds directly to a {@link Goal#getPremiseAt(int) particular premise}
+     * of a particular {@link Goal goal} in the displayed {@link GoalsManager#getCurrentGoals() currently active goals}.
+     */
     @Messages({
         "PN_premise_display_name=Premise #{0}"
     })
@@ -324,12 +350,18 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
 
         private final int premiseIndex;
 
-        private PremiseNode(GeneralGoalNode parentGoal, int premiseIndex){
+        private PremiseNode(GeneralGoalNode parentGoal, int premiseIndex) {
             super(parentGoal.getGoals(), parentGoal.getGoalIndex(), Children.LEAF);
             this.premiseIndex = premiseIndex;
             this.setDisplayName(Bundle.PN_premise_display_name(premiseIndex + 1));
         }
 
+        /**
+         * Returns the index of the premise that this node <span
+         * style="font-style:italic;">carries</span>.
+         * @return the index of the premise that this node <span
+         * style="font-style:italic;">carries</span>.
+         */
         public int getPremiseIndex() {
             return premiseIndex;
         }
