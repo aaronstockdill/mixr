@@ -29,6 +29,7 @@ import diabelli.components.FormulaPresenter;
 import diabelli.logic.FormulaRepresentation;
 import diabelli.ui.CurrentFormulaTopComponent.GeneralFormulaNode;
 import diabelli.ui.CurrentFormulaTopComponent.RepresentationFormulaNode;
+import diabelli.ui.presenters.SingleFormulaPresentationPanel;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Set;
@@ -148,12 +149,12 @@ public final class FormulaPresentationTopComponent extends TopComponent implemen
     //</editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Visualisation Methods">
-    private void showVisualisationsOf(FormulaRepresentation<?> formula) {
+    private void showVisualisationsOf(GeneralFormulaNode<?> fromNode, FormulaRepresentation<?> formula) {
         clearVisualisations();
         // Don't display anything if null is given. Just clear the panel.
         if (formula != null) {
             // Add the visualisations of this representation:
-            addVisualisationsOf(formula, null);
+            addVisualisationsOf(fromNode, formula, null);
         }
         // This has to be called to refresh the newly added visualisations. Swing
         // does not show the newly added components otherwise.
@@ -163,7 +164,7 @@ public final class FormulaPresentationTopComponent extends TopComponent implemen
     @Messages({
         "FPTC_visualiser_failed=The formula presenter '{0}' unexpectedly failed while visualising a formula of the format '{1}'."
     })
-    private void addVisualisationsOf(@NonNull FormulaRepresentation<?> formula, Set<FormulaPresenter> withPresenters) {
+    private void addVisualisationsOf(@NonNull GeneralFormulaNode<?> fromNode, @NonNull FormulaRepresentation<?> formula, Set<FormulaPresenter> withPresenters) {
         if (withPresenters == null) {
             withPresenters = getAllPresenters();
         }
@@ -175,7 +176,8 @@ public final class FormulaPresentationTopComponent extends TopComponent implemen
                     JPanel visualisationPanel = presenter.createVisualiserFor(formula);
                     if (visualisationPanel != null) {
                         // Now put the panel onto this panel:
-                        visualisationsPanel.add(visualisationPanel);
+                        SingleFormulaPresentationPanel pnl = new SingleFormulaPresentationPanel(fromNode, formula, -1, visualisationPanel, presenter);
+                        visualisationsPanel.add(pnl);
                     }
                 }
             } catch (Exception e) {
@@ -209,7 +211,7 @@ public final class FormulaPresentationTopComponent extends TopComponent implemen
                 // Display just visualisation of this representation (there will
                 // usually be just one (the one for this particular format's
                 // representation), but we still look all of visualisations:
-                showVisualisationsOf(currentlySelectedFormula.getSelectedFormulaRepresentation());
+                showVisualisationsOf(formulaRep, currentlySelectedFormula.getSelectedFormulaRepresentation());
             }
             // TODO: Show the formula with all possible presenters.
         }

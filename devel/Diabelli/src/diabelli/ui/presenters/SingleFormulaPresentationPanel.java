@@ -24,9 +24,11 @@
  */
 package diabelli.ui.presenters;
 
+import diabelli.components.FormulaPresenter;
 import diabelli.logic.FormulaRepresentation;
 import diabelli.ui.CurrentFormulaTopComponent;
 import diabelli.ui.CurrentFormulaTopComponent.PremiseFormulaNode;
+import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import org.openide.util.NbBundle;
 
@@ -39,22 +41,32 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
     //<editor-fold defaultstate="collapsed" desc="Fields">
     private static final String BoldItalicEndTag = "</i></b>";
     private static final String BoldItalicStartTag = "<b><i>";
+    private static final long serialVersionUID = 0x1906271867d69be1L;
     private final CurrentFormulaTopComponent.GeneralFormulaNode<?> presentedNode;
     private final FormulaRepresentation<?> formula;
     private final int representationIndex;
-    private final JPanel presenter;
+    private final JPanel presenterPanel;
+    private final FormulaPresenter presenter;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructor">
     /**
      * Creates new form SingleFormulaPresentationPanel
      */
-    public SingleFormulaPresentationPanel(CurrentFormulaTopComponent.GeneralFormulaNode<?> presentedNode, FormulaRepresentation<?> formula, int representationIndex, JPanel presenter) {
+    public SingleFormulaPresentationPanel(CurrentFormulaTopComponent.GeneralFormulaNode<?> presentedNode, FormulaRepresentation<?> formula, int representationIndex, JPanel presenterPanel, FormulaPresenter presenter) {
         this.presentedNode = presentedNode;
         this.formula = formula;
         this.representationIndex = representationIndex;
+        this.presenterPanel = presenterPanel;
         this.presenter = presenter;
         initComponents();
+        if (presenterPanel != null) {
+            this.add(presenterPanel, BorderLayout.CENTER);
+        }
+    }
+
+    public SingleFormulaPresentationPanel() {
+        this(null, null, -1, null, null);
     }
     //</editor-fold>
 
@@ -69,7 +81,6 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
     private void initComponents() {
 
         titlePanel = new javax.swing.JPanel();
-        visualisingLabel = new javax.swing.JLabel();
         detailLabel = new javax.swing.JLabel();
 
         setLayout(new java.awt.BorderLayout());
@@ -77,29 +88,21 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
         titlePanel.setBackground(new java.awt.Color(213, 237, 246));
         titlePanel.setPreferredSize(new java.awt.Dimension(100, 25));
 
-        visualisingLabel.setFont(new java.awt.Font("Dialog", 0, 11)); // NOI18N
-        visualisingLabel.setText(org.openide.util.NbBundle.getMessage(SingleFormulaPresentationPanel.class, "SingleFormulaPresentationPanel.visualisingLabel.text")); // NOI18N
-        visualisingLabel.setToolTipText(org.openide.util.NbBundle.getMessage(SingleFormulaPresentationPanel.class, "SingleFormulaPresentationPanel.visualisingLabel.toolTipText")); // NOI18N
-
         detailLabel.setFont(new java.awt.Font("Dialog", 0, 11)); // NOI18N
-        detailLabel.setText(org.openide.util.NbBundle.getMessage(SingleFormulaPresentationPanel.class, "SingleFormulaPresentationPanel.detailLabel.text")); // NOI18N
+        detailLabel.setText(this.buildDetailLabel());
 
         javax.swing.GroupLayout titlePanelLayout = new javax.swing.GroupLayout(titlePanel);
         titlePanel.setLayout(titlePanelLayout);
         titlePanelLayout.setHorizontalGroup(
             titlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(titlePanelLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, titlePanelLayout.createSequentialGroup()
                 .addGap(10, 10, 10)
-                .addComponent(visualisingLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(detailLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 333, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(detailLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 447, Short.MAX_VALUE)
+                .addGap(10, 10, 10))
         );
         titlePanelLayout.setVerticalGroup(
             titlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(titlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                .addComponent(visualisingLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
-                .addComponent(detailLabel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(detailLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 25, Short.MAX_VALUE)
         );
 
         add(titlePanel, java.awt.BorderLayout.NORTH);
@@ -107,35 +110,65 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel detailLabel;
     private javax.swing.JPanel titlePanel;
-    private javax.swing.JLabel visualisingLabel;
     // End of variables declaration//GEN-END:variables
     // </editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="Private UI Refresh Methods">
     @NbBundle.Messages({
         "Visualisation.DetailLabel.goal=Goal {0}",
         "Visualisation.DetailLabel.premise=Premise {0}",
-        "Visualisation.DetailLabel.premises=Premises"
+        "Visualisation.DetailLabel.premises=Premises",
+        "Visualisation.DetailLabel.conclusion=Conclusion",
+        "Visualisation.DetailLabel.format=Format: <b><i>{0}</i></b>",
+        "Visualisation.DetailLabel.presenter=Visualiser: <b><i>{0}</i></b>",
+        "Visualisation.DetailLabel.nothing=Nothing is being visualised..."
     })
-    void resetDetailLabel() {
-        StringBuilder sb = new StringBuilder("<html>");
-        
-        // Which formula in particular are we displaying?
-        CurrentFormulaTopComponent.GeneralFormulaNode<?> targetNode = this.presentedNode;
-        if (targetNode instanceof CurrentFormulaTopComponent.FormulaDelegateNode<?>) {
-            CurrentFormulaTopComponent.FormulaDelegateNode<?> delegator = (CurrentFormulaTopComponent.FormulaDelegateNode<?>) targetNode;
-            targetNode = delegator.getUnderlyingNode();
+    private String buildDetailLabel() {
+        if (formula != null && presenter != null) {
+            StringBuilder sb = new StringBuilder("<html>");
+
+            if (presentedNode != null) {
+                // Which formula in particular are we displaying?
+                CurrentFormulaTopComponent.GeneralFormulaNode<?> targetNode = this.presentedNode;
+                while (targetNode instanceof CurrentFormulaTopComponent.FormulaDelegateNode<?>) {
+                    CurrentFormulaTopComponent.FormulaDelegateNode<?> delegator = (CurrentFormulaTopComponent.FormulaDelegateNode<?>) targetNode;
+                    targetNode = delegator.getUnderlyingNode();
+                }
+
+                // Print something like this: Goal 1 > Premise 2  Format: <format>  Visualiser: <presenter>
+
+                // First print out the selected goal:
+                sb.append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_goal(targetNode.getSelectedGoalIndex() + 1)).append(BoldItalicEndTag);
+
+                if (targetNode instanceof CurrentFormulaTopComponent.PremiseFormulaNode) {
+                    PremiseFormulaNode premiseFormulaNode = (PremiseFormulaNode) targetNode;
+                    sb.append(" > ").append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_premise(premiseFormulaNode.getPremiseIndex() + 1)).append(BoldItalicEndTag);
+                } else if (targetNode instanceof CurrentFormulaTopComponent.PremisesFormulaNode) {
+                    sb.append(" > ").append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_premises()).append(BoldItalicEndTag);
+                } else if (targetNode instanceof CurrentFormulaTopComponent.ConclusionFormulaNode) {
+                    sb.append(" > ").append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_conclusion()).append(BoldItalicEndTag);
+                }
+            }
+
+            if (formula != null) {
+                // Which format are we displaying?
+                addSpaces(sb).append(Bundle.Visualisation_DetailLabel_format(formula.getFormat().getPrettyName()));
+            }
+
+            if (presenter != null) {
+                // Who is visualising the stuff?
+                addSpaces(sb).append(Bundle.Visualisation_DetailLabel_presenter(presenter.getName()));
+            }
+
+            sb.append("</html>");
+            return sb.toString();
+        } else {
+            return Bundle.Visualisation_DetailLabel_nothing();
         }
-        sb.append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_goal(targetNode.getSelectedGoalIndex() + 1)).append(BoldItalicEndTag);
-        if (targetNode instanceof CurrentFormulaTopComponent.PremiseFormulaNode) {
-            PremiseFormulaNode premiseFormulaNode = (PremiseFormulaNode) targetNode;
-            sb.append(" > ").append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_premise(premiseFormulaNode.getPremiseIndex() + 1)).append(BoldItalicEndTag);
-        }
-        
-        // Which format are we displaying?
-        
-        sb.append("</html>");
-        detailLabel.setText(sb.toString());
+    }
+    
+    StringBuilder addSpaces(StringBuilder sb) {
+        return (sb.length() > 0) ? sb.append("&nbsp;&nbsp;") : sb;
     }
     // </editor-fold>
 }
