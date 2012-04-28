@@ -35,6 +35,7 @@ import diabelli.ui.presenters.SingleFormulaPresentationPanel;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -164,18 +165,26 @@ public final class FormulaPresentationTopComponent extends TopComponent implemen
         validate();
     }
     
-    private void showVisualisationsOf(FormatFormulaNode<?> fromNode) {
+    private void showVisualisationsOf(GeneralFormulaNode<?> fromNode, FormulaFormat<?> selectedFormat) {
+        clearVisualisations();
+        // Don't display anything if null is given. Just clear the panel.
+        if (selectedFormat != null) {
+            Set<FormulaPresenter> presenters = getAllPresenters();
+            addVisualisationsOf(fromNode, selectedFormat, presenters);
+        }
+        // This has to be called to refresh the newly added visualisations. Swing
+        // does not show the newly added components otherwise.
+        validate();
+    }
+    
+    private void showVisualisationsOf(GeneralFormulaNode<?> fromNode) {
         clearVisualisations();
         // Don't display anything if null is given. Just clear the panel.
         if (fromNode != null) {
             Set<FormulaPresenter> presenters = getAllPresenters();
-            // Add visualisations of all representations in this format:
-            FormulaFormat<?> selectedFormat = fromNode.getSelectedFormat();
-            ArrayList<? extends FormulaRepresentation<?>> reps = fromNode.getSelectedFormula().fetchRepresentations(selectedFormat);
-            if (reps != null) {
-                for (FormulaRepresentation<?> rep : reps) {
-                    addVisualisationsOf(fromNode, rep, presenters);
-                }
+            Collection<FormulaFormat<?>> formats = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager().getFormulaFormats();
+            for (FormulaFormat<?> format : formats) {
+                addVisualisationsOf(fromNode, format, presenters);
             }
         }
         // This has to be called to refresh the newly added visualisations. Swing
@@ -204,6 +213,16 @@ public final class FormulaPresentationTopComponent extends TopComponent implemen
                 }
             } catch (Exception e) {
                 Logger.getLogger(FormulaPresentationTopComponent.class.getName()).log(Level.WARNING, Bundle.FPTC_visualiser_failed(presenter.getName(), formula.getFormat().getPrettyName()), e);
+            }
+        }
+    }
+
+    private void addVisualisationsOf(GeneralFormulaNode<?> fromNode, FormulaFormat<?> selectedFormat, Set<FormulaPresenter> presenters) {
+        // Add visualisations of all representations in this format:
+        ArrayList<? extends FormulaRepresentation<?>> reps = fromNode.getSelectedFormula().fetchRepresentations(selectedFormat);
+        if (reps != null) {
+            for (FormulaRepresentation<?> rep : reps) {
+                addVisualisationsOf(fromNode, rep, presenters);
             }
         }
     }
@@ -237,9 +256,10 @@ public final class FormulaPresentationTopComponent extends TopComponent implemen
             } else if (currentlySelectedFormula instanceof CurrentFormulaTopComponent.FormatFormulaNode<?>) {
                 FormatFormulaNode<?> formatFormulaNode = (FormatFormulaNode<?>) currentlySelectedFormula;
                 // Display all representations in the selected format:
-                showVisualisationsOf(formatFormulaNode);
+                showVisualisationsOf(formatFormulaNode, formatFormulaNode.getSelectedFormat());
+            } else {
+                showVisualisationsOf(currentlySelectedFormula);
             }
-            // TODO: Show the formula with all possible presenters.
         }
     }
     // </editor-fold>

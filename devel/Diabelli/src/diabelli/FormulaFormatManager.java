@@ -48,6 +48,9 @@ public interface FormulaFormatManager {
 
     /**
      * Returns all registered formula formats.
+     * 
+     * <p>This method never returns {@code null}.</p>
+     * 
      * @return all registered formula formats.
      */
     @NonNull
