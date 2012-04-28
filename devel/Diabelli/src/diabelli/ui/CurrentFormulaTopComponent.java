@@ -464,6 +464,10 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
             ArrayList<? extends FormulaRepresentation<?>> representations = getSelectedFormula().fetchRepresentations(toFormat);
             return representations == null || representations.isEmpty() ? null : representations.get(0);
         }
+
+        public final FormulaFormat<?> getSelectedFormat() {
+            return toFormat;
+        }
     }
 
     public static class RepresentationFormulaNode<T extends GeneralGoalNode> extends FormulaDelegateNode<T> {

@@ -26,12 +26,15 @@ package diabelli.ui;
 
 import diabelli.Diabelli;
 import diabelli.components.FormulaPresenter;
+import diabelli.logic.FormulaFormat;
 import diabelli.logic.FormulaRepresentation;
+import diabelli.ui.CurrentFormulaTopComponent.FormatFormulaNode;
 import diabelli.ui.CurrentFormulaTopComponent.GeneralFormulaNode;
 import diabelli.ui.CurrentFormulaTopComponent.RepresentationFormulaNode;
 import diabelli.ui.presenters.SingleFormulaPresentationPanel;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -160,6 +163,25 @@ public final class FormulaPresentationTopComponent extends TopComponent implemen
         // does not show the newly added components otherwise.
         validate();
     }
+    
+    private void showVisualisationsOf(FormatFormulaNode<?> fromNode) {
+        clearVisualisations();
+        // Don't display anything if null is given. Just clear the panel.
+        if (fromNode != null) {
+            Set<FormulaPresenter> presenters = getAllPresenters();
+            // Add visualisations of all representations in this format:
+            FormulaFormat<?> selectedFormat = fromNode.getSelectedFormat();
+            ArrayList<? extends FormulaRepresentation<?>> reps = fromNode.getSelectedFormula().fetchRepresentations(selectedFormat);
+            if (reps != null) {
+                for (FormulaRepresentation<?> rep : reps) {
+                    addVisualisationsOf(fromNode, rep, presenters);
+                }
+            }
+        }
+        // This has to be called to refresh the newly added visualisations. Swing
+        // does not show the newly added components otherwise.
+        validate();
+    }
 
     @Messages({
         "FPTC_visualiser_failed=The formula presenter '{0}' unexpectedly failed while visualising a formula of the format '{1}'."
@@ -212,6 +234,10 @@ public final class FormulaPresentationTopComponent extends TopComponent implemen
                 // usually be just one (the one for this particular format's
                 // representation), but we still look all of visualisations:
                 showVisualisationsOf(formulaRep, currentlySelectedFormula.getSelectedFormulaRepresentation());
+            } else if (currentlySelectedFormula instanceof CurrentFormulaTopComponent.FormatFormulaNode<?>) {
+                FormatFormulaNode<?> formatFormulaNode = (FormatFormulaNode<?>) currentlySelectedFormula;
+                // Display all representations in the selected format:
+                showVisualisationsOf(formatFormulaNode);
             }
             // TODO: Show the formula with all possible presenters.
         }
