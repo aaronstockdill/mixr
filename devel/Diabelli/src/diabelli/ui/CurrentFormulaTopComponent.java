@@ -205,10 +205,6 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="GUI Update Methods">
-    private void showPremises(PremisesNode premisesNode) {
-        Logger.getLogger(CurrentFormulaTopComponent.class.getName()).log(Level.INFO, "Showing whole premises not yet supported.");
-    }
-
     private static class WrapperChildFactory<T extends Node> extends ChildFactory<T> {
 
         private final T node;
@@ -252,6 +248,10 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
     private void showGoal(GeneralGoalNode generalGoalNode) {
         wrapAndSetRootNode(new GoalFormulaNode(generalGoalNode));
+    }
+
+    private void showPremises(PremisesNode premisesNode) {
+        wrapAndSetRootNode(new PremisesFormulaNode(premisesNode));
     }
 
     private void updateSelection(GeneralGoalNode generalGoalNode) {

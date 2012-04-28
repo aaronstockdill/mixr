@@ -353,6 +353,10 @@ public class Formula<T> {
      * <p>This method is quite expensive if called for the first time,
      * successive calls will be as expensive as calls to {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
      *
+     * <p><span style="font-weight:bold">Important</span>: this method tries to
+     * translate only the main representation into others. Therefore, if there
+     * is no main representation, this method does the same as {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
+     *
      * @param <TRepresentation> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
      * carried by the returned representations.
      * @param format the desired format in which to get this formula.
@@ -374,6 +378,9 @@ public class Formula<T> {
             if (representations.containsKey(format.getFormatName())) {
                 return getRepresentations(format);
             }
+        }
+        if (getMainRepresentation() == null) {
+            return null;
         }
         // Try to translate this formula:
         FormulaRepresentation<TRepresentation> representation = null;
