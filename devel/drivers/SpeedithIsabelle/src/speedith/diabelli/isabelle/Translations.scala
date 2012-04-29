@@ -19,6 +19,7 @@ import diabelli.isabelle.pure.lib.TermUtils
 import scala.collection.immutable.TreeSet
 import NormalForms._
 import speedith.core.lang.Zone
+import scala.collection.JavaConversions;
 
 object Translations {
 
@@ -42,6 +43,26 @@ object Translations {
    */
   @throws(classOf[ReadingException])
   def termToSpiderDiagram(t: Term): SpiderDiagram = recognise(t, null)._1;
+
+  /**
+   * Takes an Isabelle term and tries to translate it to a spider diagram.
+   *
+   * @throws an exception is thrown if the translation fails for any reason.
+   */
+  @throws(classOf[ReadingException])
+  def termToSpiderDiagram(premises: java.util.List[Term], spiders: java.util.List[Free]): PrimarySpiderDiagram = {
+    if (premises == null || premises.size() == 0) {
+      throw new ReadingException("The list of premises must not be empty.");
+    }
+    if (spiders == null || spiders.size() == 0){
+    	val (psd, _) = convertoToPSD(ArrayBuffer[Free](), null, JavaConversions.asScalaBuffer(premises));
+    	return psd;
+    } else {
+    	val (psd, _) = convertoToPSD(JavaConversions.asScalaBuffer(spiders), spiders.get(0).typ, JavaConversions.asScalaBuffer(premises));
+    	return psd;
+    }
+    null;
+  }
 
   // Everything below here is just implementation detail.
 
@@ -403,7 +424,7 @@ object Translations {
     (habitats, spiderType);
   }
 
-  private def convertoToPSD(spiders: Buffer[Free], spiderType: Typ, conjuncts: Buffer[Term]): (SpiderDiagram, Typ) = {
+  private def convertoToPSD(spiders: Buffer[Free], spiderType: Typ, conjuncts: Buffer[Term]): (PrimarySpiderDiagram, Typ) = {
     // Check spider inequalities:
     checkSpiderInequalities(spiders, conjuncts);
 
