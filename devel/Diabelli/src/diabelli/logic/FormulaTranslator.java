@@ -26,7 +26,6 @@ package diabelli.logic;
 
 import diabelli.Diabelli;
 import diabelli.components.DiabelliComponent;
-import java.util.ArrayList;
 import java.util.List;
 import org.netbeans.api.annotations.common.NonNull;
 import org.openide.util.NbBundle;
@@ -42,8 +41,10 @@ import org.openide.util.NbBundle;
  * <p>Diabelli will try to automatically translate all goals, premises, and
  * conclusions, that the user deliberately inspects.</p>
  *
- * @param <TFrom> the {@link FormulaFormat#getRawFormulaType() type of the raw formula} which this translator can translate to another type.
- * @param <TTo> the {@link FormulaFormat#getRawFormulaType() type of the raw formula} to which this translator can translate a formula.
+ * @param <TFrom> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
+ * which this translator can translate to another type.
+ * @param <TTo> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
+ * to which this translator can translate a formula.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public abstract class FormulaTranslator<TFrom, TTo> {
@@ -170,29 +171,45 @@ public abstract class FormulaTranslator<TFrom, TTo> {
 
     /**
      * Translates the given formula (in the {@link
-     * FormulaTranslator#getFromFormat() source format}) into a formula in the
+     * FormulaTranslator#getFromFormat() source format}) into a new formula in
+     * the
      * {@link FormulaTranslator#getToFormat() target format}.
      *
+     * <p><span style="font-weight:bold">Important</span>: the returned {@link Formula formula}
+     * should be new and the translation should be its {@link Formula#getMainRepresentation() main representation}.</p>
+     *
+     * @param context the goal that contains the formula to translate.
      * @param formula the formula to translate.
      * @return the translated formulae.
      * @throws diabelli.logic.FormulaTranslator.TranslationException This
      * exception is thrown whenever the translation didn't succeed for any
      * reason. A detailed explanation might be given for the user.
      */
-    public abstract Formula<TTo> translate(Formula<TFrom> formula) throws TranslationException;
+    public abstract Formula<TTo> translate(Goal context, Formula<TFrom> formula) throws TranslationException;
 
     /**
-     * Translates the given formulae (in the {@link
-     * FormulaTranslator#getFromFormat() source format}) into formulae in the
-     * {@link FormulaTranslator#getToFormat() target format}.
+     * Translates the given premises (in the {@link
+     * FormulaTranslator#getFromFormat() source format}) into a new single
+     * formula in the {@link FormulaTranslator#getToFormat() target format}.
      *
-     * @param formulae the formulae to translate.
-     * @return the translated formulae.
+     * <p><span style="font-weight:bold">Important</span>: the returned {@link Formula formula}
+     * should be new and the translation should be its {@link Formula#getMainRepresentation() main representation}.</p>
+     *
+     * <p><span style="font-weight:bold">Important</span>: this method must
+     * check that the given formulae have the {@link Formula#getRole() role} of
+     * {@link Formula.FormulaRole#Premise a premise} (use the
+     * {@link FormulaTranslator#arePremises(java.util.List)} method for
+     * this).</p>
+     *
+     * @param hostingGoal the goal that contains the list of premises.
+     * @param premises the formulae to translate (this is a subset of premises
+     * of the given goal).
+     * @return the translated formula.
      * @throws diabelli.logic.FormulaTranslator.TranslationException This
      * exception is thrown whenever the translation didn't succeed for any
      * reason. A detailed explanation might be given for the user.
      */
-    public abstract ArrayList<Formula<TTo>> translate(List<Formula<TFrom>> formulae) throws TranslationException;
+    public abstract Formula<TTo> translate(Goal hostingGoal, List<? extends Formula<TFrom>> premises) throws TranslationException;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Helper Classes">
@@ -245,4 +262,30 @@ public abstract class FormulaTranslator<TFrom, TTo> {
         }
     }
     //</editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Static Helper Methods">
+    /**
+     * Checks whether the given formulae are all premises.
+     *
+     * <p>This method returns {@code true} only if the given list is not {@code null}
+     * or empty and if all the formulae have the {@link Formula#getRole() role}
+     * of {@link Formula.FormulaRole#Premise a premise}. </p>
+     *
+     * @param formulae the list of formulae to check.
+     * @return {@code true} iff the given list contains at least one formula and
+     * all of them are premises.
+     */
+    public static boolean arePremises(List<? extends Formula<?>> formulae) {
+        if (formulae == null || formulae.isEmpty()) {
+            return false;
+        } else {
+            for (Formula<?> formula : formulae) {
+                if (formula.getRole() != Formula.FormulaRole.Premise) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    }
+    // </editor-fold>
 }

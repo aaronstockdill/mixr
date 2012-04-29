@@ -61,7 +61,9 @@ import org.openide.util.NbBundle;
  * formula.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-@NbBundle.Messages({})
+@NbBundle.Messages({
+    "F_toFormat_null=A target format has to be specified."
+})
 public class Formula<T> {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
@@ -81,15 +83,28 @@ public class Formula<T> {
      * translations in this case,</li>
      *
      * <li>if this hash map returns a non-{@code null} value, then this
-     * indicates that a translation attempt through {@link Formula#fetchRepresentations(diabelli.logic.FormulaFormat)}
+     * indicates that a translation attempt through {@link Goal#fetchRepresentations(diabelli.logic.Formula, diabelli.logic.FormulaFormat)}
      * has been made but no translation has been found. In this case, there is
      * no need to search for a translation again.</li>
      *
      * </ul>
      *
+     * <p><span style="font-weight:bold">Important</span>: this object must be
+     * used as the threading lock when fetching old or adding new
+     * representations to this formula.</p>
+     *
      * </p>
      */
-    private final HashMap<String, HashSet<FormulaRepresentation<?>>> representations;
+    private final HashMap<String, HashSet<FormulaRepresentation<?>>> representationsMap;
+    /**
+     * This set contains all non-{@code null} representations of this formula
+     * (including the main representation, if there is any).
+     *
+     * <p><span style="font-weight:bold">Important</span>: when using this
+     * variable, you have to acquire a lock on {@link Formula#representationsMap}.
+     * .</p>
+     */
+    private final HashSet<FormulaRepresentation<?>> representationsSet;
     private final FormulaRole role;
     // </editor-fold>
 
@@ -114,16 +129,17 @@ public class Formula<T> {
             throw new IllegalArgumentException(Bundle.F_role_null());
         }
         // Initialise the fields:
-        this.representations = new HashMap<>();
+        this.representationsMap = new HashMap<>();
+        this.representationsSet = new HashSet<>();
         this.mainRepresentation = mainRepresentation;
         if (mainRepresentation != null) {
             // Add the main representation to the registry:
-            putRepresentation(mainRepresentation.getFormat(), mainRepresentation);
+            addRepresentation(mainRepresentation.getFormat(), mainRepresentation);
         }
         // Now add the other representations:
         if (otherRepresentations != null && !otherRepresentations.isEmpty()) {
             for (FormulaRepresentation<?> otherRepresentation : otherRepresentations) {
-                putRepresentation(otherRepresentation);
+                addRepresentation(otherRepresentation);
             }
         }
         this.role = role;
@@ -169,9 +185,8 @@ public class Formula<T> {
      * reasoner} that provided this formula.
      *
      * <p>Other representations must be either entailed by this representation
-     * (if this formula acts as a premise) or they must entail
-     * representationsthe main representation (if this formula acts as a
-     * conclusion).</p>
+     * (if this formula acts as a premise) or they must entail the main
+     * representation (if this formula acts as a conclusion).</p>
      *
      * <p><span style="font-weight:bold">Note</span>: this value may be {@code
      * null}. A formula may be without a main representation. This is useful,
@@ -186,6 +201,25 @@ public class Formula<T> {
      */
     public FormulaRepresentation<T> getMainRepresentation() {
         return mainRepresentation;
+    }
+
+    /**
+     * This method returns {@code true} iff this formula has no {@link
+     * Formula#getMainRepresentation() main representation} and no
+     * {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)
+     * representations} in any other format.
+     *
+     * <p>A call to this method does the same as {@code getRepresentationsCount() == 0}.</p>
+     *
+     * @return {@code true} iff this formula has no {@link
+     * Formula#getMainRepresentation() main representation} and no
+     * {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)
+     * representations} in any other format.
+     */
+    public boolean isEmpty() {
+        synchronized (representationsMap) {
+            return representationsSet.isEmpty();
+        }
     }
 
     /**
@@ -204,10 +238,10 @@ public class Formula<T> {
      */
     @NonNull
     public ArrayList<FormulaFormat<?>> getFormats() {
-        synchronized (representations) {
+        synchronized (representationsMap) {
             ArrayList<FormulaFormat<?>> formats = new ArrayList<>();
             FormulaFormatManager formatManager = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager();
-            for (Map.Entry<String, HashSet<FormulaRepresentation<?>>> formatEntry : representations.entrySet()) {
+            for (Map.Entry<String, HashSet<FormulaRepresentation<?>>> formatEntry : representationsMap.entrySet()) {
                 if (formatEntry.getValue() != null && formatEntry.getValue().size() > 0) {
                     formats.add(formatManager.getFormulaFormat(formatEntry.getKey()));
                 }
@@ -227,8 +261,8 @@ public class Formula<T> {
      * we have at least tried to get a representation of this formula.
      */
     public String[] getFetchedFormatNames() {
-        synchronized (representations) {
-            Set<String> formatNames = representations.keySet();
+        synchronized (representationsMap) {
+            Set<String> formatNames = representationsMap.keySet();
             return formatNames.toArray(new String[formatNames.size()]);
         }
     }
@@ -243,8 +277,8 @@ public class Formula<T> {
      * @return the number of representations this formula has.
      */
     public int getFetchedFormatsCount() {
-        synchronized (representations) {
-            return representations.size();
+        synchronized (representationsMap) {
+            return representationsMap.size();
         }
     }
 
@@ -258,10 +292,33 @@ public class Formula<T> {
     }
 
     /**
+     * Returns all representations of this formula (including the {@link Formula#getMainRepresentation() main representation}).
+     *
+     * @return all representations of this formula (including the {@link Formula#getMainRepresentation() main representation}).
+     */
+    public FormulaRepresentation<?>[] getRepresentations() {
+        synchronized (representationsMap) {
+            return representationsSet.isEmpty() ? null : representationsSet.toArray(new FormulaRepresentation<?>[representationsSet.size()]);
+        }
+    }
+
+    /**
+     * Returns the total number of representations of this formula. This number
+     * equals to the length of the list returned by {@link Formula#getRepresentations()}.
+     *
+     * @return the total number of representations of this formula.
+     */
+    public int getRepresentationsCount() {
+        synchronized (representationsMap) {
+            return representationsSet.size();
+        }
+    }
+
+    /**
      * Returns the representations of this formula in the given format. This
      * method does not try to convert the formula into the given format. It only
      * gives already present representations. To try and automatically calculate
-     * a representation of this formula in the given format, use {@link Formula#fetchRepresentations(diabelli.logic.FormulaFormat)
+     * a representation of this formula in the given format, use {@link Goal#fetchRepresentations(diabelli.logic.Formula, diabelli.logic.FormulaFormat)
      * }.
      *
      * <p>This function returns {@code null} if there are no representations of
@@ -280,8 +337,8 @@ public class Formula<T> {
         if (format == null) {
             throw new IllegalArgumentException(Bundle.F_toFormat_null());
         }
-        synchronized (representations) {
-            HashSet<FormulaRepresentation<?>> formatReps = representations.get(format.getFormatName());
+        synchronized (representationsMap) {
+            HashSet<FormulaRepresentation<?>> formatReps = representationsMap.get(format.getFormatName());
             if (formatReps == null || formatReps.isEmpty()) {
                 return null;
             }
@@ -292,6 +349,29 @@ public class Formula<T> {
                 }
             }
             return reps;
+        }
+    }
+
+    /**
+     * Returns {@code true} if an attempt has been made to translate this
+     * formula into the given format.
+     *
+     * <p>This method will return {@code true} if, for example, the {@link Goal#fetchRepresentations(diabelli.logic.Formula, diabelli.logic.FormulaFormat)}
+     * method tried to translate this formula into the given format but none of
+     * the translations succeeded (they all threw a {@link TranslationException}
+     * or there was no direct translation to this format from the {@link Formula#getMainRepresentation() main representation}.
+     * This method is used if the {@link Goal#fetchRepresentations(diabelli.logic.Formula, diabelli.logic.FormulaFormat) fetch representations method}
+     * is called multiple times&mdash;to prevent redundant translation
+     * attempts.</p>
+     *
+     * @param format the format for which we want to check if a translation of
+     * this formula to this format has been fetched already.
+     * @return {@code true} if an attempt has been made to translate this
+     * formula into the given format.
+     */
+    public boolean hasAttemptedTranslations(FormulaFormat<?> format) {
+        synchronized (representationsMap) {
+            return representationsMap.get(format.getFormatName()) != null;
         }
     }
 
@@ -312,10 +392,36 @@ public class Formula<T> {
         if (format == null) {
             throw new IllegalArgumentException(Bundle.F_toFormat_null());
         }
-        synchronized (representations) {
-            HashSet<FormulaRepresentation<?>> formatReps = representations.get(format.getFormatName());
+        synchronized (representationsMap) {
+            HashSet<FormulaRepresentation<?>> formatReps = representationsMap.get(format.getFormatName());
             return (FormulaRepresentation<TRep>) (formatReps == null || formatReps.isEmpty() ? null : formatReps.iterator().next());
         }
+    }
+
+    /**
+     * Adds a new representation of this formula to the {@link Formula#getRepresentations() collection of all representations}.
+     *
+     * <p>This method may be used to add representations of {@link Goal#getPremises() premises}
+     * into the {@link Goal#getPremisesFormula() premises formula} if the latter
+     * does not have a {@link Formula#getMainRepresentation() main representation}.</p>
+     *
+     * <p><span style="font-weight:bold">Warning</span>: the added
+     * representations must logically correspond to the original formula. For
+     * example, a subset of premises converted with an {@link FormulaTranslator.TranslationType#ToEntailed entailed translation}
+     * can be placed into the formula that represents premises.</p>
+     *
+     * @param <T> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
+     * carried by the added representation.
+     * @param representation the representation of this formula.
+     */
+    @NbBundle.Messages({
+        "F_representation_null=Only valid non-null representations can be added to a formula."
+    })
+    public <T> void addRepresentation(FormulaRepresentation<T> representation) {
+        if (representation == null) {
+            throw new IllegalArgumentException(Bundle.F_representation_null());
+        }
+        addRepresentation(representation.getFormat(), representation);
     }
 
     /**
@@ -331,89 +437,9 @@ public class Formula<T> {
         if (format == null) {
             throw new IllegalArgumentException(Bundle.F_toFormat_null());
         }
-        synchronized (representations) {
-            HashSet<FormulaRepresentation<?>> formatReps = representations.get(format.getFormatName());
+        synchronized (representationsMap) {
+            HashSet<FormulaRepresentation<?>> formatReps = representationsMap.get(format.getFormatName());
             return formatReps == null || formatReps.isEmpty() ? 0 : formatReps.size();
-        }
-    }
-
-    /**
-     * First looks up if there already is a representation of this formula in
-     * the given format or if it has already been attempted to convert this
-     * formula to the given format. If so, then the existing list of
-     * representations are returned (which might be {@code null} or empty).
-     *
-     * <p>However, if there was no attempt to translate this formula into the
-     * given format, then an attempt will be made. If the translation was
-     * successful the resulting representation will be returned, otherwise
-     * {@code null} is returned.</p>
-     *
-     * <p>This method is thread-safe.</p>
-     *
-     * <p>This method is quite expensive if called for the first time,
-     * successive calls will be as expensive as calls to {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
-     *
-     * <p><span style="font-weight:bold">Important</span>: this method tries to
-     * translate only the main representation into others. Therefore, if there
-     * is no main representation, this method does the same as {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
-     *
-     * @param <TRepresentation> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
-     * carried by the returned representations.
-     * @param format the desired format in which to get this formula.
-     * @return the translation of the {@link Formula#getMainRepresentation()
-     * formula}.
-     */
-    @NbBundle.Messages({
-        "F_toFormat_null=A target format has to be specified."
-    })
-    @SuppressWarnings("unchecked")
-    public <TRepresentation> ArrayList<? extends FormulaRepresentation<TRepresentation>> fetchRepresentations(FormulaFormat<TRepresentation> format) {
-        if (format == null) {
-            throw new IllegalArgumentException(Bundle.F_toFormat_null());
-        }
-        // If the representations in this format have already been calculated
-        // once, return what is already available (it does not matter if no
-        // translations are available).
-        synchronized (representations) {
-            if (representations.containsKey(format.getFormatName())) {
-                return getRepresentations(format);
-            }
-        }
-        if (getMainRepresentation() == null) {
-            return null;
-        }
-        // Try to translate this formula:
-        FormulaRepresentation<TRepresentation> representation = null;
-        // There is no representation yet for this format. Try to find one.
-        for (FormulaTranslator<?, ?> translator : Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager().getFormulaTranslators()) {
-            // Make sure that the translation is valid:
-            if (translator.getFromFormat().equals(getMainRepresentation().getFormat())
-                    && translator.getToFormat().equals(format)
-                    && getRole().isTranslationApplicable(translator.getTranslationType())) {
-                try {
-                    // We can try and translate it:
-                    Formula<TRepresentation> otherRep = ((FormulaTranslator<T, TRepresentation>) translator).translate(this);
-                    if (otherRep != null) {
-                        // We got a translation, add it to the collection of
-                        // all representations of this formula and return it
-                        representation = otherRep.getMainRepresentation();
-                        break;
-                    }
-                } catch (TranslationException ex) {
-                    Logger.getLogger(Formula.class.getName()).log(Level.FINEST, String.format("Translation with '%s' failed. Translation error message: %s", translator.getPrettyName(), ex.getMessage()), ex);
-                }
-            }
-        }
-        // Put the found representation into the collection of all representatios.
-        // In case the translation didn't succeed, null will indicate that in the
-        // future no automatic translation attempts need to be made.
-        putRepresentation(format, representation);
-        if (representation == null) {
-            return null;
-        } else {
-            ArrayList<FormulaRepresentation<TRepresentation>> rep = new ArrayList<>();
-            rep.add(representation);
-            return rep;
         }
     }
     // </editor-fold>
@@ -457,31 +483,35 @@ public class Formula<T> {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Private Helper Methods">
+    /**
+     * Adds the representation into the collection of all representations of
+     * this formula.
+     *
+     * <p>If the given representation is {@code null}</p>
+     *
+     * @param <T>
+     * @param format the format of the representation to add (must not be {@code null}).
+     * @param representation
+     */
     @NbBundle.Messages({
-        "F_representation_null=Only valid non-null representations can be added to a formula."
+        "F_format_null=The representation to be added does not identify its format. A valid format must be provided.",
+        "F_format_mismatch=The format of the representation to be added and the specified format are not the same."
     })
-    private <T> void putRepresentation(FormulaRepresentation<T> representation) {
-        if (representation == null) {
-            throw new IllegalArgumentException(Bundle.F_representation_null());
-        }
-        putRepresentation(representation.getFormat(), representation);
-    }
-
-    @NbBundle.Messages({
-        "F_format_null=The representation to be added does not identify its format. A valid format must be provided."
-    })
-    private <T> void putRepresentation(FormulaFormat<T> format, FormulaRepresentation<T> representation) {
+    final <T> void addRepresentation(FormulaFormat<T> format, FormulaRepresentation<T> representation) {
         if (format == null) {
             throw new IllegalArgumentException(Bundle.F_format_null());
         }
-        synchronized (representations) {
-            HashSet<FormulaRepresentation<?>> formatReps = representations.get(format.getFormatName());
+        synchronized (representationsMap) {
+            HashSet<FormulaRepresentation<?>> formatReps = representationsMap.get(format.getFormatName());
             if (formatReps == null) {
-                formatReps = new HashSet<>();
-                representations.put(format.getFormatName(), formatReps);
+                representationsMap.put(format.getFormatName(), formatReps = new HashSet<>());
             }
             if (representation != null) {
+                if (representation.getFormat() != format) {
+                    throw new IllegalStateException(Bundle.F_format_mismatch());
+                }
                 formatReps.add(representation);
+                representationsSet.add(representation);
             }
         }
     }

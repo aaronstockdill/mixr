@@ -30,27 +30,30 @@ import diabelli.logic.FormulaFormat;
 import diabelli.logic.FormulaRepresentation;
 import diabelli.logic.FormulaTranslator;
 import java.util.Collection;
+import java.util.Set;
 import org.netbeans.api.annotations.common.NonNull;
 
 /**
  * Provides a central mechanism for registering known {@link
- * FormulaFormat formula formats}. This provides a way for
- * identifying, translating, and understanding of {@link FormulaRepresentation formulae}
- * in different formats. Since Diabelli's main goal is to connect different
+ * FormulaFormat formula formats}. This provides a way for identifying,
+ * translating, and understanding of {@link FormulaRepresentation formulae} in
+ * different formats. Since Diabelli's main goal is to connect different
  * reasoners, all of which may understand different representations, this class
- * provides a solution for ease of translation between the reasoners.
- * <p>Formula formats are registered when {@link DiabelliComponent Diabelli components}
- * are loaded. The components which want to register new formula formats must 
+ * provides a solution for ease of translation between the reasoners. <p>Formula
+ * formats are registered when {@link DiabelliComponent Diabelli components} are
+ * loaded. The components which want to register new formula formats must
  * implement the {@link FormulaFormatsProvider} interface.</p>
+ *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public interface FormulaFormatManager {
 
+    //<editor-fold defaultstate="collapsed" desc="Formula Formats">
     /**
      * Returns all registered formula formats.
-     * 
+     *
      * <p>This method never returns {@code null}.</p>
-     * 
+     *
      * @return all registered formula formats.
      */
     @NonNull
@@ -58,35 +61,120 @@ public interface FormulaFormatManager {
 
     /**
      * Returns the formula format with the given name.
+     *
      * @param formatName the name of the format to look up.
      * @return the formula format with the given name.
      */
     FormulaFormat<?> getFormulaFormat(String formatName);
-    
+
     /**
      * Returns the number of registered formula formats.
+     *
      * @return the number of registered formula formats.
      */
     int getFormulaFormatsCount();
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Translators">
     /**
      * Returns all registered formula translators.
+     *
      * @return all registered formula translators.
      */
     @NonNull
-    Collection<FormulaTranslator<?,?>> getFormulaTranslators();
+    Collection<FormulaTranslator<?, ?>> getFormulaTranslators();
 
     /**
-     * Returns the formula translator with the given name.
-     * @param formatName the name of the formula translator to look up.
-     * @return the formula translator with the given name.
-     */
-    FormulaTranslator<?,?> getFormulaTranslator(String formatName);
-    
-    /**
      * Returns the number of registered formula translators.
+     *
      * @return the number of registered formula translators.
      */
     int getFormulaTranslatorsCount();
-    
+
+    /**
+     * Returns all registered formula translators that can convert formulae of
+     * the given format into any other format.
+     * 
+     * <p><span style="font-weight:bold">Note</span>: this method will return
+     * {@code null} to indicate that there are no desired translators.</p>
+     *
+     * @param <TFrom> the {@link FormulaFormat#getRawFormulaType() raw formula
+     * type} of the formulae from which we want to translate.
+     * @param fromFormat the formula format of formulae from which we want to
+     * translate.
+     * @return all registered formula translators that can convert formulae of
+     * the given format into any other format.
+     */
+    <TFrom> Set<FormulaTranslator<TFrom, ?>> getFormulaTranslatorsFrom(FormulaFormat<TFrom> fromFormat);
+
+    /**
+     * Returns the number of registered formula translators that can convert
+     * formulae of the given format into any other format.
+     *
+     * @param <TFrom> the {@link FormulaFormat#getRawFormulaType() raw formula
+     * type} of the formulae from which we want to translate.
+     * @param fromFormat the formula format of formulae from which we want to
+     * translate.
+     * @return the number of registered formula translators that can convert
+     * formulae of the given format into any other format.
+     */
+    <TFrom> int getFormulaTranslatorsFromCount(FormulaFormat<TFrom> fromFormat);
+
+    /**
+     * Returns all registered formula translators that can convert formulae from
+     * any format into a given output format.
+     * 
+     * <p><span style="font-weight:bold">Note</span>: this method will return
+     * {@code null} to indicate that there are no desired translators.</p>
+     *
+     * @param <TTo> the {@link FormulaFormat#getRawFormulaType() raw formula
+     * type} of the format to which we want to translate.
+     * @param toFormat the format into which we want to translate formulae of
+     * the input format.
+     * @return all registered formula translators that can convert formulae from
+     * any format into a given output format.
+     */
+    <TTo> Set<FormulaTranslator<?, TTo>> getFormulaTranslatorsTo(FormulaFormat<TTo> toFormat);
+
+    /**
+     * Returns the number of registered formula translators that can convert
+     * formulae from any format into a given output format.
+     *
+     * @param <TTo> the {@link FormulaFormat#getRawFormulaType() raw formula
+     * type} of the format to which we want to translate.
+     * @param toFormat the format into which we want to translate formulae of
+     * the input format.
+     * @return the number of registered formula translators that can convert
+     * formulae from any format into a given output format.
+     */
+    <TTo> int getFormulaTranslatorsToCount(FormulaFormat<TTo> toFormat);
+
+    /**
+     * Returns all registered formula translators that can convert formulae of
+     * the given input format into the given output format.
+     * 
+     * <p><span style="font-weight:bold">Note</span>: this method will return
+     * {@code null} to indicate that there are no desired translators.</p>
+     *
+     * @param <TFrom> the {@link FormulaFormat#getRawFormulaType() raw formula
+     * type} of the formulae from which we want to translate.
+     * @param <TTo> the {@link FormulaFormat#getRawFormulaType() raw formula
+     * type} of the format to which we want to translate.
+     * @param fromFormat the formula format of formulae from which we want to
+     * translate.
+     * @param toFormat the format into which we want to translate formulae of
+     * the input format.
+     * @return all registered formula translators that can convert formulae of
+     * the given input format into the given output format.
+     */
+    <TFrom, TTo> Set<FormulaTranslator<TFrom, TTo>> getFormulaTranslators(FormulaFormat<TFrom> fromFormat, FormulaFormat<TTo> toFormat);
+
+    /**
+     * Returns the formula translator with the given name.
+     *
+     * @param formatName the name of the formula translator to look up.
+     * @return the formula translator with the given name.
+     */
+    FormulaTranslator<?, ?> getFormulaTranslator(String formatName);
+    //</editor-fold>
 }

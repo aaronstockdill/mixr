@@ -30,6 +30,7 @@ import diabelli.logic.Goal;
 import diabelli.logic.Goals;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
@@ -63,7 +64,7 @@ autostore = false)
 @TopComponent.Description(preferredID = GoalsTopComponent.PreferredID,
 //iconBase="SET/PATH/TO/ICON/HERE", 
 persistenceType = TopComponent.PERSISTENCE_ALWAYS)
-@TopComponent.Registration(mode = "output", openAtStartup = true)
+@TopComponent.Registration(mode = "navigator", openAtStartup = true)
 @ActionID(category = "Window", id = "diabelli.ui.GoalsTopComponent")
 @ActionReference(path = "Menu/Window/Diabelli", position = 100)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_GoalsAction",
@@ -77,6 +78,7 @@ preferredID = GoalsTopComponent.PreferredID)
 public final class GoalsTopComponent extends TopComponent implements ExplorerManager.Provider {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
+    private static final long serialVersionUID = 0x5b5c7d5e172704ebL;
     private ExplorerManager em;
     private Lookup lookup;
     private GoalsChangedListenerImpl goalsChangedListener;
@@ -100,7 +102,7 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
 
         // Make the root node invisible in the view:
         ((TreeTableView) goalsView).setRootVisible(false);
-        ((TreeTableView) goalsView).setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        ((TreeTableView) goalsView).setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 
         updateGoalsList();
     }
@@ -208,14 +210,12 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
 
         @Override
         protected boolean createKeys(List<AbstractNode> toPopulate) {
-//            if (goalNode != null) {
-            if (goalNode.getGoal().getPremisesCount() > 0) {
+            if (goalNode.getGoal().getPremisesCount() > 0 && goalNode.getGoal().getPremisesFormula().isEmpty()) {
                 toPopulate.add(new PremisesNode(goalNode));
             }
             if (goalNode.getGoal().getConclusion() != null) {
                 toPopulate.add(new ConclusionNode(goalNode));
             }
-//            }
             return true;
         }
 
@@ -398,6 +398,49 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         } else {
             updateGoalsList(null);
         }
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Private Helper Methods">
+    /**
+     * Checks if premises were selected and returns a non-{@code null} array of
+     * selected premise nodes if and only if:
+     *
+     * <ul>
+     *
+     * <li>all selected nodes are premises, and</li>
+     *
+     * <li>all of them are from the same goal, and</li>
+     *
+     * <li>at least two premises are selected.</li>
+     *
+     * </ul>
+     *
+     * In every other case this method returns {@code null}.
+     *
+     * @param selectedNodes the nodes representing the selected
+     * @return an array of selected premises or {@code null}.
+     */
+    public static PremiseNode[] checkPremisesSelected(Node[] selectedNodes) {
+        if (selectedNodes == null || selectedNodes.length < 2) {
+            return null;
+        }
+        Goal commonGoal = null;
+        for (int i = 0; i < selectedNodes.length; i++) {
+            Node node = selectedNodes[i];
+            if (!(node instanceof PremiseNode)) {
+                return null;
+            }
+            PremiseNode premiseNode = (PremiseNode) node;
+            // Is the premise from the same goal?
+            if (commonGoal == null) {
+                commonGoal = premiseNode.getGoal();
+            } else if (premiseNode.getGoal() != commonGoal) {
+                return null;
+            }
+        }
+        // Good, the selected premises passed the test.
+        return Arrays.copyOf(selectedNodes, selectedNodes.length, PremiseNode[].class);
     }
     // </editor-fold>
 }

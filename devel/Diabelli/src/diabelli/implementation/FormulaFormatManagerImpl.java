@@ -34,6 +34,8 @@ import diabelli.logic.FormulaTranslator;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.NbBundle;
@@ -46,13 +48,19 @@ import org.openide.util.NbBundle;
 class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
-    private HashMap<String, FormulaFormat<?>> formulaFormats;
-    private HashMap<String, FormulaTranslator<?, ?>> formulaTranslators;
+    private final HashMap<String, FormulaFormat<?>> formulaFormats;
+    private final HashMap<String, FormulaTranslator<?, ?>> formulaTranslators;
+    private final HashMap<FormulaFormat<?>, HashSet<? extends FormulaTranslator<?, ?>>> fromFormatTranslatorsMap;
+    private final HashMap<FormulaFormat<?>, HashSet<? extends FormulaTranslator<?, ?>>> toFormatTranslatorsMap;
     private Diabelli diabelli;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
     FormulaFormatManagerImpl() {
+        this.formulaFormats = new HashMap<>();
+        this.formulaTranslators = new HashMap<>();
+        this.fromFormatTranslatorsMap = new HashMap<>();
+        this.toFormatTranslatorsMap = new HashMap<>();
     }
     //</editor-fold>
 
@@ -97,7 +105,7 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
         }
     }
     // </editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="Formula Translators">
     @Override
     public Collection<FormulaTranslator<?, ?>> getFormulaTranslators() {
@@ -112,6 +120,46 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
     @Override
     public FormulaTranslator<?, ?> getFormulaTranslator(String formatName) {
         return formulaTranslators.get(formatName);
+    }
+
+    @Override
+    public <TFrom> Set<FormulaTranslator<TFrom, ?>> getFormulaTranslatorsFrom(FormulaFormat<TFrom> fromFormat) {
+        @SuppressWarnings("unchecked")
+        HashSet<FormulaTranslator<TFrom, ?>> translators = (HashSet<FormulaTranslator<TFrom, ?>>) fromFormatTranslatorsMap.get(fromFormat);
+        return translators == null ? null : Collections.unmodifiableSet(translators);
+    }
+
+    @Override
+    public <TFrom> int getFormulaTranslatorsFromCount(FormulaFormat<TFrom> fromFormat) {
+        HashSet<?> translators = fromFormatTranslatorsMap.get(fromFormat);
+        return translators == null ? 0 : translators.size();
+    }
+
+    @Override
+    public <TTo> Set<FormulaTranslator<?, TTo>> getFormulaTranslatorsTo(FormulaFormat<TTo> toFormat) {
+        @SuppressWarnings("unchecked")
+        HashSet<? extends FormulaTranslator<?, TTo>> translators = (HashSet<? extends FormulaTranslator<?, TTo>>) toFormatTranslatorsMap.get(toFormat);
+        return translators == null ? null : Collections.unmodifiableSet(translators);
+    }
+
+    @Override
+    public <TTo> int getFormulaTranslatorsToCount(FormulaFormat<TTo> toFormat) {
+        HashSet<?> translators = toFormatTranslatorsMap.get(toFormat);
+        return translators == null ? 0 : translators.size();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <TFrom, TTo> Set<FormulaTranslator<TFrom, TTo>> getFormulaTranslators(FormulaFormat<TFrom> fromFormat, FormulaFormat<TTo> toFormat) {
+        HashSet<? extends FormulaTranslator<TFrom, ?>> from = (HashSet<? extends FormulaTranslator<TFrom, ?>>) fromFormatTranslatorsMap.get(fromFormat);
+        HashSet<? extends FormulaTranslator<?, TTo>> to = (HashSet<? extends FormulaTranslator<? extends Object, TTo>>) toFormatTranslatorsMap.get(toFormat);
+        if (from == null || to == null) {
+            return null;
+        } else {
+            HashSet<? extends FormulaTranslator<TFrom, ?>> fromClone = (HashSet<? extends FormulaTranslator<TFrom, ?>>) from.clone();
+            from.retainAll(to);
+            return (Set<FormulaTranslator<TFrom, TTo>>) fromClone;
+        }
     }
 
     /**
@@ -135,8 +183,32 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
                     throw new IllegalArgumentException(Bundle.FFM_translator_already_exists(providingComponent.getName(), translator.getName()));
                 }
                 formulaTranslators.put(translator.getName(), translator);
+                // Add to the 'from' map:
+                addFromFormat(translator);
+                // Add to the 'to' map:
+                addToFormat(translator);
             }
         }
+    }
+
+    private <TFrom> void addFromFormat(FormulaTranslator<TFrom, ?> translator) {
+        FormulaFormat<TFrom> fromFormat = translator.getFromFormat();
+        @SuppressWarnings("unchecked")
+        HashSet<FormulaTranslator<TFrom, ?>> fromTranslators = (HashSet<FormulaTranslator<TFrom, ?>>) fromFormatTranslatorsMap.get(fromFormat);
+        if (fromTranslators == null) {
+            fromFormatTranslatorsMap.put(fromFormat, fromTranslators = new HashSet<>());
+        }
+        fromTranslators.add(translator);
+    }
+
+    private <TTo> void addToFormat(FormulaTranslator<?, TTo> translator) {
+        FormulaFormat<TTo> toFormat = translator.getToFormat();
+        @SuppressWarnings("unchecked")
+        HashSet<FormulaTranslator<?, TTo>> toTranslators = (HashSet<FormulaTranslator<?, TTo>>) toFormatTranslatorsMap.get(toFormat);
+        if (toTranslators == null) {
+            toFormatTranslatorsMap.put(toFormat, toTranslators = new HashSet<>());
+        }
+        toTranslators.add(translator);
     }
     // </editor-fold>
 
@@ -147,8 +219,6 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
             throw new IllegalArgumentException(Bundle.Manager_diabelli_null());
         }
         this.diabelli = host;
-        this.formulaFormats = new HashMap<>();
-        this.formulaTranslators = new HashMap<>();
     }
 
     @Override
@@ -156,7 +226,7 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
         // Register all available formula formats and translations:
         for (DiabelliComponent diabelliComponent : diabelli.getRegisteredComponents()) {
             if (diabelliComponent instanceof FormulaFormatsProvider) {
-                    FormulaFormatsProvider formulaFormatProvider = (FormulaFormatsProvider) diabelliComponent;
+                FormulaFormatsProvider formulaFormatProvider = (FormulaFormatsProvider) diabelliComponent;
                 try {
                     registerFormulaFormats(formulaFormatProvider.getFormulaFormats(), formulaFormatProvider);
                 } catch (Exception e) {

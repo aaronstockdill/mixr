@@ -129,10 +129,11 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
 
             if (presentedNode != null) {
                 // Which formula in particular are we displaying?
-                CurrentFormulaTopComponent.GeneralFormulaNode<?> targetNode = this.presentedNode;
-                while (targetNode instanceof CurrentFormulaTopComponent.FormulaDelegateNode<?>) {
-                    CurrentFormulaTopComponent.FormulaDelegateNode<?> delegator = (CurrentFormulaTopComponent.FormulaDelegateNode<?>) targetNode;
-                    targetNode = delegator.getUnderlyingNode();
+                CurrentFormulaTopComponent.GeneralFormulaNode<?> targetNode;
+                if (presentedNode instanceof CurrentFormulaTopComponent.FormulaDelegateNode<?>) {
+                    targetNode = ((CurrentFormulaTopComponent.FormulaDelegateNode<?>) presentedNode).getBaseFormulaNode();
+                } else {
+                    targetNode = presentedNode;
                 }
 
                 // Print something like this: Goal 1 > Premise 2  Format: <format>  Visualiser: <presenter>
@@ -166,7 +167,7 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
             return Bundle.Visualisation_DetailLabel_nothing();
         }
     }
-    
+
     StringBuilder addSpaces(StringBuilder sb) {
         return (sb.length() > 0) ? sb.append("&nbsp;&nbsp;") : sb;
     }

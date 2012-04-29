@@ -28,15 +28,14 @@ import diabelli.Diabelli;
 import diabelli.FormulaFormatManager;
 import diabelli.components.FormulaPresenter;
 import diabelli.logic.*;
+import diabelli.logic.FormulaTranslator.TranslationException;
 import diabelli.ui.GoalsTopComponent.ConclusionNode;
 import diabelli.ui.GoalsTopComponent.GeneralGoalNode;
 import diabelli.ui.GoalsTopComponent.PremiseNode;
 import diabelli.ui.GoalsTopComponent.PremisesNode;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ActionMap;
@@ -53,6 +52,7 @@ import org.openide.nodes.AbstractNode;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
@@ -63,13 +63,13 @@ import org.openide.windows.WindowManager;
  * (formats) of a formula selected in the {@link GoalsTopComponent}. This
  * selection may then consequently be displayed with the help of {@link
  * FormulaPresenter formula presenters}. In fact, the window {@link FormulaPresentationTopComponent}
- * displays the current selection automatically. Additionally,
- * the user may request additional translations through this window.
- * 
- * 
+ * displays the current selection automatically. Additionally, the user may
+ * request additional translations through this window.
+ *
+ *
  * User's selection of the contents of this component is managed by the provided
- * {@link CurrentFormulaTopComponent#getExplorerManager() explorer manager}
- * and the {@link CurrentFormulaTopComponent#getLookup() associated lookup}.
+ * {@link CurrentFormulaTopComponent#getExplorerManager() explorer manager} and
+ * the {@link CurrentFormulaTopComponent#getLookup() associated lookup}.
  *
  * <p>The nodes that can be found in the explorer manager of this component are
  * of type {@link GeneralFormulaNode}.</p>
@@ -271,7 +271,14 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
     private void updateSelectionFrom(ExplorerManager em) {
         Node[] selectedNodes = em.getSelectedNodes();
         if (selectedNodes != null && selectedNodes.length > 0 && selectedNodes[0] instanceof GeneralGoalNode) {
-            updateSelection((GeneralGoalNode) selectedNodes[0]);
+            // Did the user select a bunch of premises from the same goal:
+            PremiseNode[] premises = GoalsTopComponent.checkPremisesSelected(selectedNodes);
+            if (premises != null) {
+                // The user selected a bunch of premises. What to do?
+                Logger.getLogger(CurrentFormulaTopComponent.class.getName()).log(Level.INFO, "The user selected a bunch of premises. It is not yet decided what we want to do with them.");
+            } else {
+                updateSelection((GeneralGoalNode) selectedNodes[0]);
+            }
         } else {
             updateSelection(null);
         }
@@ -342,12 +349,13 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         public final int getSelectedGoalIndex() {
             return goal.getGoalIndex();
         }
-        
+
         /**
-         * Returns the {@link Goals goals object} that hosts the formula selection
-         * represented by this node.
-         * @return the {@link Goals goals object} that hosts the formula selection
-         * represented by this node.
+         * Returns the {@link Goals goals object} that hosts the formula
+         * selection represented by this node.
+         *
+         * @return the {@link Goals goals object} that hosts the formula
+         * selection represented by this node.
          */
         public final Goals getHostingGoals() {
             return goal.getGoals();
@@ -369,7 +377,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         public Formula<?> getSelectedFormula() {
             return goal.getGoal().getPremiseAt(goal.getPremiseIndex());
         }
-        
+
         public final int getPremiseIndex() {
             return goal.getPremiseIndex();
         }
@@ -439,9 +447,42 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         public FormulaRepresentation<?> getSelectedFormulaRepresentation() {
             return delegate.getSelectedFormulaRepresentation();
         }
-        
+
+        /**
+         * The node to which this one delegates.
+         *
+         * @return the node to which this one delegates.
+         */
         public final GeneralFormulaNode<T> getUnderlyingNode() {
             return delegate;
+        }
+
+        /**
+         * Returns the formula node on which this delegate node is based. In
+         * other words, this method returns a {@link GeneralFormulaNode formula
+         * node} that is of one of the following types:
+         *
+         * <ul>
+         *
+         * <li>{@link GoalFormulaNode},</li>
+         *
+         * <li>{@link PremisesFormulaNode},</li>
+         *
+         * <li>{@link PremiseFormulaNode}, or</li>
+         *
+         * <li>{@link ConclusionFormulaNode}.</li>
+         *
+         * </ul>
+         *
+         * @return the formula node on which this delegate node is based.
+         */
+        public final GeneralFormulaNode<T> getBaseFormulaNode() {
+            if (delegate instanceof FormulaDelegateNode<?>) {
+                FormulaDelegateNode<T> formulaDelegateNode = (FormulaDelegateNode<T>) delegate;
+                return formulaDelegateNode.getBaseFormulaNode();
+            } else {
+                return delegate;
+            }
         }
     }
 
@@ -461,7 +502,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
         @Override
         public FormulaRepresentation<?> getSelectedFormulaRepresentation() {
-            ArrayList<? extends FormulaRepresentation<?>> representations = getSelectedFormula().fetchRepresentations(toFormat);
+            ArrayList<? extends FormulaRepresentation<?>> representations = getSelectedGoal().fetchRepresentations(getSelectedFormula(), toFormat);
             return representations == null || representations.isEmpty() ? null : representations.get(0);
         }
 
@@ -535,7 +576,21 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         protected boolean createKeys(List<RepresentationFormulaNode<T>> toPopulate) {
             // Go through all known formats and try to translate the selected
             // formula into all the formats.
-            ArrayList<? extends FormulaRepresentation<?>> representations = source.getSelectedFormula().fetchRepresentations(source.toFormat);
+            // If the selected formula are `premises' and there is no main
+            // representation, then try to translate the whole array of premises
+            // into the selected format.
+            GeneralFormulaNode<T> baseFormulaNode = source.getBaseFormulaNode();
+            if (baseFormulaNode instanceof PremisesFormulaNode && baseFormulaNode.getSelectedFormula().getMainRepresentation() == null) {
+                PremisesFormulaNode premisesFormulaNode = (PremisesFormulaNode) baseFormulaNode;
+                // Okay, now convert the array of formulae into this format and,
+                // if translation was successful, add it as a representation of
+                // the premises formula.
+                @SuppressWarnings("unchecked")
+                final List<? extends Formula<Object>> premises = (List<? extends Formula<Object>>) premisesFormulaNode.getSelectedGoal().getPremises();
+                baseFormulaNode.getSelectedGoal().addPremisesTranslations(premises, source.getSelectedFormat());
+            }
+
+            ArrayList<? extends FormulaRepresentation<?>> representations = source.getSelectedGoal().fetchRepresentations(source.getSelectedFormula(), source.toFormat);
             if (representations != null && !representations.isEmpty()) {
                 for (int i = 0; i < representations.size(); i++) {
                     toPopulate.add(new RepresentationFormulaNode<>(source, representations, i));

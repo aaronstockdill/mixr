@@ -29,19 +29,27 @@ package diabelli.components;
  * inference rules in other Diabelli reasoners). The new goals should logically
  * entail the old goals, which means that if the new goal is proved, so will be
  * the old one.
- * 
- *  <p>A goal-accepting reasoner provides the following:
- * 
+ *
+ * <p>A goal-accepting reasoner provides the following:
+ *
  * <ul>
  * 
- * <li>this reasoner's current goals </li>
+ * <li>its current goals through the {@link GoalProvidingReasoner goal-providing interface},</li>
+ *
+ * <li>an interface for accepting new goals, which entail the {@link
+ * GoalProvidingReasoner#getGoals() original ones},</li>
+ *
+ * <li>an interface that provides an optional instruction to this reasoner to
+ * try and reconstruct the transformation that produced the new goal, and</li>
+ *
+ * <li>an interface that optionally enables passing prover-specific proof
+ * traces that come with the new goals (useful for proof reconstruction).</li>
  * 
  * </ul>
- * 
+ *
  * </p>
- * 
+ *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public interface GoalAcceptingReasoner extends GoalProvidingReasoner {
-    
 }

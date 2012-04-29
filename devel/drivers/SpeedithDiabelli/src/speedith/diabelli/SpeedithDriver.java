@@ -24,7 +24,10 @@
  */
 package speedith.diabelli;
 
-import diabelli.components.*;
+import diabelli.components.DiabelliComponent;
+import diabelli.components.FormulaFormatsProvider;
+import diabelli.components.FormulaTranslationsProvider;
+import diabelli.components.GoalAcceptingReasoner;
 import diabelli.components.util.BareGoalProvidingReasoner;
 import diabelli.logic.*;
 import java.util.*;
@@ -52,7 +55,7 @@ import speedith.ui.SpiderDiagramPanel;
 public class SpeedithDriver extends BareGoalProvidingReasoner implements
         FormulaFormatsProvider,
         FormulaTranslationsProvider,
-        FormulaPresenter {
+        diabelli.components.FormulaPresenter {
 
     @Override
     public String getName() {

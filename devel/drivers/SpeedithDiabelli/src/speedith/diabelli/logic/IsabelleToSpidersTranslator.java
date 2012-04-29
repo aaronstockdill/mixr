@@ -25,13 +25,17 @@
 package speedith.diabelli.logic;
 
 import diabelli.isabelle.terms.TermFormatDescriptor;
+import diabelli.isabelle.terms.TermGoal;
 import diabelli.logic.Formula;
 import diabelli.logic.FormulaRepresentation;
 import diabelli.logic.FormulaTranslator;
+import diabelli.logic.Goal;
 import isabelle.Term;
 import java.util.ArrayList;
 import java.util.List;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
+import speedith.core.lang.PrimarySpiderDiagram;
 import speedith.core.lang.SpiderDiagram;
 import speedith.core.lang.reader.ReadingException;
 
@@ -84,8 +88,8 @@ public class IsabelleToSpidersTranslator extends FormulaTranslator<Term.Term, Sp
         "ISAtoSDTrans_translation_error_isa_formula_not_a_term=The Isabelle driver might be faulty. It returned an Isabelle term formula that is not a Term.Term.",
         "ISAtoSDTrans_translation_error_null_sd_returned=The translation failed to produce a valid spider diagram."
     })
-    public Formula<SpiderDiagram> translate(Formula<Term.Term> formula) throws TranslationException {
-        ArrayList<? extends FormulaRepresentation<Term.Term>> isaReps = formula.fetchRepresentations(TermFormatDescriptor.getInstance());
+    public Formula<SpiderDiagram> translate(Goal context, Formula<Term.Term> formula) throws TranslationException {
+        ArrayList<? extends FormulaRepresentation<Term.Term>> isaReps = context.fetchRepresentations(formula, TermFormatDescriptor.getInstance());
         if (isaReps == null || isaReps.isEmpty()) {
             throw new TranslationException(Bundle.ISAtoSDTrans_translation_error_no_isa_term());
         }
@@ -105,8 +109,28 @@ public class IsabelleToSpidersTranslator extends FormulaTranslator<Term.Term, Sp
         }
     }
 
+    @NbBundle.Messages({
+        "ITST_not_all_premises=The list of formulae does not contain only premises.",
+        "ITST_context_unknown=The type of the given context goal is not supported.",
+        "ITST_premises_translation_failed=Could not extract a spider diagram from the given premises."
+    })
     @Override
-    public ArrayList<Formula<SpiderDiagram>> translate(List<Formula<Term.Term>> formulae) throws TranslationException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Formula<SpiderDiagram> translate(Goal context, List<? extends Formula<Term.Term>> formulae) throws TranslationException {
+        if (!arePremises(formulae)) {
+            throw new TranslationException(Bundle.ITST_not_all_premises());
+        } else if (!(context instanceof TermGoal)) {
+            throw new TranslationException(Bundle.ITST_context_unknown());
+        } else {
+            TermGoal termGoal = (TermGoal) context;
+            ArrayList<Term.Term> terms = new ArrayList<>();
+            for (Formula<Term.Term> formula : formulae) {
+                terms.add(formula.getMainRepresentation().getFormula());
+            }
+            try {
+                return new Formula<>(new FormulaRepresentation<>(speedith.diabelli.isabelle.Translations.termToSpiderDiagram(terms, termGoal.getVariables()), SpeedithFormatDescriptor.getInstance()), Formula.FormulaRole.Premise);
+            } catch (ReadingException ex) {
+                throw new TranslationException(Bundle.ITST_premises_translation_failed(), ex);
+            }
+        }
     }
 }

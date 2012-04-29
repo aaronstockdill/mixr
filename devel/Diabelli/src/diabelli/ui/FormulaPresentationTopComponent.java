@@ -219,7 +219,7 @@ public final class FormulaPresentationTopComponent extends TopComponent implemen
 
     private void addVisualisationsOf(GeneralFormulaNode<?> fromNode, FormulaFormat<?> selectedFormat, Set<FormulaPresenter> presenters) {
         // Add visualisations of all representations in this format:
-        ArrayList<? extends FormulaRepresentation<?>> reps = fromNode.getSelectedFormula().fetchRepresentations(selectedFormat);
+        ArrayList<? extends FormulaRepresentation<?>> reps = fromNode.getSelectedGoal().fetchRepresentations(fromNode.getSelectedFormula(), selectedFormat);
         if (reps != null) {
             for (FormulaRepresentation<?> rep : reps) {
                 addVisualisationsOf(fromNode, rep, presenters);
