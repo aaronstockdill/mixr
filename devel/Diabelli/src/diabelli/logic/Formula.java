@@ -106,6 +106,10 @@ public class Formula<T> {
      */
     private final HashSet<FormulaRepresentation<?>> representationsSet;
     private final FormulaRole role;
+    /**
+     * The goal that contains this formula.
+     */
+    private Goal hostingGoal;
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -201,6 +205,20 @@ public class Formula<T> {
      */
     public FormulaRepresentation<T> getMainRepresentation() {
         return mainRepresentation;
+    }
+
+    /**
+     * Returns the goal that contains this formula or forms its context.
+     * 
+     * <p>For example, particular implementations of the goal, such as
+     * Isabelle's, may contain a list of globally universally quantified
+     * variables. The names and types of these variables can be accessed
+     * by translations or visualisations through this hosting goal.</p>
+     * 
+     * @return the goal that contains this formula or forms its context.
+     */
+    public Goal getHostingGoal() {
+        return hostingGoal;
     }
 
     /**
@@ -399,32 +417,6 @@ public class Formula<T> {
     }
 
     /**
-     * Adds a new representation of this formula to the {@link Formula#getRepresentations() collection of all representations}.
-     *
-     * <p>This method may be used to add representations of {@link Goal#getPremises() premises}
-     * into the {@link Goal#getPremisesFormula() premises formula} if the latter
-     * does not have a {@link Formula#getMainRepresentation() main representation}.</p>
-     *
-     * <p><span style="font-weight:bold">Warning</span>: the added
-     * representations must logically correspond to the original formula. For
-     * example, a subset of premises converted with an {@link FormulaTranslator.TranslationType#ToEntailed entailed translation}
-     * can be placed into the formula that represents premises.</p>
-     *
-     * @param <T> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
-     * carried by the added representation.
-     * @param representation the representation of this formula.
-     */
-    @NbBundle.Messages({
-        "F_representation_null=Only valid non-null representations can be added to a formula."
-    })
-    public <T> void addRepresentation(FormulaRepresentation<T> representation) {
-        if (representation == null) {
-            throw new IllegalArgumentException(Bundle.F_representation_null());
-        }
-        addRepresentation(representation.getFormat(), representation);
-    }
-
-    /**
      * Returns the number of representations of this formula in the given
      * format.
      *
@@ -481,6 +473,84 @@ public class Formula<T> {
         }
     }
     // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="Translation Interface">
+    /**
+     * First looks up if there already is a representation of this formula in
+     * the given format or if it has already been attempted to convert this
+     * formula to the given format. If so, then the existing list of
+     * representations are returned (which might be {@code null} or empty).
+     *
+     * <p>However, if there was no attempt to translate this formula into the
+     * given format, then an attempt will be made. If the translation was
+     * successful the resulting representation will be returned, otherwise
+     * {@code null} is returned.</p>
+     *
+     * <p>This method is thread-safe.</p>
+     *
+     * <p>This method is quite expensive if called for the first time,
+     * successive calls will be as expensive as calls to {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
+     *
+     * <p><span style="font-weight:bold">Important</span>: this method tries to
+     * translate only the main representation into others. Therefore, if there
+     * is no main representation, this method does the same as {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
+     *
+     * @param <TTo> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
+     * carried by the returned representations.
+     * @param format the desired format in which to get this formula.
+     * @return the translation of the {@link Formula#getMainRepresentation()
+     * formula}.
+     */
+    public <TTo> ArrayList<? extends FormulaRepresentation<TTo>> fetchRepresentations(FormulaFormat<TTo> format) {
+        if (format == null) {
+            throw new IllegalArgumentException(Bundle.F_toFormat_null());
+        }
+        // If the representations in this format have already been calculated
+        // once, return what is already available (it does not matter if no
+        // translations are available).
+        if (hasAttemptedTranslations(format)) {
+            return getRepresentations(format);
+        }
+        // If there is no main representation, then we will not attempt a
+        // translation at all:
+        if (getMainRepresentation() == null) {
+            return null;
+        }
+        // Try to translate this formula:
+        FormulaRepresentation<TTo> representation = null;
+        // There is no representation yet for this format. Try to find one.
+        final Set<FormulaTranslator<T, TTo>> formulaTranslatorsFrom = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager().getFormulaTranslators(getMainRepresentation().getFormat(), format);
+        if (formulaTranslatorsFrom != null && !formulaTranslatorsFrom.isEmpty()) {
+            for (FormulaTranslator<T, TTo> translator : formulaTranslatorsFrom) {
+                // Make sure that the translation is valid:
+                if (getRole().isTranslationApplicable(translator.getTranslationType())) {
+                    try {
+                        // We can try and translate it:
+                        representation = translator.translate(this);
+                        if (representation != null) {
+                            // We got a translation, add it to the collection of
+                            // all representations of this formula and return it
+                            break;
+                        }
+                    } catch (FormulaTranslator.TranslationException ex) {
+                        Logger.getLogger(Formula.class.getName()).log(Level.FINEST, String.format("Translation with '%s' failed. Translation error message: %s", translator.getPrettyName(), ex.getMessage()), ex);
+                    }
+                }
+            }
+        }
+        // Put the found representation into the collection of all representatios.
+        // In case the translation didn't succeed, null will indicate that in the
+        // future no automatic translation attempts need to be made.
+        addRepresentation(format, representation);
+        if (representation == null) {
+            return null;
+        } else {
+            ArrayList<FormulaRepresentation<TTo>> rep = new ArrayList<>();
+            rep.add(representation);
+            return rep;
+        }
+    }
+    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Private Helper Methods">
     /**
@@ -489,7 +559,7 @@ public class Formula<T> {
      *
      * <p>If the given representation is {@code null}</p>
      *
-     * @param <T>
+     * @param <T> the new format of the representation to add.
      * @param format the format of the representation to add (must not be {@code null}).
      * @param representation
      */
@@ -497,7 +567,7 @@ public class Formula<T> {
         "F_format_null=The representation to be added does not identify its format. A valid format must be provided.",
         "F_format_mismatch=The format of the representation to be added and the specified format are not the same."
     })
-    final <T> void addRepresentation(FormulaFormat<T> format, FormulaRepresentation<T> representation) {
+    private <T> void addRepresentation(FormulaFormat<T> format, FormulaRepresentation<T> representation) {
         if (format == null) {
             throw new IllegalArgumentException(Bundle.F_format_null());
         }
@@ -514,6 +584,43 @@ public class Formula<T> {
                 representationsSet.add(representation);
             }
         }
+    }
+
+    /**
+     * Adds a new representation of this formula to the {@link Formula#getRepresentations() collection of all representations}.
+     *
+     * <p>This method may be used to add representations of {@link Goal#getPremises() premises}
+     * into the {@link Goal#getPremisesFormula() premises formula} if the latter
+     * does not have a {@link Formula#getMainRepresentation() main representation}.</p>
+     *
+     * <p><span style="font-weight:bold">Warning</span>: the added
+     * representations must logically correspond to the original formula. For
+     * example, a subset of premises converted with an {@link FormulaTranslator.TranslationType#ToEntailed entailed translation}
+     * can be placed into the formula that represents premises.</p>
+     *
+     * @param <T> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
+     * carried by the added representation.
+     * @param representation the representation of this formula.
+     */
+    @NbBundle.Messages({
+        "F_representation_null=Only valid non-null representations can be added to a formula."
+    })
+    final <T> void addRepresentation(FormulaRepresentation<T> representation) {
+        if (representation == null) {
+            throw new IllegalArgumentException(Bundle.F_representation_null());
+        }
+        addRepresentation(representation.getFormat(), representation);
+    }
+
+    /**
+     * Sets the hosting goal of this formula.
+     * 
+     * <p>Typically, the {@link Goal goal} itself will set this value.</p>
+     * 
+     * @param hostingGoal the new context of this formula.
+     */
+    final void setHostingGoal(Goal hostingGoal) {
+        this.hostingGoal = hostingGoal;
     }
     // </editor-fold>
 }

@@ -66,6 +66,10 @@ public class Goal {
      * @param conclusion the conclusion of the goal.
      * @param goalFormula the goal represented with a formula.
      */
+    @NbBundle.Messages({
+        "G_premises_contains_null=The list of premises contains a null formula."
+    })
+    @SuppressWarnings("LeakingThisInConstructor")
     public Goal(
             ArrayList<? extends Formula<?>> premises,
             Formula<?> premisesFormula,
@@ -75,6 +79,19 @@ public class Goal {
         this.conclusion = conclusion == null ? new Formula<>(null, Formula.FormulaRole.Conclusion) : conclusion;
         this.goalFormula = goalFormula == null ? new Formula<>(null, Formula.FormulaRole.Goal) : goalFormula;
         this.premisesFormula = premisesFormula == null ? new Formula<>(null, Formula.FormulaRole.Premise) : premisesFormula;
+        
+        // Set self as the hosting goal for all the above formulae:
+        if (premises != null && !premises.isEmpty()) {
+            for (Formula<?> formula : premises) {
+                if (formula == null) {
+                    throw new IllegalArgumentException(Bundle.G_premises_contains_null());
+                }
+                formula.setHostingGoal(this);
+            }
+        }
+        this.conclusion.setHostingGoal(this);
+        this.goalFormula.setHostingGoal(this);
+        this.premisesFormula.setHostingGoal(this);
     }
     // </editor-fold>
 
@@ -149,93 +166,6 @@ public class Goal {
     }
 
     /**
-     * First looks up if there already is a representation of this formula in
-     * the given format or if it has already been attempted to convert this
-     * formula to the given format. If so, then the existing list of
-     * representations are returned (which might be {@code null} or empty).
-     *
-     * <p>However, if there was no attempt to translate this formula into the
-     * given format, then an attempt will be made. If the translation was
-     * successful the resulting representation will be returned, otherwise
-     * {@code null} is returned.</p>
-     *
-     * <p>This method is thread-safe.</p>
-     *
-     * <p>This method is quite expensive if called for the first time,
-     * successive calls will be as expensive as calls to {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
-     *
-     * <p><span style="font-weight:bold">Important</span>: this method tries to
-     * translate only the main representation into others. Therefore, if there
-     * is no main representation, this method does the same as {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
-     *
-     * @param <TFrom> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
-     * carried by the main representation of the given formula.
-     * @param <TTo> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
-     * carried by the returned representations.
-     * @param formula a formula in this goal.
-     * @param format the desired format in which to get this formula.
-     * @return the translation of the {@link Formula#getMainRepresentation()
-     * formula}.
-     */
-    @NbBundle.Messages({
-        "G_toFormat_null=A target format has to be specified.",
-        "G_formula_null=A formula for which to fetch representations in the given format must be specified."
-    })
-    public <TFrom, TTo> ArrayList<? extends FormulaRepresentation<TTo>> fetchRepresentations(Formula<TFrom> formula, FormulaFormat<TTo> format) {
-        if (format == null) {
-            throw new IllegalArgumentException(Bundle.G_toFormat_null());
-        }
-        if (formula == null) {
-            throw new IllegalArgumentException(Bundle.G_formula_null());
-        }
-        // If the representations in this format have already been calculated
-        // once, return what is already available (it does not matter if no
-        // translations are available).
-        if (formula.hasAttemptedTranslations(format)) {
-            return formula.getRepresentations(format);
-        }
-        // If there is no main representation, then we will not attempt a
-        // translation at all:
-        if (formula.getMainRepresentation() == null) {
-            return null;
-        }
-        // Try to translate this formula:
-        FormulaRepresentation<TTo> representation = null;
-        // There is no representation yet for this format. Try to find one.
-        final Set<FormulaTranslator<TFrom, TTo>> formulaTranslatorsFrom = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager().getFormulaTranslators(formula.getMainRepresentation().getFormat(), format);
-        if (formulaTranslatorsFrom != null && !formulaTranslatorsFrom.isEmpty()) {
-            for (FormulaTranslator<TFrom, TTo> translator : formulaTranslatorsFrom) {
-                // Make sure that the translation is valid:
-                if (formula.getRole().isTranslationApplicable(translator.getTranslationType())) {
-                    try {
-                        // We can try and translate it:
-                        Formula<TTo> otherRep = translator.translate(this, formula);
-                        if (otherRep != null) {
-                            // We got a translation, add it to the collection of
-                            // all representations of this formula and return it
-                            representation = otherRep.getMainRepresentation();
-                            break;
-                        }
-                    } catch (FormulaTranslator.TranslationException ex) {
-                        Logger.getLogger(Formula.class.getName()).log(Level.FINEST, String.format("Translation with '%s' failed. Translation error message: %s", translator.getPrettyName(), ex.getMessage()), ex);
-                    }
-                }
-            }
-        }
-        // Put the found representation into the collection of all representatios.
-        // In case the translation didn't succeed, null will indicate that in the
-        // future no automatic translation attempts need to be made.
-        formula.addRepresentation(format, representation);
-        if (representation == null) {
-            return null;
-        } else {
-            ArrayList<FormulaRepresentation<TTo>> rep = new ArrayList<>();
-            rep.add(representation);
-            return rep;
-        }
-    }
-
-    /**
      * Tries to add all translation of the given premises to the given format.
      * This method puts the translations into the {@link Goal#getPremisesFormula()
      * premises formula}.
@@ -246,15 +176,12 @@ public class Goal {
      * @param toFormat the format to which to translate the subset of premises.
      */
     public <TTo> void addPremisesTranslations(List<? extends Formula<? extends Object>> premises, FormulaFormat<TTo> toFormat) {
-        // Are there any premises at all?
-        if (premises != null && premises.size() > 0) {
-            // TODO: Check that the premises are actually contained in this
-            // goal's premises collection
-
-            // Check that all premises have the same format of the main
-            // representation:
-            @SuppressWarnings("unchecked")
-            List<? extends Formula<Object>> premisesO = (List<? extends Formula<Object>>) premises;
+        @SuppressWarnings("unchecked")
+        List<? extends Formula<Object>> premisesO = (List<? extends Formula<Object>>) premises;
+        // Check that the premises are actually contained in this goal's
+        // premises collection
+        if (hostingGoalOf(premisesO) == this) {
+            // Check that all premises have the same format of the main representation:
             FormulaFormat<Object> fromFormat = getCommonMainFormat(premisesO);
             // If there is a common main format, use it to get all
             // translators:
@@ -264,6 +191,8 @@ public class Goal {
                     addPremisesTranslationImpl(premisesO, translator);
                 }
             }
+        } else {
+            Logger.getLogger(Goal.class.getName()).log(Level.INFO, Bundle.G_translator_format_mismatch());
         }
     }
 
@@ -271,6 +200,12 @@ public class Goal {
      * Tries to add the translation of the given premises to the given format.
      * This method puts the translation into the {@link Goal#getPremisesFormula()
      * premises formula}.
+     *
+     * <p><span style="font-weight:bold">Important</span>: this method will not
+     * add any representations if the given premises are not contained in this
+     * goal, if their main representations are not of the same format, or if the
+     * translator cannot translate from the format of the premises to the given
+     * format.</p>
      *
      * @param <TFrom> the type of raw formulae contained by the main
      * representations of all the premises.
@@ -282,22 +217,24 @@ public class Goal {
      */
     @NbBundle.Messages({
         "G_premises_not_with_same_formats=Not all premises have the same format or there are no premises to translate.",
-        "G_translator_format_mismatch=The format of the premises does not match the translator's input format."
+        "G_translator_format_mismatch=The format of the premises does not match the translator's input format.",
+        "G_foreign_premises=The premises are not hosted by this goal."
     })
     public <TFrom, TTo> void addPremisesTranslation(List<? extends Formula<TFrom>> premises, FormulaTranslator<TFrom, TTo> translator) {
-        // TODO: Check that the premise is actually contained in this
-        // goal's premises collection
-
-        // Check that all premises have the same format of the main representation:
-//        @SuppressWarnings("unchecked")
-//        List<? extends Formula<TFrom>> premisesO = (List<? extends Formula<TFrom>>) premises;
-        FormulaFormat<TFrom> fromFormat = getCommonMainFormat(premises);
-        if (fromFormat == null) {
-            Logger.getLogger(Goal.class.getName()).log(Level.INFO, Bundle.G_premises_not_with_same_formats());
-        } else if (fromFormat != translator.getFromFormat()) {
-            Logger.getLogger(Goal.class.getName()).log(Level.INFO, Bundle.G_translator_format_mismatch());
+        // Check that the premises are actually contained in this goal's
+        // premises collection
+        if (hostingGoalOf(premises) == this) {
+            // Check that all premises have the same format of the main representation:
+            FormulaFormat<TFrom> fromFormat = getCommonMainFormat(premises);
+            if (fromFormat == null) {
+                Logger.getLogger(Goal.class.getName()).log(Level.INFO, Bundle.G_premises_not_with_same_formats());
+            } else if (fromFormat != translator.getFromFormat()) {
+                Logger.getLogger(Goal.class.getName()).log(Level.INFO, Bundle.G_translator_format_mismatch());
+            } else {
+                addPremisesTranslationImpl(premises, translator);
+            }
         } else {
-            addPremisesTranslationImpl(premises, translator);
+            Logger.getLogger(Goal.class.getName()).log(Level.INFO, Bundle.G_translator_format_mismatch());
         }
     }
 
@@ -316,8 +253,8 @@ public class Goal {
      */
     private <TFrom, TTo> void addPremisesTranslationImpl(List<? extends Formula<TFrom>> premises, FormulaTranslator<TFrom, TTo> translator) {
         try {
-            Formula<TTo> translate = translator.translate(this, premises);
-            getPremisesFormula().addRepresentation(translate.getMainRepresentation());
+            FormulaRepresentation<TTo> translate = translator.translate(premises);
+            getPremisesFormula().addRepresentation(translate);
         } catch (TranslationException ex) {
             Logger.getLogger(Formula.class.getName()).log(Level.FINEST, String.format("Translation with '%s' failed. Translation error message: %s", translator.getPrettyName(), ex.getMessage()), ex);
         }
@@ -347,6 +284,30 @@ public class Goal {
                 }
                 return format;
             }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the common hosting goal of the given premises.
+     *
+     * <p>{@code null} is returned if the premises don't share the same goal or
+     * if {@code null} is actually the value of all of their {@link Formula#getHostingGoal() hosting goals}.</p>
+     *
+     * @param <T>
+     * @param premises
+     * @return
+     */
+    private static <T> Goal hostingGoalOf(List<? extends Formula<T>> premises) {
+        if (premises != null && premises.size() > 0) {
+            Goal curGoal = premises.get(0).getHostingGoal();
+            for (int i = 1; i < premises.size(); i++) {
+                Formula<T> formula = premises.get(i);
+                if (formula.getHostingGoal() != curGoal) {
+                    return null;
+                }
+            }
+            return curGoal;
         }
         return null;
     }

@@ -178,14 +178,13 @@ public abstract class FormulaTranslator<TFrom, TTo> {
      * <p><span style="font-weight:bold">Important</span>: the returned {@link Formula formula}
      * should be new and the translation should be its {@link Formula#getMainRepresentation() main representation}.</p>
      *
-     * @param context the goal that contains the formula to translate.
      * @param formula the formula to translate.
-     * @return the translated formulae.
+     * @return the translated representation of the formula.
      * @throws diabelli.logic.FormulaTranslator.TranslationException This
      * exception is thrown whenever the translation didn't succeed for any
      * reason. A detailed explanation might be given for the user.
      */
-    public abstract Formula<TTo> translate(Goal context, Formula<TFrom> formula) throws TranslationException;
+    public abstract FormulaRepresentation<TTo> translate(Formula<TFrom> formula) throws TranslationException;
 
     /**
      * Translates the given premises (in the {@link
@@ -201,15 +200,14 @@ public abstract class FormulaTranslator<TFrom, TTo> {
      * {@link FormulaTranslator#arePremises(java.util.List)} method for
      * this).</p>
      *
-     * @param hostingGoal the goal that contains the list of premises.
      * @param premises the formulae to translate (this is a subset of premises
      * of the given goal).
-     * @return the translated formula.
+     * @return the translated representation of the formula.
      * @throws diabelli.logic.FormulaTranslator.TranslationException This
      * exception is thrown whenever the translation didn't succeed for any
      * reason. A detailed explanation might be given for the user.
      */
-    public abstract Formula<TTo> translate(Goal hostingGoal, List<? extends Formula<TFrom>> premises) throws TranslationException;
+    public abstract FormulaRepresentation<TTo> translate(List<? extends Formula<TFrom>> premises) throws TranslationException;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Helper Classes">

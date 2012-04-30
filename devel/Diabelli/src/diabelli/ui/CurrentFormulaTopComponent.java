@@ -502,7 +502,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
         @Override
         public FormulaRepresentation<?> getSelectedFormulaRepresentation() {
-            ArrayList<? extends FormulaRepresentation<?>> representations = getSelectedGoal().fetchRepresentations(getSelectedFormula(), toFormat);
+            ArrayList<? extends FormulaRepresentation<?>> representations = getSelectedFormula().fetchRepresentations(toFormat);
             return representations == null || representations.isEmpty() ? null : representations.get(0);
         }
 
@@ -590,7 +590,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
                 baseFormulaNode.getSelectedGoal().addPremisesTranslations(premises, source.getSelectedFormat());
             }
 
-            ArrayList<? extends FormulaRepresentation<?>> representations = source.getSelectedGoal().fetchRepresentations(source.getSelectedFormula(), source.toFormat);
+            ArrayList<? extends FormulaRepresentation<?>> representations = source.getSelectedFormula().fetchRepresentations(source.toFormat);
             if (representations != null && !representations.isEmpty()) {
                 for (int i = 0; i < representations.size(); i++) {
                     toPopulate.add(new RepresentationFormulaNode<>(source, representations, i));
