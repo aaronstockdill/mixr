@@ -22,19 +22,32 @@ import speedith.core.lang.Zone
 import scala.collection.JavaConversions;
 
 object Translations {
+  
+  // TESTING METHODS
 
   /**
    * This main method is used only for testing.
    */
   def main(args: Array[String]): Unit = {
-    termToSpiderDiagram(parseYXML(Example6_unescapedYXML));
-    termToSpiderDiagram(parseYXML(Example7_unescapedYXML));
-    termToSpiderDiagram(parseYXML(Example4_unescapedYXML));
-    termToSpiderDiagram(parseYXML(Example5_unescapedYXML));
-    termToSpiderDiagram(parseYXML(Example3_unescapedYXML));
-    termToSpiderDiagram(parseYXML(Example2_unescapedYXML));
-    termToSpiderDiagram(parseYXML(Example1_unescapedYXML));
+    testExample(Example6_unescapedYXML);
+    testExample(Example7_unescapedYXML);
+    testExample(Example8_unescapedYXML);
+    testExample(Example4_unescapedYXML);
+    testExample(Example5_unescapedYXML);
+    testExample(Example3_unescapedYXML);
+    testExample(Example2_unescapedYXML);
+    testExample(Example1_unescapedYXML);
   }
+  
+  private def testExample(s: String): SpiderDiagram = {
+    val t = parseYXML(s);
+    val sd = termToSpiderDiagram(t);
+    println(sd.toString());
+    sd;
+  }
+  
+  
+  // TRANSLATIONS (public interface)
 
   /**
    * Takes an Isabelle term and tries to translate it to a spider diagram.
@@ -47,6 +60,8 @@ object Translations {
   /**
    * Takes an Isabelle term and tries to translate it to a spider diagram.
    *
+   * <p>The premises must be `Trueprop`s.</p>
+   *
    * @throws an exception is thrown if the translation fails for any reason.
    */
   @throws(classOf[ReadingException])
@@ -54,19 +69,28 @@ object Translations {
     if (premises == null || premises.size() == 0) {
       throw new ReadingException("The list of premises must not be empty.");
     }
-    if (spiders == null || spiders.size() == 0){
-    	val (psd, _) = convertoToPSD(ArrayBuffer[Free](), null, JavaConversions.asScalaBuffer(premises));
-    	return psd;
+    val premisesHOL = JavaConversions.asScalaBuffer(premises).map(t => {
+      t match {
+        case App(Const(HOLTrueprop, typ), body) => body;
+        case t => throw new ReadingException("The list of premises contains a term that is not a Trueprop: '%s;.".format(t.toString()));
+      }
+    })
+    if (spiders == null || spiders.size() == 0) {
+      val (psd, _) = convertoToPSD(ArrayBuffer[Free](), null, premisesHOL);
+      return psd;
     } else {
-    	val (psd, _) = convertoToPSD(JavaConversions.asScalaBuffer(spiders), spiders.get(0).typ, JavaConversions.asScalaBuffer(premises));
-    	return psd;
+      val (psd, _) = convertoToPSD(JavaConversions.asScalaBuffer(spiders), spiders.get(0).typ, premisesHOL);
+      return psd;
     }
     null;
   }
 
+  
+  
   // Everything below here is just implementation detail.
 
   // RECOGNISERS: Just functions of a special type that convert Isabelle terms to spider diagrams.
+  
   private type RecogniserIn = ( /*term:*/ Term, /*spiderType:*/ Typ);
   private type RecogniserOut = (SpiderDiagram, /*spiderType:*/ Typ);
   private type Recogniser = PartialFunction[RecogniserIn, RecogniserOut];
@@ -190,6 +214,7 @@ object Translations {
         extractConjuncts(lhs, conjuncts);
         extractConjuncts(rhs, conjuncts);
       }
+      case App(Const(HOLTrueprop, typ), body) => extractConjuncts(body, conjuncts);
       case x => conjuncts += x;
     }
   }
