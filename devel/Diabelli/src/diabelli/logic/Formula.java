@@ -580,6 +580,7 @@ public class Formula<T> {
                 if (representation.getFormat() != format) {
                     throw new IllegalStateException(Bundle.F_format_mismatch());
                 }
+                representation.setParentFormula(this);
                 formatReps.add(representation);
                 representationsSet.add(representation);
             }

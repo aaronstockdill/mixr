@@ -39,6 +39,7 @@ public final class FormulaRepresentation<T> {
     //<editor-fold defaultstate="collapsed" desc="Fields">
     private final T formula;
     private final FormulaFormat<T> format;
+    private Formula<?> parentFormula;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -92,5 +93,28 @@ public final class FormulaRepresentation<T> {
     public FormulaFormat<T> getFormat() {
         return format;
     }
+    
+    /**
+     * Returns the formula of which this is a representation.
+     * 
+     * <p><span style="font-weight:bold">Note</span>: this method may return {@code null}
+     * if this representation is not associated with any formula.</p>
+     * 
+     * @return the formula of which this is a representation.
+     */
+    public Formula<?> getParentFormula() {
+        return parentFormula;
+    }
     //</editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="Parent Formula">
+    /**
+     * This method is called by the parent formula itself once this representation
+     * is added to the formula's collection of representations.
+     * @param parentFormula the formula of which this is a representation.
+     */
+    void setParentFormula(Formula<?> parentFormula) {
+        this.parentFormula = parentFormula;
+    }
+    // </editor-fold>
 }
