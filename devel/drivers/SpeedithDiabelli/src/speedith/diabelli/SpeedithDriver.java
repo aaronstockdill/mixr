@@ -31,7 +31,6 @@ import diabelli.components.GoalAcceptingReasoner;
 import diabelli.components.util.BareGoalProvidingReasoner;
 import diabelli.logic.*;
 import java.util.*;
-import javax.swing.JPanel;
 import org.openide.util.lookup.ServiceProvider;
 import speedith.core.lang.SpiderDiagram;
 import speedith.diabelli.logic.IsabelleToSpidersTranslator;

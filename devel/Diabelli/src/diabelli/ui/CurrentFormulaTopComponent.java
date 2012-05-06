@@ -28,14 +28,16 @@ import diabelli.Diabelli;
 import diabelli.FormulaFormatManager;
 import diabelli.components.FormulaPresenter;
 import diabelli.logic.*;
-import diabelli.logic.FormulaTranslator.TranslationException;
 import diabelli.ui.GoalsTopComponent.ConclusionNode;
 import diabelli.ui.GoalsTopComponent.GeneralGoalNode;
 import diabelli.ui.GoalsTopComponent.PremiseNode;
 import diabelli.ui.GoalsTopComponent.PremisesNode;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.*;
+import java.beans.PropertyVetoException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ActionMap;
@@ -52,7 +54,6 @@ import org.openide.nodes.AbstractNode;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
@@ -236,6 +237,13 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
     private <T extends Node> void wrapAndSetRootNode(final T aNode) {
         resetRootNode(new AbstractNode(Children.create(new WrapperChildFactory<>(aNode), false)));
+        if (aNode != null) {
+            try {
+                this.em.setSelectedNodes(new Node[]{aNode});
+            } catch (PropertyVetoException ex) {
+                Logger.getLogger(GoalsTopComponent.class.getName()).log(Level.SEVERE, "The topmost formula could not have been selected.", ex);
+            }
+        }
     }
 
     private void showConclusion(ConclusionNode conclusionNode) {

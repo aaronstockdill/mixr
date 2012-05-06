@@ -34,7 +34,7 @@ import org.openide.util.NbBundle;
 @NbBundle.Messages({
     "SF_string_format_pretty_name=Isabelle string formula"
 })
-public class StringFormat extends FormulaFormatDescriptor<String> {
+public class StringFormat extends FormulaFormatDescriptor<StringFormula> {
     
     //<editor-fold defaultstate="collapsed" desc="Fields">
     /**
@@ -45,7 +45,7 @@ public class StringFormat extends FormulaFormatDescriptor<String> {
     
     //<editor-fold defaultstate="collapsed" desc="Constructor">
     private StringFormat() {
-        super(TermFormatName, Bundle.SF_string_format_pretty_name(), String.class);
+        super(TermFormatName, Bundle.SF_string_format_pretty_name(), StringFormula.class);
     }
     //</editor-fold>
     

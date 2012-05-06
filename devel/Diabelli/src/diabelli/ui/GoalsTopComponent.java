@@ -30,8 +30,11 @@ import diabelli.logic.Goal;
 import diabelli.logic.Goals;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyVetoException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
@@ -46,6 +49,7 @@ import org.openide.nodes.AbstractNode;
 import org.openide.nodes.ChildFactory;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.lookup.Lookups;
@@ -359,6 +363,7 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         /**
          * Returns the index of the premise that this node <span
          * style="font-style:italic;">carries</span>.
+         *
          * @return the index of the premise that this node <span
          * style="font-style:italic;">carries</span>.
          */
@@ -388,7 +393,13 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         Node root = new AbstractNode(children);
         this.em.setRootContext(root);
         this.em.getRootContext().setDisplayName(Bundle.GTC_root_node_display_name());
-        // TODO: Maybe select the first non-mainrepresentation formula?
+        if (children.getNodesCount() > 0) {
+            try {
+                this.em.setSelectedNodes(new Node[]{children.getNodeAt(0)});
+            } catch (PropertyVetoException ex) {
+                Logger.getLogger(GoalsTopComponent.class.getName()).log(Level.SEVERE, "The first goal could not have been selected.", ex);
+            }
+        }
     }
 
     private void updateGoalsList() {
