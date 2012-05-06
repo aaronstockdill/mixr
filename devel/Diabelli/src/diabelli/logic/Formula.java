@@ -606,7 +606,7 @@ public class Formula<T> {
     @NbBundle.Messages({
         "F_representation_null=Only valid non-null representations can be added to a formula."
     })
-    final <T> void addRepresentation(FormulaRepresentation<T> representation) {
+    public final <T> void addRepresentation(FormulaRepresentation<T> representation) {
         if (representation == null) {
             throw new IllegalArgumentException(Bundle.F_representation_null());
         }

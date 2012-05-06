@@ -29,6 +29,7 @@ import diabelli.logic.Formula;
 import diabelli.logic.FormulaFormat;
 import diabelli.logic.FormulaRepresentation;
 import diabelli.logic.Goal;
+import java.awt.Component;
 import javax.swing.JPanel;
 
 /**
@@ -70,7 +71,7 @@ public abstract class BareFormulaPresenter implements FormulaPresenter {
     }
 
     @Override
-    public JPanel createVisualiserFor(Goal goal) throws VisualisationException {
+    public Component createVisualiserFor(Goal goal) throws VisualisationException {
         if (goal == null) {
             return null;
         }
@@ -78,7 +79,7 @@ public abstract class BareFormulaPresenter implements FormulaPresenter {
     }
 
     @Override
-    public JPanel createVisualiserFor(Formula<?> formula) throws VisualisationException {
+    public Component createVisualiserFor(Formula<?> formula) throws VisualisationException {
         if (formula == null) {
             return null;
         }

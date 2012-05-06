@@ -26,13 +26,14 @@ package diabelli.isabelle;
 
 import diabelli.components.DiabelliComponent;
 import diabelli.components.FormulaFormatsProvider;
+import diabelli.components.FormulaPresenter;
 import diabelli.components.util.BareGoalProvidingReasoner;
 import diabelli.isabelle.pure.lib.TermYXML;
+import diabelli.isabelle.terms.StringFormat;
 import diabelli.isabelle.terms.TermFormatDescriptor;
+import diabelli.isabelle.terms.TermGoal;
 import diabelli.isabelle.terms.TermsToDiabelli;
-import diabelli.logic.FormulaFormat;
-import diabelli.logic.Goal;
-import diabelli.logic.Goals;
+import diabelli.logic.*;
 import isabelle.Term.Term;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -43,6 +44,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
+import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.Timer;
 import org.isabelle.iapp.facade.CentralEventDispatcher;
 import org.isabelle.iapp.facade.IAPP;
@@ -67,7 +70,9 @@ import org.openide.windows.TopComponent;
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 @ServiceProvider(service = DiabelliComponent.class)
-public class IsabelleDriver extends BareGoalProvidingReasoner implements FormulaFormatsProvider {
+public class IsabelleDriver extends BareGoalProvidingReasoner implements
+        FormulaFormatsProvider,
+        FormulaPresenter {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
     private IsabelleMessageListener isabelleListener;
@@ -99,6 +104,7 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements Formula
         static {
             ArrayList<FormulaFormat<?>> tmp = new ArrayList<>();
             tmp.add(TermFormatDescriptor.getInstance());
+            tmp.add(StringFormat.getInstance());
             IsabelleFormats = Collections.unmodifiableList(tmp);
         }
     }
@@ -165,8 +171,9 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements Formula
      */
     private class IsabelleMessageListener extends InjectionFinishListener implements StateListener, ActionListener, PropertyChangeListener {
 
-        public static final String DIABELLI_ISABELLE_RESPONSE_GOAL = "DiabelliResponse: Goal: ";
         private static final String DIABELLI_ISABELLE_RESPONSE = "DiabelliResponse: ";
+        private static final String DIABELLI_ISABELLE_RESPONSE_GOAL = DIABELLI_ISABELLE_RESPONSE + "Goal: ";
+        private static final String DIABELLI_ISABELLE_RESPONSE_GOAL_STRING = DIABELLI_ISABELLE_RESPONSE + "Goal string: ";
         private static final int DelayMillis = 500;
         private final Timer delayer;
 
@@ -215,12 +222,19 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements Formula
                 Message[] results = inj.getResults();
                 if (results != null) {
                     ArrayList<Goal> goals = new ArrayList<>();
-                    for (Message message : results) {
+                    for (int i = 0; i < results.length; i++) {
+                        Message message = results[i];
                         if (message.getText() != null && message.getText().startsWith(DIABELLI_ISABELLE_RESPONSE_GOAL)) {
                             String escapedYXML = message.getText().substring(DIABELLI_ISABELLE_RESPONSE_GOAL.length());
                             String unescapedYXML = TermYXML.unescapeControlChars(escapedYXML);
                             Term term = TermYXML.parseYXML(unescapedYXML);
-                            goals.add(TermsToDiabelli.toGoal(term));
+                            final TermGoal toGoal = TermsToDiabelli.toGoal(term);
+                            // Get the string version of this goal:
+                            if (i + 1 < results.length && results[i + 1].getText().startsWith(DIABELLI_ISABELLE_RESPONSE_GOAL_STRING)) {
+                                String stringFormat = results[++i].getText().substring(DIABELLI_ISABELLE_RESPONSE_GOAL_STRING.length());
+                                toGoal.asFormula().addRepresentation(new FormulaRepresentation<>(stringFormat, StringFormat.getInstance()));
+                            }
+                            goals.add(toGoal);
                         }
                     }
                     setGoals(goals);
@@ -276,6 +290,75 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements Formula
 
     private void setGoals(ArrayList<Goal> goals) {
         setGoals(new Goals(this, goals));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Formula Presenter Interface">
+    @Override
+    public boolean canPresent(Goal goal) {
+        if (goal == null) {
+            return false;
+        }
+        return canPresent(goal.asFormula());
+    }
+
+    @Override
+    public boolean canPresent(Formula<?> formula) {
+        if (formula == null) {
+            return false;
+        }
+        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
+            if (canPresent(formulaFormat)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean canPresent(FormulaRepresentation<?> formula) {
+        if (formula == null) {
+            return false;
+        }
+        return canPresent(formula.getFormat());
+    }
+
+    @Override
+    public JTextArea createVisualiserFor(Goal goal) throws VisualisationException {
+        if (goal == null) {
+            return null;
+        }
+        return createVisualiserFor(goal.asFormula());
+    }
+
+    @Override
+    public JTextArea createVisualiserFor(Formula<?> formula) throws VisualisationException {
+        if (formula == null) {
+            return null;
+        }
+        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
+            if (canPresent(formulaFormat)) {
+                return createVisualiserFor(formula.getRepresentation(formulaFormat));
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean canPresent(FormulaFormat<?> format) {
+        return StringFormat.getInstance() == format;
+    }
+
+    @Override
+    public JTextArea createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException {
+        if (canPresent(formula.getFormat()) && formula.getFormula() instanceof String) {
+            String f = (String) formula.getFormula();
+            final JTextArea ta = new JTextArea(f);
+            ta.setEditable(false);
+            return ta;
+        } else {
+            return null;
+        }
     }
     // </editor-fold>
 }

@@ -29,7 +29,7 @@ import diabelli.logic.FormulaRepresentation;
 import diabelli.ui.CurrentFormulaTopComponent;
 import diabelli.ui.CurrentFormulaTopComponent.PremiseFormulaNode;
 import java.awt.BorderLayout;
-import javax.swing.JPanel;
+import java.awt.Component;
 import org.openide.util.NbBundle;
 
 /**
@@ -45,7 +45,7 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
     private final CurrentFormulaTopComponent.GeneralFormulaNode<?> presentedNode;
     private final FormulaRepresentation<?> formula;
     private final int representationIndex;
-    private final JPanel presenterPanel;
+    private final Component presenterPanel;
     private final FormulaPresenter presenter;
     //</editor-fold>
 
@@ -53,7 +53,7 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
     /**
      * Creates new form SingleFormulaPresentationPanel
      */
-    public SingleFormulaPresentationPanel(CurrentFormulaTopComponent.GeneralFormulaNode<?> presentedNode, FormulaRepresentation<?> formula, int representationIndex, JPanel presenterPanel, FormulaPresenter presenter) {
+    public SingleFormulaPresentationPanel(CurrentFormulaTopComponent.GeneralFormulaNode<?> presentedNode, FormulaRepresentation<?> formula, int representationIndex, Component presenterPanel, FormulaPresenter presenter) {
         this.presentedNode = presentedNode;
         this.formula = formula;
         this.representationIndex = representationIndex;

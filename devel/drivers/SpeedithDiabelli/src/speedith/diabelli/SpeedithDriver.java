@@ -129,7 +129,7 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
     }
 
     @Override
-    public JPanel createVisualiserFor(Goal goal) throws VisualisationException {
+    public SpiderDiagramPanel createVisualiserFor(Goal goal) throws VisualisationException {
         if (goal == null) {
             return null;
         }
@@ -137,7 +137,7 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
     }
 
     @Override
-    public JPanel createVisualiserFor(Formula<?> formula) throws VisualisationException {
+    public SpiderDiagramPanel createVisualiserFor(Formula<?> formula) throws VisualisationException {
         if (formula == null) {
             return null;
         }
@@ -155,7 +155,7 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
     }
 
     @Override
-    public JPanel createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException {
+    public SpiderDiagramPanel createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException {
         if (formula.getFormula() instanceof SpiderDiagram) {
             SpiderDiagram spiderDiagram = (SpiderDiagram) formula.getFormula();
             if (spiderDiagram.isValid()) {

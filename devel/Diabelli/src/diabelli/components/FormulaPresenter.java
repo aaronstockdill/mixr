@@ -29,6 +29,7 @@ import diabelli.logic.FormulaFormat;
 import diabelli.logic.FormulaRepresentation;
 import diabelli.logic.Goal;
 import diabelli.ui.CurrentFormulaTopComponent;
+import java.awt.Component;
 import javax.swing.JPanel;
 
 /**
@@ -100,7 +101,7 @@ public interface FormulaPresenter extends DiabelliComponent {
      * @throws diabelli.components.FormulaPresenter.VisualisationException see {@link VisualisationException}
      * for info on when this exception is thrown.
      */
-    JPanel createVisualiserFor(Goal goal) throws VisualisationException;
+    Component createVisualiserFor(Goal goal) throws VisualisationException;
 
     /**
      * Returns a panel which displays the given goal. The returned panel will be
@@ -116,7 +117,7 @@ public interface FormulaPresenter extends DiabelliComponent {
      * @throws diabelli.components.FormulaPresenter.VisualisationException see {@link VisualisationException}
      * for info on when this exception is thrown.
      */
-    JPanel createVisualiserFor(Formula<?> formula) throws VisualisationException;
+    Component createVisualiserFor(Formula<?> formula) throws VisualisationException;
 
     /**
      * Returns a panel which displays the given goal. The returned panel will be
@@ -130,7 +131,7 @@ public interface FormulaPresenter extends DiabelliComponent {
      * @throws diabelli.components.FormulaPresenter.VisualisationException see {@link VisualisationException}
      * for info on when this exception is thrown.
      */
-    JPanel createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException;
+    Component createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException;
 
     /**
      * This exception is thrown if the visualisation failed unexpectedly. If the

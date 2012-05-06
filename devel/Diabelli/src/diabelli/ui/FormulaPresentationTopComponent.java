@@ -32,6 +32,7 @@ import diabelli.ui.CurrentFormulaTopComponent.FormatFormulaNode;
 import diabelli.ui.CurrentFormulaTopComponent.GeneralFormulaNode;
 import diabelli.ui.CurrentFormulaTopComponent.RepresentationFormulaNode;
 import diabelli.ui.presenters.SingleFormulaPresentationPanel;
+import java.awt.Component;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -204,7 +205,7 @@ public final class FormulaPresentationTopComponent extends TopComponent implemen
         for (FormulaPresenter presenter : withPresenters) {
             try {
                 if (presenter.canPresent(formula)) {
-                    JPanel visualisationPanel = presenter.createVisualiserFor(formula);
+                    Component visualisationPanel = presenter.createVisualiserFor(formula);
                     if (visualisationPanel != null) {
                         // Now put the panel onto this panel:
                         SingleFormulaPresentationPanel pnl = new SingleFormulaPresentationPanel(fromNode, formula, -1, visualisationPanel, presenter);

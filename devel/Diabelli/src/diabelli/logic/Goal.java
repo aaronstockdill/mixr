@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.api.annotations.common.NonNull;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
@@ -157,10 +158,13 @@ public class Goal {
     /**
      * Returns a formula that represents the whole goal. If the reasoner that
      * owns this goal does not support representation of a whole goal as a
-     * formula then this method may return {@code null}.
+     * formula then this formula may have no representation.
+     * 
+     * <p>This method will never return {@code null}.</p>
      *
      * @return a formula that represents the whole goal.
      */
+    @NonNull
     public Formula<?> asFormula() {
         return goalFormula;
     }
