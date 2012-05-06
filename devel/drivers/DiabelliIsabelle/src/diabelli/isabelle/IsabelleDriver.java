@@ -69,7 +69,7 @@ import org.openide.windows.TopComponent;
 @ServiceProvider(service = DiabelliComponent.class)
 public class IsabelleDriver extends BareGoalProvidingReasoner implements
         FormulaFormatsProvider,
-        FormulaPresenter {
+        FormulaPresenter<StringFormula> {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
     private IsabelleMessageListener isabelleListener;
@@ -289,32 +289,8 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
 
     // <editor-fold defaultstate="collapsed" desc="Formula Presenter Interface">
     @Override
-    public boolean canPresent(Goal goal) {
-        if (goal == null) {
-            return false;
-        }
-        return canPresent(goal.asFormula());
-    }
-
-    @Override
-    public boolean canPresent(Formula<?> formula) {
-        if (formula == null) {
-            return false;
-        }
-        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
-            if (canPresent(formulaFormat)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean canPresent(FormulaRepresentation<?> formula) {
-        if (formula == null) {
-            return false;
-        }
-        return canPresent(formula.getFormat());
+    public FormulaFormat<StringFormula> getPresentedFormat() {
+        return StringFormat.getInstance();
     }
 
     @Override
@@ -338,7 +314,6 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
         return null;
     }
 
-    @Override
     public boolean canPresent(FormulaFormat<?> format) {
         return StringFormat.getInstance() == format;
     }

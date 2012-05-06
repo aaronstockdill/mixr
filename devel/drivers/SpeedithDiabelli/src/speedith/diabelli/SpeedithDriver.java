@@ -54,7 +54,7 @@ import speedith.ui.SpiderDiagramPanel;
 public class SpeedithDriver extends BareGoalProvidingReasoner implements
         FormulaFormatsProvider,
         FormulaTranslationsProvider,
-        diabelli.components.FormulaPresenter {
+        diabelli.components.FormulaPresenter<SpiderDiagram> {
 
     @Override
     public String getName() {
@@ -99,35 +99,6 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
 
     // <editor-fold defaultstate="collapsed" desc="Formula Presenter Interface">
     @Override
-    public boolean canPresent(Goal goal) {
-        if (goal == null) {
-            return false;
-        }
-        return canPresent(goal.asFormula());
-    }
-
-    @Override
-    public boolean canPresent(Formula<?> formula) {
-        if (formula == null) {
-            return false;
-        }
-        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
-            if (canPresent(formulaFormat)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean canPresent(FormulaRepresentation<?> formula) {
-        if (formula == null) {
-            return false;
-        }
-        return canPresent(formula.getFormat());
-    }
-
-    @Override
     public SpiderDiagramPanel createVisualiserFor(Goal goal) throws VisualisationException {
         if (goal == null) {
             return null;
@@ -149,8 +120,12 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
     }
 
     @Override
+    public FormulaFormat<SpiderDiagram> getPresentedFormat() {
+        return SpeedithFormatDescriptor.getInstance();
+    }
+
     public boolean canPresent(FormulaFormat<?> format) {
-        return FormulaFormatsContainer.SpeedithFormats.contains(format);
+        return SpeedithFormatDescriptor.getInstance() == format;
     }
 
     @Override

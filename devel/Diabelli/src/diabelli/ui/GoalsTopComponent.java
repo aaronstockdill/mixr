@@ -26,6 +26,7 @@ package diabelli.ui;
 
 import diabelli.Diabelli;
 import diabelli.GoalsManager;
+import diabelli.logic.Formula;
 import diabelli.logic.Goal;
 import diabelli.logic.Goals;
 import java.beans.PropertyChangeEvent;
@@ -297,18 +298,29 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         public final int getGoalIndex() {
             return goalIndex;
         }
+        
+        /**
+         * Returns the formula that corresponds to this node.
+         * @return the formula that corresponds to this node.
+         */
+        public abstract Formula<?> getFormula();
     }
 
     /**
      * This node corresponds directly to a particular {@link Goal goal} in the
      * displayed {@link GoalsManager#getCurrentGoals() currently active goals}.
      */
-    public static class GoalNode extends GeneralGoalNode {
+    public static final class GoalNode extends GeneralGoalNode {
 
         GoalNode(Goals goals, int goalIndex) {
             super(goals, goalIndex, Children.LEAF, Lookups.singleton(goals));
             setDisplayName("Goal #" + (goalIndex + 1));
             setChildren(Children.create(new GoalPremisesConclusionFactory(this), false));
+        }
+
+        @Override
+        public Formula<?> getFormula() {
+            return this.getGoal().asFormula();
         }
     }
 
@@ -319,11 +331,16 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
     @Messages({
         "FN_conclusion_display_name=Conclusion"
     })
-    public static class ConclusionNode extends GeneralGoalNode {
+    public static final class ConclusionNode extends GeneralGoalNode {
 
         private ConclusionNode(GeneralGoalNode parentGoal) {
             super(parentGoal.getGoals(), parentGoal.getGoalIndex(), Children.LEAF);
             setDisplayName(Bundle.FN_conclusion_display_name());
+        }
+
+        @Override
+        public Formula<?> getFormula() {
+            return this.getGoal().getConclusion();
         }
     }
 
@@ -334,12 +351,17 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
     @Messages({
         "PN_premises_display_name=Premises"
     })
-    public static class PremisesNode extends GeneralGoalNode {
+    public static final class PremisesNode extends GeneralGoalNode {
 
         private PremisesNode(GeneralGoalNode parentGoal) {
             super(parentGoal.getGoals(), parentGoal.getGoalIndex(), Children.LEAF);
             setDisplayName(Bundle.PN_premises_display_name());
             setChildren(Children.create(new PremisesFactory(this), false));
+        }
+
+        @Override
+        public Formula<?> getFormula() {
+            return this.getGoal().getPremisesFormula();
         }
     }
 
@@ -350,7 +372,7 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
     @Messages({
         "PN_premise_display_name=Premise #{0}"
     })
-    public static class PremiseNode extends GeneralGoalNode {
+    public static final class PremiseNode extends GeneralGoalNode {
 
         private final int premiseIndex;
 
@@ -367,8 +389,13 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
          * @return the index of the premise that this node <span
          * style="font-style:italic;">carries</span>.
          */
-        public int getPremiseIndex() {
+        public final int getPremiseIndex() {
             return premiseIndex;
+        }
+
+        @Override
+        public Formula<?> getFormula() {
+            return this.getGoal().getPremiseAt(this.getPremiseIndex());
         }
     }
     //</editor-fold>
