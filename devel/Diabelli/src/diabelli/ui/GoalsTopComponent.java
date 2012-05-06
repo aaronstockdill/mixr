@@ -420,13 +420,6 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         Node root = new AbstractNode(children);
         this.em.setRootContext(root);
         this.em.getRootContext().setDisplayName(Bundle.GTC_root_node_display_name());
-        if (children.getNodesCount() > 0) {
-            try {
-                this.em.setSelectedNodes(new Node[]{children.getNodeAt(0)});
-            } catch (PropertyVetoException ex) {
-                Logger.getLogger(GoalsTopComponent.class.getName()).log(Level.SEVERE, "The first goal could not have been selected.", ex);
-            }
-        }
     }
 
     private void updateGoalsList() {

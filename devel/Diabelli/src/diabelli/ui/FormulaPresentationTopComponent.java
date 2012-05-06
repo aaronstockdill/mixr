@@ -252,11 +252,15 @@ public final class FormulaPresentationTopComponent extends TopComponent {
 
     private void updateFromSelectedIn(ExplorerManager em) {
         Node[] nodes = em.getSelectedNodes();
-        updatePresented(extractGoalNodes(nodes));
+        if (nodes == null || nodes.length < 1) {
+            updateFromAllIn(em);
+        } else {
+            updatePresented(extractGoalNodes(nodes));
+        }
     }
 
     private void updateFromAllIn(ExplorerManager em) {
-        Node[] nodes = em.getRootContext().getChildren().getNodes();
+        Node[] nodes = em.getRootContext().getChildren().getNodes(true);
         updatePresented(extractGoalNodes(nodes));
     }
 
@@ -277,12 +281,17 @@ public final class FormulaPresentationTopComponent extends TopComponent {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            if (ExplorerManager.PROP_SELECTED_NODES.equals(evt.getPropertyName())) {
-                ExplorerManager em = (ExplorerManager) evt.getSource();
-                updateFromSelectedIn(em);
-            } else if (ExplorerManager.PROP_ROOT_CONTEXT.equals(evt.getPropertyName())) {
-                ExplorerManager em = (ExplorerManager) evt.getSource();
-                updateFromAllIn(em);
+            switch (evt.getPropertyName()) {
+                case ExplorerManager.PROP_SELECTED_NODES: {
+                    ExplorerManager em = (ExplorerManager) evt.getSource();
+                    updateFromSelectedIn(em);
+                    break;
+                }
+                case ExplorerManager.PROP_ROOT_CONTEXT: {
+                    ExplorerManager em = (ExplorerManager) evt.getSource();
+                    updateFromAllIn(em);
+                    break;
+                }
             }
         }
     }
