@@ -26,9 +26,6 @@ package diabelli.ui.presenters;
 
 import diabelli.components.FormulaPresenter;
 import diabelli.logic.FormulaRepresentation;
-import diabelli.ui.CurrentFormulaTopComponent;
-import diabelli.ui.CurrentFormulaTopComponent.PremiseFormulaNode;
-import diabelli.ui.GoalsTopComponent;
 import diabelli.ui.GoalsTopComponent.ConclusionNode;
 import diabelli.ui.GoalsTopComponent.GeneralGoalNode;
 import diabelli.ui.GoalsTopComponent.PremiseNode;
@@ -84,6 +81,7 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
         titlePanel = new javax.swing.JPanel();
         detailLabel = new javax.swing.JLabel();
@@ -91,6 +89,7 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
         setLayout(new java.awt.BorderLayout());
 
         titlePanel.setBackground(new java.awt.Color(213, 237, 246));
+        titlePanel.setMinimumSize(new java.awt.Dimension(100, 25));
         titlePanel.setPreferredSize(new java.awt.Dimension(100, 25));
 
         detailLabel.setFont(new java.awt.Font("Dialog", 0, 11)); // NOI18N

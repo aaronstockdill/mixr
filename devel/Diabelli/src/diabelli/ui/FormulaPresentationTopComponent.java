@@ -29,9 +29,6 @@ import diabelli.components.FormulaPresenter;
 import diabelli.logic.Formula;
 import diabelli.logic.FormulaFormat;
 import diabelli.logic.FormulaRepresentation;
-import diabelli.ui.CurrentFormulaTopComponent.FormatFormulaNode;
-import diabelli.ui.CurrentFormulaTopComponent.GeneralFormulaNode;
-import diabelli.ui.CurrentFormulaTopComponent.RepresentationFormulaNode;
 import diabelli.ui.GoalsTopComponent.GeneralGoalNode;
 import diabelli.ui.presenters.SingleFormulaPresentationPanel;
 import java.awt.Component;
@@ -42,8 +39,6 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JPanel;
-import org.netbeans.api.annotations.common.NonNull;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -105,7 +100,7 @@ public final class FormulaPresentationTopComponent extends TopComponent {
 
         setLayout(new java.awt.BorderLayout());
 
-        visualisationsPanel.setLayout(new java.awt.GridLayout(0, 1));
+        visualisationsPanel.setLayout(new javax.swing.BoxLayout(visualisationsPanel, javax.swing.BoxLayout.Y_AXIS));
         scrlVisualisationsPanel.setViewportView(visualisationsPanel);
 
         add(scrlVisualisationsPanel, java.awt.BorderLayout.CENTER);
@@ -152,44 +147,6 @@ public final class FormulaPresentationTopComponent extends TopComponent {
     //</editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Visualisation Methods">
-//    private void showVisualisationsOf(GeneralFormulaNode<?> fromNode, FormulaRepresentation<?> formula) {
-//        clearVisualisations();
-//        // Don't display anything if null is given. Just clear the panel.
-//        if (formula != null) {
-//            // Add the visualisations of this representation:
-//            addVisualisationsOf(fromNode, formula, null);
-//        }
-//        // This has to be called to refresh the newly added visualisations. Swing
-//        // does not show the newly added components otherwise.
-//        validate();
-//    }
-//
-//    private void showVisualisationsOf(GeneralFormulaNode<?> fromNode, FormulaFormat<?> selectedFormat) {
-//        clearVisualisations();
-//        // Don't display anything if null is given. Just clear the panel.
-//        if (selectedFormat != null) {
-//            Set<FormulaPresenter> presenters = getAllPresenters();
-//            addVisualisationsOf(fromNode, selectedFormat, presenters);
-//        }
-//        // This has to be called to refresh the newly added visualisations. Swing
-//        // does not show the newly added components otherwise.
-//        validate();
-//    }
-//
-//    private void showVisualisationsOf(GeneralFormulaNode<?> fromNode) {
-//        clearVisualisations();
-//        // Don't display anything if null is given. Just clear the panel.
-//        if (fromNode != null) {
-//            Set<FormulaPresenter> presenters = getAllPresenters();
-//            Collection<FormulaFormat<?>> formats = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager().getFormulaFormats();
-//            for (FormulaFormat<?> format : formats) {
-//                addVisualisationsOf(fromNode, format, presenters);
-//            }
-//        }
-//        // This has to be called to refresh the newly added visualisations. Swing
-//        // does not show the newly added components otherwise.
-//        validate();
-//    }
     @Messages({
         "FPTC_visualiser_failed=The formula presenter '{0}' unexpectedly failed while visualising a formula of the format '{1}'."
     })
