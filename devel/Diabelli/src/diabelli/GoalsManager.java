@@ -28,7 +28,6 @@ import diabelli.components.GoalProvidingReasoner;
 import diabelli.logic.Goal;
 import diabelli.logic.Goals;
 import java.beans.PropertyChangeListener;
-import org.openide.util.Lookup;
 
 /**
  * Keeps a list of currently pending {@link Goal goals} for the currently

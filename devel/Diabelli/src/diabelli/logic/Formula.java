@@ -209,12 +209,12 @@ public class Formula<T> {
 
     /**
      * Returns the goal that contains this formula or forms its context.
-     * 
+     *
      * <p>For example, particular implementations of the goal, such as
      * Isabelle's, may contain a list of globally universally quantified
-     * variables. The names and types of these variables can be accessed
-     * by translations or visualisations through this hosting goal.</p>
-     * 
+     * variables. The names and types of these variables can be accessed by
+     * translations or visualisations through this hosting goal.</p>
+     *
      * @return the goal that contains this formula or forms its context.
      */
     public Goal getHostingGoal() {
@@ -473,7 +473,7 @@ public class Formula<T> {
         }
     }
     // </editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="Translation Interface">
     /**
      * First looks up if there already is a representation of this formula in
@@ -492,8 +492,25 @@ public class Formula<T> {
      * successive calls will be as expensive as calls to {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
      *
      * <p><span style="font-weight:bold">Important</span>: this method tries to
-     * translate only the main representation into others. Therefore, if there
-     * is no main representation, this method does the same as {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
+     * translate only the main translation source into others. Therefore, if
+     * there is no {@link Formula#hasMainTranslationSource()  main translation source},
+     * this method does the same as {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
+     *
+     * <p>Implementations that want to change the main source for automatic
+     * translations must override the following methods:
+     *
+     * <ul>
+     *
+     * <li>{@link Formula#hasMainTranslationSource() },</li>
+     *
+     * <li>{@link Formula#getMainTranslationSourceFormat()}, and</li>
+     *
+     * <li>{@link Formula#translateWith(diabelli.logic.FormulaTranslator)}.</li>
+     *
+     * </ul>
+     *
+     * The method {@link Formula#fetchRepresentations(diabelli.logic.FormulaFormat) uses
+     * the above methods to determine whether an how to translate this formula.</p>
      *
      * @param <TTo> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
      * carried by the returned representations.
@@ -511,30 +528,28 @@ public class Formula<T> {
         if (hasAttemptedTranslations(format)) {
             return getRepresentations(format);
         }
-        // If there is no main representation, then we will not attempt a
+        // If there is no main source for translation, then we will not attempt a
         // translation at all:
-        if (getMainRepresentation() == null) {
+        if (!hasMainTranslationSource()) {
             return null;
         }
         // Try to translate this formula:
         FormulaRepresentation<TTo> representation = null;
         // There is no representation yet for this format. Try to find one.
-        final Set<FormulaTranslator<T, TTo>> formulaTranslatorsFrom = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager().getFormulaTranslators(getMainRepresentation().getFormat(), format);
+        final Set<FormulaTranslator<T, TTo>> formulaTranslatorsFrom = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager().getFormulaTranslators(getMainTranslationSourceFormat(), format);
         if (formulaTranslatorsFrom != null && !formulaTranslatorsFrom.isEmpty()) {
             for (FormulaTranslator<T, TTo> translator : formulaTranslatorsFrom) {
-                // Make sure that the translation is valid:
-                if (getRole().isTranslationApplicable(translator.getTranslationType())) {
-                    try {
-                        // We can try and translate it:
-                        representation = translator.translate(this);
-                        if (representation != null) {
-                            // We got a translation, add it to the collection of
-                            // all representations of this formula and return it
-                            break;
-                        }
-                    } catch (FormulaTranslator.TranslationException ex) {
-                        Logger.getLogger(Formula.class.getName()).log(Level.FINEST, String.format("Translation with '%s' failed. Translation error message: %s", translator.getPrettyName(), ex.getMessage()), ex);
+                // Make sure that the translation is valid and then translate it:
+                try {
+                    // We can try and translate it:
+                    representation = translateWith(translator);
+                    if (representation != null) {
+                        // We got a translation, add it to the collection of
+                        // all representations of this formula and return it
+                        break;
                     }
+                } catch (FormulaTranslator.TranslationException ex) {
+                    Logger.getLogger(Formula.class.getName()).log(Level.FINEST, String.format("Translation with '%s' failed. Translation error message: %s", translator.getPrettyName(), ex.getMessage()), ex);
                 }
             }
         }
@@ -549,6 +564,81 @@ public class Formula<T> {
             rep.add(representation);
             return rep;
         }
+    }
+
+    /**
+     * Tries to translate this formula with the given translator. This method
+     * silently fails (returning {@code null}) if {@link FormulaTranslator#getTranslationType()  the type of translation}
+     * is not compatible with {@link Formula#getRole() the role} of this
+     * formula.
+     *
+     * <p><span style="font-weight:bold">Note</span>: this method uses the
+     * {@link Formula#hasMainTranslationSource() main translation source}. What
+     * the main translation source is depends on the implementation, but
+     * typically it is the {@link Formula#getMainRepresentation() main representation}.
+     * </p>
+     *
+     * @param <TTo> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
+     * carried by the returned representations.
+     * @param translator the translator with which to translate the formula.
+     * @return the representation of this formula which is the result of the
+     * translation with the given {@code translator}. Returns {@code null} if
+     * the translation failed gracefully.
+     * @throws diabelli.logic.FormulaTranslator.TranslationException thrown by
+     * the translator (see {@link FormulaTranslator#translate(diabelli.logic.Formula)
+     * }).
+     * @throws IllegalArgumentException if the given {@code translator} is {@code null}.
+     */
+    @NbBundle.Messages({
+        "F_null_translator=A valid non-null translator must be provided."
+    })
+    public <TTo> FormulaRepresentation<TTo> translateWith(FormulaTranslator<T, TTo> translator) throws TranslationException {
+        if (translator == null) {
+            throw new IllegalArgumentException(Bundle.F_null_translator());
+        }
+        // Make sure that the translation is valid and then translate it:
+        if (getRole().isTranslationApplicable(translator.getTranslationType())) {
+            // We can try and translate it:
+            return translator.translate(this);
+        }
+        return null;
+    }
+
+    /**
+     * Indicates whether this formula has a main translation source which can be
+     * used to provide additional translation for this formula.
+     *
+     * <p>Typically, {@link Formula#getMainRepresentation()} is the main
+     * translation source.</p>
+     *
+     * <p>The main translation source is used by {@link Formula#fetchRepresentations(diabelli.logic.FormulaFormat)}
+     * to automatically convert this formula into the desired format. If there
+     * is no main translation source (which is {@link Formula#getMainRepresentation()}
+     * by default) then no automatic translation will be attempted.</p>
+     *
+     * @return {@code true} if the main translation source exists for this
+     * formula.
+     */
+    public boolean hasMainTranslationSource() {
+        return getMainRepresentation() != null;
+    }
+
+    /**
+     * Returns the format of the main translation source.
+     *
+     * <p>Typically, this is the format of the
+     * {@link Formula#getMainRepresentation() main representation}.</p>
+     *
+     * <p><span style="font-weight:bold">Note</span>: this method must not
+     * return
+     * {@code null} if {@link Formula#hasAttemptedTranslations(diabelli.logic.FormulaFormat)
+     * }
+     * returns {@code true}. </p>
+     *
+     * @return the format of the main translation source.
+     */
+    public FormulaFormat<T> getMainTranslationSourceFormat() {
+        return getMainRepresentation() == null ? null : getMainRepresentation().getFormat();
     }
     // </editor-fold>
 
@@ -615,13 +705,23 @@ public class Formula<T> {
 
     /**
      * Sets the hosting goal of this formula.
-     * 
+     *
      * <p>Typically, the {@link Goal goal} itself will set this value.</p>
-     * 
+     *
      * @param hostingGoal the new context of this formula.
      */
+    @NbBundle.Messages({
+        "F_already_has_goal=This formula already belongs to a goal. Another goal tried to become the owner of this formula."
+    })
     final void setHostingGoal(Goal hostingGoal) {
-        this.hostingGoal = hostingGoal;
+        if (this.hostingGoal != hostingGoal) {
+            // Check if the formula doesn't already belong to another goal. This
+            // should not happen!
+            if (this.hostingGoal != null) {
+                throw new IllegalArgumentException(Bundle.F_already_has_goal());
+            }
+            this.hostingGoal = hostingGoal;
+        }
     }
     // </editor-fold>
 }

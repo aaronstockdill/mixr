@@ -27,7 +27,6 @@ package diabelli;
 import diabelli.components.FormulaPresenter;
 import diabelli.logic.Formula;
 import diabelli.logic.FormulaFormat;
-import java.util.Collection;
 import java.util.Set;
 
 /**

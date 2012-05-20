@@ -48,14 +48,14 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
     private final FormulaRepresentation<?> formula;
     private final int representationIndex;
     private final Component presenterPanel;
-    private final FormulaPresenter presenter;
+    private final FormulaPresenter<?> presenter;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructor">
     /**
      * Creates new form SingleFormulaPresentationPanel
      */
-    public SingleFormulaPresentationPanel(GeneralGoalNode presentedNode, FormulaRepresentation<?> formula, int representationIndex, Component presenterPanel, FormulaPresenter presenter) {
+    public SingleFormulaPresentationPanel(GeneralGoalNode presentedNode, FormulaRepresentation<?> formula, int representationIndex, Component presenterPanel, FormulaPresenter<?> presenter) {
         this.presentedNode = presentedNode;
         this.formula = formula;
         this.representationIndex = representationIndex;
