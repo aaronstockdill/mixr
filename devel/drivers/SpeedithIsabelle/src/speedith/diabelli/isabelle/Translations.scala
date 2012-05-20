@@ -75,6 +75,9 @@ object Translations {
         case t => throw new ReadingException("The list of premises contains a term that is not a Trueprop: '%s;.".format(t.toString()));
       }
     })
+    // TODO: Handle the case where each premise is a PSD itself (just try each
+    // premise) and then conjunctively connect these primary spider diagrams
+    // with the rest of the premises.
     if (spiders == null || spiders.size() == 0) {
       val (psd, _) = convertoToPSD(ArrayBuffer[Free](), null, premisesHOL);
       return psd;
