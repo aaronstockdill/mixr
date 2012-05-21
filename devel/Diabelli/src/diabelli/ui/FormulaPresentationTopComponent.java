@@ -230,6 +230,9 @@ public final class FormulaPresentationTopComponent extends TopComponent {
             }
         }
         validate();
+        // NOTE: We have to repaint if nothing has been added onto the panel.
+        // I guess `validate` does nothing if the panel has been just emptied.
+        repaint();
     }
     // </editor-fold>
 

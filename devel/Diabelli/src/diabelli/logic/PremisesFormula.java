@@ -41,12 +41,15 @@ import java.util.ArrayList;
  */
 class PremisesFormula<T> extends Formula<T> {
 
+    //<editor-fold defaultstate="collapsed" desc="Fields">
     /**
      * The array that carries all the premises handled by this formula.
      */
     private final ArrayList<? extends Formula<T>> originalPremises;
     private final boolean supportsTranslation;
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Constructor">
     PremisesFormula(ArrayList<? extends Formula<T>> originalPremises) {
         super(null, FormulaRole.Premise);
         this.originalPremises = originalPremises;
@@ -54,6 +57,7 @@ class PremisesFormula<T> extends Formula<T> {
                 && originalPremises.size() > 0
                 && originalPremises.get(0).getMainRepresentation() != null;
     }
+    //</editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Translation">
     @Override
