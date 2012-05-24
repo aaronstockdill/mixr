@@ -243,10 +243,6 @@ public abstract class FormulaTranslator<TFrom, TTo> {
         public TranslationException() {
         }
 
-        public TranslationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-            super(message, cause, enableSuppression, writableStackTrace);
-        }
-
         public TranslationException(Throwable cause) {
             super(cause);
         }

@@ -161,10 +161,6 @@ public interface FormulaPresenter extends DiabelliComponent {
         public VisualisationException() {
         }
 
-        public VisualisationException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-            super(message, cause, enableSuppression, writableStackTrace);
-        }
-
         public VisualisationException(Throwable cause) {
             super(cause);
         }
