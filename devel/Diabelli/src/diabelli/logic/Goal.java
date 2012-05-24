@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.api.annotations.common.NonNull;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
@@ -61,7 +62,9 @@ public class Goal {
      * Initialises the goal with the given premises, conclusion, and a formula
      * that represents the whole goal. <p>Any of the parameters may be {@code null}.</p>
      *
-     * @param premises the premises of the goal.
+     * @param premises the premises of the goal. <p><span
+     * style="font-weight:bold">Note</span>: the reference to this array list is
+     * stored (no copy of the array is made).</p>
      * @param premisesFormula the premises as a single formula.
      * @param conclusion the conclusion of the goal.
      * @param goalFormula the goal represented with a formula.
@@ -69,7 +72,7 @@ public class Goal {
     @NbBundle.Messages({
         "G_premises_contains_null=The list of premises contains a null formula."
     })
-    @SuppressWarnings("LeakingThisInConstructor")
+    @SuppressWarnings({"LeakingThisInConstructor", "rawtypes", "unchecked"})
     public Goal(
             ArrayList<? extends Formula<?>> premises,
             Formula<?> premisesFormula,
@@ -78,8 +81,8 @@ public class Goal {
         this.premises = premises;
         this.conclusion = conclusion == null ? new Formula<>(null, Formula.FormulaRole.Conclusion) : conclusion;
         this.goalFormula = goalFormula == null ? new Formula<>(null, Formula.FormulaRole.Goal) : goalFormula;
-        this.premisesFormula = premisesFormula == null ? new Formula<>(null, Formula.FormulaRole.Premise) : premisesFormula;
-        
+        this.premisesFormula = premisesFormula == null ? new PremisesFormula(premises) : premisesFormula;
+
         // Set self as the hosting goal for all the above formulae:
         if (premises != null && !premises.isEmpty()) {
             for (Formula<?> formula : premises) {
@@ -157,10 +160,13 @@ public class Goal {
     /**
      * Returns a formula that represents the whole goal. If the reasoner that
      * owns this goal does not support representation of a whole goal as a
-     * formula then this method may return {@code null}.
+     * formula then this formula may have no representation.
+     *
+     * <p>This method will never return {@code null}.</p>
      *
      * @return a formula that represents the whole goal.
      */
+    @NonNull
     public Formula<?> asFormula() {
         return goalFormula;
     }

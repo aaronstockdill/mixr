@@ -31,7 +31,6 @@ import diabelli.components.GoalAcceptingReasoner;
 import diabelli.components.util.BareGoalProvidingReasoner;
 import diabelli.logic.*;
 import java.util.*;
-import javax.swing.JPanel;
 import org.openide.util.lookup.ServiceProvider;
 import speedith.core.lang.SpiderDiagram;
 import speedith.diabelli.logic.IsabelleToSpidersTranslator;
@@ -55,7 +54,7 @@ import speedith.ui.SpiderDiagramPanel;
 public class SpeedithDriver extends BareGoalProvidingReasoner implements
         FormulaFormatsProvider,
         FormulaTranslationsProvider,
-        diabelli.components.FormulaPresenter {
+        diabelli.components.FormulaPresenter<SpiderDiagram> {
 
     @Override
     public String getName() {
@@ -100,36 +99,7 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
 
     // <editor-fold defaultstate="collapsed" desc="Formula Presenter Interface">
     @Override
-    public boolean canPresent(Goal goal) {
-        if (goal == null) {
-            return false;
-        }
-        return canPresent(goal.asFormula());
-    }
-
-    @Override
-    public boolean canPresent(Formula<?> formula) {
-        if (formula == null) {
-            return false;
-        }
-        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
-            if (canPresent(formulaFormat)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean canPresent(FormulaRepresentation<?> formula) {
-        if (formula == null) {
-            return false;
-        }
-        return canPresent(formula.getFormat());
-    }
-
-    @Override
-    public JPanel createVisualiserFor(Goal goal) throws VisualisationException {
+    public SpiderDiagramPanel createVisualiserFor(Goal goal) throws VisualisationException {
         if (goal == null) {
             return null;
         }
@@ -137,7 +107,7 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
     }
 
     @Override
-    public JPanel createVisualiserFor(Formula<?> formula) throws VisualisationException {
+    public SpiderDiagramPanel createVisualiserFor(Formula<?> formula) throws VisualisationException {
         if (formula == null) {
             return null;
         }
@@ -150,12 +120,16 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
     }
 
     @Override
+    public FormulaFormat<SpiderDiagram> getPresentedFormat() {
+        return SpeedithFormatDescriptor.getInstance();
+    }
+
     public boolean canPresent(FormulaFormat<?> format) {
-        return FormulaFormatsContainer.SpeedithFormats.contains(format);
+        return SpeedithFormatDescriptor.getInstance() == format;
     }
 
     @Override
-    public JPanel createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException {
+    public SpiderDiagramPanel createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException {
         if (formula.getFormula() instanceof SpiderDiagram) {
             SpiderDiagram spiderDiagram = (SpiderDiagram) formula.getFormula();
             if (spiderDiagram.isValid()) {

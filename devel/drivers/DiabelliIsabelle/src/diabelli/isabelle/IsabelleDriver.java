@@ -26,14 +26,13 @@ package diabelli.isabelle;
 
 import diabelli.components.DiabelliComponent;
 import diabelli.components.FormulaFormatsProvider;
+import diabelli.components.FormulaPresenter;
 import diabelli.components.util.BareGoalProvidingReasoner;
 import diabelli.isabelle.pure.lib.TermYXML;
-import diabelli.isabelle.terms.TermFormatDescriptor;
-import diabelli.isabelle.terms.TermsToDiabelli;
-import diabelli.logic.FormulaFormat;
-import diabelli.logic.Goal;
-import diabelli.logic.Goals;
+import diabelli.isabelle.terms.*;
+import diabelli.logic.*;
 import isabelle.Term.Term;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -54,6 +53,7 @@ import org.isabelle.iapp.process.features.InjectionResult;
 import org.isabelle.iapp.process.features.InjectionResultListener;
 import org.isabelle.iapp.proofdocument.StateChangeEvent;
 import org.isabelle.iapp.proofdocument.StateListener;
+import org.isabelle.resultdisplay.MarkedupTextDisplay;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
@@ -67,7 +67,9 @@ import org.openide.windows.TopComponent;
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 @ServiceProvider(service = DiabelliComponent.class)
-public class IsabelleDriver extends BareGoalProvidingReasoner implements FormulaFormatsProvider {
+public class IsabelleDriver extends BareGoalProvidingReasoner implements
+        FormulaFormatsProvider,
+        FormulaPresenter<StringFormula> {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
     private IsabelleMessageListener isabelleListener;
@@ -99,6 +101,7 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements Formula
         static {
             ArrayList<FormulaFormat<?>> tmp = new ArrayList<>();
             tmp.add(TermFormatDescriptor.getInstance());
+            tmp.add(StringFormat.getInstance());
             IsabelleFormats = Collections.unmodifiableList(tmp);
         }
     }
@@ -165,8 +168,9 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements Formula
      */
     private class IsabelleMessageListener extends InjectionFinishListener implements StateListener, ActionListener, PropertyChangeListener {
 
-        public static final String DIABELLI_ISABELLE_RESPONSE_GOAL = "DiabelliResponse: Goal: ";
         private static final String DIABELLI_ISABELLE_RESPONSE = "DiabelliResponse: ";
+        private static final String DIABELLI_ISABELLE_RESPONSE_GOAL = DIABELLI_ISABELLE_RESPONSE + "Goal: ";
+        private static final String DIABELLI_ISABELLE_RESPONSE_GOAL_STRING = DIABELLI_ISABELLE_RESPONSE + "Goal string: ";
         private static final int DelayMillis = 500;
         private final Timer delayer;
 
@@ -213,14 +217,18 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements Formula
         public void injectedFinished(InjectionResult inj) {
             try {
                 Message[] results = inj.getResults();
-                if (results != null) {
+                if (results != null && (results.length & 1) == 0) {
                     ArrayList<Goal> goals = new ArrayList<>();
-                    for (Message message : results) {
+                    for (int i = 0; i < results.length; i += 2) {
+                        Message message = results[i];
                         if (message.getText() != null && message.getText().startsWith(DIABELLI_ISABELLE_RESPONSE_GOAL)) {
                             String escapedYXML = message.getText().substring(DIABELLI_ISABELLE_RESPONSE_GOAL.length());
                             String unescapedYXML = TermYXML.unescapeControlChars(escapedYXML);
                             Term term = TermYXML.parseYXML(unescapedYXML);
-                            goals.add(TermsToDiabelli.toGoal(term));
+                            final TermGoal toGoal = TermsToDiabelli.toGoal(term);
+                            // Get the string version of this goal:
+                            toGoal.asFormula().addRepresentation(new FormulaRepresentation<>(new StringFormula(results[i + 1]), StringFormat.getInstance()));
+                            goals.add(toGoal);
                         }
                     }
                     setGoals(goals);
@@ -276,6 +284,50 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements Formula
 
     private void setGoals(ArrayList<Goal> goals) {
         setGoals(new Goals(this, goals));
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Formula Presenter Interface">
+    @Override
+    public FormulaFormat<StringFormula> getPresentedFormat() {
+        return StringFormat.getInstance();
+    }
+
+    @Override
+    public Component createVisualiserFor(Goal goal) throws VisualisationException {
+        if (goal == null) {
+            return null;
+        }
+        return createVisualiserFor(goal.asFormula());
+    }
+
+    @Override
+    public Component createVisualiserFor(Formula<?> formula) throws VisualisationException {
+        if (formula == null) {
+            return null;
+        }
+        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
+            if (canPresent(formulaFormat)) {
+                return createVisualiserFor(formula.getRepresentation(formulaFormat));
+            }
+        }
+        return null;
+    }
+
+    public boolean canPresent(FormulaFormat<?> format) {
+        return StringFormat.getInstance() == format;
+    }
+
+    @Override
+    public Component createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException {
+        if (canPresent(formula.getFormat()) && formula.getFormula() instanceof StringFormula) {
+            StringFormula f = (StringFormula) formula.getFormula();
+            MarkedupTextDisplay mtd = new MarkedupTextDisplay(true);
+            mtd.addMessages(new Message[] {f.getMarkedUpFormula()});
+            return mtd;
+        } else {
+            return null;
+        }
     }
     // </editor-fold>
 }

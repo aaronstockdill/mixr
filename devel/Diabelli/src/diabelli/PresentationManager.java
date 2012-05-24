@@ -26,33 +26,44 @@ package diabelli;
 
 import diabelli.components.FormulaPresenter;
 import diabelli.logic.Formula;
-import java.util.Collection;
+import diabelli.logic.FormulaFormat;
 import java.util.Set;
 
 /**
  * Provides a central mechanism for handling visualisation of {@link Formula Diabelli formulae}.
- * 
+ *
  * <p>This manager keeps track of all </p>
- * 
+ *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public interface PresentationManager {
-    
+
     /**
      * Returns a collection of all registered {@link FormulaPresenter formula
      * presenters}. These Diabelli components are used to visualise currently
      * selected formulae in Diabelli's user interface.
+     *
      * @return a collection of all registered {@link FormulaPresenter formula
      * presenters}.
      */
-    Set<FormulaPresenter> getPresenters();
-    
+    Set<FormulaPresenter<?>> getPresenters();
+
+    /**
+     * Returns formula presenters that can visualise formulae of the given
+     * format.
+     *
+     * @param format the format of formulae we want to get presenters for.
+     * @return formula presenters that can visualise formulae of the given
+     * format.
+     */
+    Set<FormulaPresenter<?>> getPresenters(FormulaFormat<?> format);
+
     /**
      * Returns the number of {@link PresentationManager#getPresenters() registered
      * formula presenters}.
+     *
      * @return the number of {@link PresentationManager#getPresenters() registered
      * formula presenters}.
      */
     int getPresentersCount();
-    
 }

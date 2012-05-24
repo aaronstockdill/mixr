@@ -28,29 +28,39 @@ import diabelli.logic.Goals;
 import java.beans.PropertyChangeListener;
 
 /**
- * Goal-providing reasoners are all interactive reasoners that fulfil the following
- * requirements: <ul> <li>they provide a list of goals that are to be proved
- * (these goals may be provided to the Diabelli framework in whatever format,
- * but the format should preferably be understandable by other Diabelli
- * components, which can then present these goals diagrammatically, for
- * example),</li> <li>the goals should contain premises and a conclusion (a goal
- * is proved if the premises entail the conclusion trivially), and</li> <li>if
- * the list of this prover's goals changes, Diabelli should be notified of it (through
- * events).</li> </ul>
- * 
+ * Goal-providing reasoners are all interactive reasoners that fulfil the
+ * following requirements:
+ *
+ * <ul>
+ *
+ * <li>they provide a list of goals that are to be proved (these goals may be
+ * provided to the Diabelli framework in whatever format, but the format should
+ * preferably be understandable by other Diabelli components, which can then
+ * present these goals diagrammatically, for example),</li>
+ *
+ * <li>the goals should contain premises and a conclusion (a goal is proved if
+ * the premises entail the conclusion trivially), and</li>
+ *
+ * <li>if the list of this prover's goals changes, Diabelli should be notified
+ * of it (through events).</li>
+ *
+ * </ul>
+ *
  * <p>Note that a goal-providing reasoner alone does not have to accept changed
  * goals from other components. Goal-providing reasoners can use the Diabelli
- * framework merely for displaying goals in other ways (diagrammatic, for example)
- * or exporting them to other components. Reasoners that accept changed goals
- * are of the type {@link GoalAcceptingReasoner}.</p>
+ * framework merely for displaying goals in other ways (diagrammatic, for
+ * example) or exporting them to other components. Reasoners that accept changed
+ * goals are of the type {@link GoalAcceptingReasoner}.</p>
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public interface GoalProvidingReasoner extends Reasoner {
+
     /**
      * Returns this reasoner's current goals (the ones the user is currently
-     * working with, for example, the goals of the current proof in the active editor
-     * window).
+     * working with, for example, the goals of the current proof in the active
+     * editor window).
+     *
      * @return this reasoner's current goals.
      */
     Goals getGoals();
@@ -63,7 +73,7 @@ public interface GoalProvidingReasoner extends Reasoner {
      * @param listener the object that will receive the property changed events.
      */
     void addPropertyChangeListener(PropertyChangeListener listener);
-    
+
     /**
      * Registers a property listener.
      *
@@ -73,7 +83,7 @@ public interface GoalProvidingReasoner extends Reasoner {
      * for a list of available events).
      */
     void addPropertyChangeListener(PropertyChangeListener listener, String event);
-    
+
     /**
      * Unregisters the given property listener.
      *
@@ -81,7 +91,7 @@ public interface GoalProvidingReasoner extends Reasoner {
      * events anymore.
      */
     void removePropertyChangeListener(PropertyChangeListener listener);
-    
+
     /**
      * Unregisters the given property listener.
      *
@@ -90,12 +100,10 @@ public interface GoalProvidingReasoner extends Reasoner {
      * @param event the event from which to deregister this listener.
      */
     void removePropertyChangeListener(PropertyChangeListener listener, String event);
-    
     /**
      * The identifier that will come with the {@link GoalProvidingReasoner#addPropertyChangeListener(java.beans.PropertyChangeListener) property
      * change event} that indicates that the current goals have changed.
      */
     static final String CurrentGoalsChangedEvent = "current_goals_changed";
     //</editor-fold>
-    
 }

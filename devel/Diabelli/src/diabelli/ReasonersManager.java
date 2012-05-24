@@ -27,7 +27,6 @@ package diabelli;
 import diabelli.components.GoalProvidingReasoner;
 import diabelli.components.Reasoner;
 import java.beans.PropertyChangeListener;
-import org.openide.util.Lookup;
 
 /**
  * Manages currently registered {@link Reasoner reasoners}. For example, this
@@ -40,6 +39,7 @@ import org.openide.util.Lookup;
  */
 public interface ReasonersManager {
 
+    //<editor-fold defaultstate="collapsed" desc="Goal-Providing Reasoners">
     /**
      * Returns the currently active goal-providing reasoner, if any. This method
      * returns {@code null} if there is currently no active goal-providing
@@ -49,7 +49,7 @@ public interface ReasonersManager {
      * @return the currently active goal-providing reasoner, if any.
      */
     GoalProvidingReasoner getActiveReasoner();
-
+    
     /**
      * This method tells the {@link Diabelli#getReasonersManager()
      * reasoners manager} to make the given {@link GoalProvidingReasoner} the
@@ -63,6 +63,7 @@ public interface ReasonersManager {
      * @param reasoner the reasoner that should become the active one.
      */
     void requestActive(GoalProvidingReasoner reasoner);
+    //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Property Changed Stuff">
     /**

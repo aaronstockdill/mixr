@@ -27,50 +27,24 @@ package diabelli.components.util;
 import diabelli.components.FormulaPresenter;
 import diabelli.logic.Formula;
 import diabelli.logic.FormulaFormat;
-import diabelli.logic.FormulaRepresentation;
 import diabelli.logic.Goal;
-import javax.swing.JPanel;
+import java.awt.Component;
 
 /**
  * Provides a basic partial implementation of the {@link FormulaPresenter formula presenter
  * interface}. This class provides implementations of some methods which can be
  * implemented through using others.
  *
+ * @param <T> the format type of formulae that this presenter is capable of
+ * visualising.
+ *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public abstract class BareFormulaPresenter implements FormulaPresenter {
+public abstract class BareFormulaPresenter<T> implements FormulaPresenter<T> {
+
 
     @Override
-    public boolean canPresent(Goal goal) {
-        if (goal == null) {
-            return false;
-        }
-        return canPresent(goal.asFormula());
-    }
-
-    @Override
-    public boolean canPresent(Formula<?> formula) {
-        if (formula == null) {
-            return false;
-        }
-        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
-            if (canPresent(formulaFormat)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean canPresent(FormulaRepresentation<?> formula) {
-        if (formula == null) {
-            return false;
-        }
-        return canPresent(formula.getFormat());
-    }
-
-    @Override
-    public JPanel createVisualiserFor(Goal goal) throws VisualisationException {
+    public Component createVisualiserFor(Goal goal) throws VisualisationException {
         if (goal == null) {
             return null;
         }
@@ -78,12 +52,12 @@ public abstract class BareFormulaPresenter implements FormulaPresenter {
     }
 
     @Override
-    public JPanel createVisualiserFor(Formula<?> formula) throws VisualisationException {
+    public Component createVisualiserFor(Formula<?> formula) throws VisualisationException {
         if (formula == null) {
             return null;
         }
         for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
-            if (canPresent(formulaFormat)) {
+            if (getPresentedFormat() == formulaFormat) {
                 return createVisualiserFor(formula.getRepresentation(formulaFormat));
             }
         }

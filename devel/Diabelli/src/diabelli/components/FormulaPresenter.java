@@ -29,7 +29,9 @@ import diabelli.logic.FormulaFormat;
 import diabelli.logic.FormulaRepresentation;
 import diabelli.logic.Goal;
 import diabelli.ui.CurrentFormulaTopComponent;
+import java.awt.Component;
 import javax.swing.JPanel;
+import org.netbeans.api.annotations.common.NonNull;
 
 /**
  * Formula presenters take a {@link Formula Diabelli formula} and return a
@@ -42,50 +44,24 @@ import javax.swing.JPanel;
  * Specifically, {@link CurrentFormulaTopComponent} is responsible for selecting
  * the formula that should be displayed with the help of presenters.</p>
  *
+ * @param <T> the format type of formulae that this presenter is capable of
+ * visualising.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface FormulaPresenter extends DiabelliComponent {
+public interface FormulaPresenter<T> extends DiabelliComponent {
 
     /**
-     * Should return {@code true} if this presenter can produce a visualisation
-     * of the given goal.
+     * Returns the format type of formulae this presenter is capable of
+     * visualising.
+     * 
+     * <p><span style="font-weight:bold">Important</span>: this method must
+     * not return {@code null}.</p>
      *
-     * @param goal the goal about which we are asking this presenter.
-     * @return {@code true} if this presenter can produce a visualisation of the
-     * given goal.
+     * @return the format type of formulae this presenter is capable of
+     * visualising.
      */
-    boolean canPresent(Goal goal);
-
-    /**
-     * Should return {@code true} if this presenter can produce a visualisation
-     * of the given formula.
-     *
-     * @param formula the formula about which we are asking this presenter.
-     * @return {@code true} if this presenter can produce a visualisation of the
-     * given formula.
-     */
-    boolean canPresent(Formula<?> formula);
-
-    /**
-     * Should return {@code true} if this presenter can produce a visualisation
-     * of the given formula.
-     *
-     * @param formula the formula about which we are asking this presenter.
-     * @return {@code true} if this presenter can produce a visualisation of the
-     * given formula.
-     */
-    boolean canPresent(FormulaRepresentation<?> formula);
-
-    /**
-     * Should return {@code true} if this presenter can produce a visualisation
-     * of formulae in the given format.
-     *
-     * @param format the format of formulae about which we are asking this
-     * presenter.
-     * @return {@code true} if this presenter can produce a visualisation of
-     * formulae in the given format.
-     */
-    boolean canPresent(FormulaFormat<?> format);
+    @NonNull
+    FormulaFormat<T> getPresentedFormat();
 
     /**
      * Returns a panel which displays the given goal. The returned panel will be
@@ -100,7 +76,7 @@ public interface FormulaPresenter extends DiabelliComponent {
      * @throws diabelli.components.FormulaPresenter.VisualisationException see {@link VisualisationException}
      * for info on when this exception is thrown.
      */
-    JPanel createVisualiserFor(Goal goal) throws VisualisationException;
+    Component createVisualiserFor(Goal goal) throws VisualisationException;
 
     /**
      * Returns a panel which displays the given goal. The returned panel will be
@@ -116,7 +92,7 @@ public interface FormulaPresenter extends DiabelliComponent {
      * @throws diabelli.components.FormulaPresenter.VisualisationException see {@link VisualisationException}
      * for info on when this exception is thrown.
      */
-    JPanel createVisualiserFor(Formula<?> formula) throws VisualisationException;
+    Component createVisualiserFor(Formula<?> formula) throws VisualisationException;
 
     /**
      * Returns a panel which displays the given goal. The returned panel will be
@@ -130,7 +106,7 @@ public interface FormulaPresenter extends DiabelliComponent {
      * @throws diabelli.components.FormulaPresenter.VisualisationException see {@link VisualisationException}
      * for info on when this exception is thrown.
      */
-    JPanel createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException;
+    Component createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException;
 
     /**
      * This exception is thrown if the visualisation failed unexpectedly. If the

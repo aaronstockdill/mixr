@@ -112,16 +112,16 @@ public class IsabelleToSpidersTranslator extends FormulaTranslator<Term.Term, Sp
         "ITST_premises_translation_failed=Could not extract a spider diagram from the given premises."
     })
     @Override
-    public FormulaRepresentation<SpiderDiagram> translate(List<? extends Formula<Term.Term>> formulae) throws TranslationException {
-        if (!arePremises(formulae)) {
+    public FormulaRepresentation<SpiderDiagram> translate(List<? extends Formula<Term.Term>> premises) throws TranslationException {
+        if (!arePremises(premises)) {
             throw new TranslationException(Bundle.ITST_not_all_premises());
-        } else if (!(formulae.get(0).getHostingGoal() instanceof TermGoal)) {
+        } else if (!(premises.get(0).getHostingGoal() instanceof TermGoal)) {
             throw new TranslationException(Bundle.ITST_context_unknown());
         } else {
-            TermGoal termGoal = (TermGoal) formulae.get(0).getHostingGoal();
+            TermGoal termGoal = (TermGoal) premises.get(0).getHostingGoal();
             ArrayList<Term.Term> terms = new ArrayList<>();
-            for (Formula<Term.Term> formula : formulae) {
-                terms.add(formula.getMainRepresentation().getFormula());
+            for (Formula<Term.Term> premise : premises) {
+                terms.add(premise.getMainRepresentation().getFormula());
             }
             try {
                 return new FormulaRepresentation<>(speedith.diabelli.isabelle.Translations.termToSpiderDiagram(terms, termGoal.getVariables()), SpeedithFormatDescriptor.getInstance());

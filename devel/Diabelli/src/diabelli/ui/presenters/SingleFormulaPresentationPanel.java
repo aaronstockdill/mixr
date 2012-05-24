@@ -26,10 +26,12 @@ package diabelli.ui.presenters;
 
 import diabelli.components.FormulaPresenter;
 import diabelli.logic.FormulaRepresentation;
-import diabelli.ui.CurrentFormulaTopComponent;
-import diabelli.ui.CurrentFormulaTopComponent.PremiseFormulaNode;
+import diabelli.ui.GoalsTopComponent.ConclusionNode;
+import diabelli.ui.GoalsTopComponent.GeneralGoalNode;
+import diabelli.ui.GoalsTopComponent.PremiseNode;
+import diabelli.ui.GoalsTopComponent.PremisesNode;
 import java.awt.BorderLayout;
-import javax.swing.JPanel;
+import java.awt.Component;
 import org.openide.util.NbBundle;
 
 /**
@@ -42,18 +44,18 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
     private static final String BoldItalicEndTag = "</i></b>";
     private static final String BoldItalicStartTag = "<b><i>";
     private static final long serialVersionUID = 0x1906271867d69be1L;
-    private final CurrentFormulaTopComponent.GeneralFormulaNode<?> presentedNode;
+    private final GeneralGoalNode presentedNode;
     private final FormulaRepresentation<?> formula;
     private final int representationIndex;
-    private final JPanel presenterPanel;
-    private final FormulaPresenter presenter;
+    private final Component presenterPanel;
+    private final FormulaPresenter<?> presenter;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructor">
     /**
      * Creates new form SingleFormulaPresentationPanel
      */
-    public SingleFormulaPresentationPanel(CurrentFormulaTopComponent.GeneralFormulaNode<?> presentedNode, FormulaRepresentation<?> formula, int representationIndex, JPanel presenterPanel, FormulaPresenter presenter) {
+    public SingleFormulaPresentationPanel(GeneralGoalNode presentedNode, FormulaRepresentation<?> formula, int representationIndex, Component presenterPanel, FormulaPresenter<?> presenter) {
         this.presentedNode = presentedNode;
         this.formula = formula;
         this.representationIndex = representationIndex;
@@ -79,6 +81,7 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
+        java.awt.GridBagConstraints gridBagConstraints;
 
         titlePanel = new javax.swing.JPanel();
         detailLabel = new javax.swing.JLabel();
@@ -86,6 +89,7 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
         setLayout(new java.awt.BorderLayout());
 
         titlePanel.setBackground(new java.awt.Color(213, 237, 246));
+        titlePanel.setMinimumSize(new java.awt.Dimension(100, 25));
         titlePanel.setPreferredSize(new java.awt.Dimension(100, 25));
 
         detailLabel.setFont(new java.awt.Font("Dialog", 0, 11)); // NOI18N
@@ -128,25 +132,17 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
             StringBuilder sb = new StringBuilder("<html>");
 
             if (presentedNode != null) {
-                // Which formula in particular are we displaying?
-                CurrentFormulaTopComponent.GeneralFormulaNode<?> targetNode;
-                if (presentedNode instanceof CurrentFormulaTopComponent.FormulaDelegateNode<?>) {
-                    targetNode = ((CurrentFormulaTopComponent.FormulaDelegateNode<?>) presentedNode).getBaseFormulaNode();
-                } else {
-                    targetNode = presentedNode;
-                }
-
                 // Print something like this: Goal 1 > Premise 2  Format: <format>  Visualiser: <presenter>
 
                 // First print out the selected goal:
-                sb.append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_goal(targetNode.getSelectedGoalIndex() + 1)).append(BoldItalicEndTag);
+                sb.append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_goal(presentedNode.getGoalIndex() + 1)).append(BoldItalicEndTag);
 
-                if (targetNode instanceof CurrentFormulaTopComponent.PremiseFormulaNode) {
-                    PremiseFormulaNode premiseFormulaNode = (PremiseFormulaNode) targetNode;
+                if (presentedNode instanceof PremiseNode) {
+                    PremiseNode premiseFormulaNode = (PremiseNode) presentedNode;
                     sb.append(" > ").append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_premise(premiseFormulaNode.getPremiseIndex() + 1)).append(BoldItalicEndTag);
-                } else if (targetNode instanceof CurrentFormulaTopComponent.PremisesFormulaNode) {
+                } else if (presentedNode instanceof PremisesNode) {
                     sb.append(" > ").append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_premises()).append(BoldItalicEndTag);
-                } else if (targetNode instanceof CurrentFormulaTopComponent.ConclusionFormulaNode) {
+                } else if (presentedNode instanceof ConclusionNode) {
                     sb.append(" > ").append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_conclusion()).append(BoldItalicEndTag);
                 }
             }

@@ -22,7 +22,7 @@ import speedith.core.lang.Zone
 import scala.collection.JavaConversions;
 
 object Translations {
-  
+
   // TESTING METHODS
 
   /**
@@ -32,21 +32,36 @@ object Translations {
     testExample(Example6_unescapedYXML);
     testExample(Example7_unescapedYXML);
     testExample(Example8_unescapedYXML);
+    testExample(Example9_unescapedYXML);
+    testPremises(Example9_unescapedYXML);
     testExample(Example4_unescapedYXML);
     testExample(Example5_unescapedYXML);
     testExample(Example3_unescapedYXML);
     testExample(Example2_unescapedYXML);
     testExample(Example1_unescapedYXML);
   }
-  
+
+  private def testPremises(s: String): SpiderDiagram = {
+    val t = parseYXML(s);
+    t match {
+      case App(App(Const(MetaImplication, _), lhs), _) => {
+        // Now find all premises and the conclusion:
+        val premises = ArrayBuffer[Term](lhs);
+        val sd = termToSpiderDiagram(scala.collection.JavaConversions.asJavaList(premises), null);
+        println(sd);
+        sd;
+      }
+      case _ => println("WTF!"); null;
+    }
+  }
+
   private def testExample(s: String): SpiderDiagram = {
     val t = parseYXML(s);
     val sd = termToSpiderDiagram(t);
     println(sd.toString());
     sd;
   }
-  
-  
+
   // TRANSLATIONS (public interface)
 
   /**
@@ -65,7 +80,7 @@ object Translations {
    * @throws an exception is thrown if the translation fails for any reason.
    */
   @throws(classOf[ReadingException])
-  def termToSpiderDiagram(premises: java.util.List[Term], spiders: java.util.List[Free]): PrimarySpiderDiagram = {
+  def termToSpiderDiagram(premises: java.util.List[Term], spiders: java.util.List[Free]): SpiderDiagram = {
     if (premises == null || premises.size() == 0) {
       throw new ReadingException("The list of premises must not be empty.");
     }
@@ -75,22 +90,32 @@ object Translations {
         case t => throw new ReadingException("The list of premises contains a term that is not a Trueprop: '%s;.".format(t.toString()));
       }
     })
-    if (spiders == null || spiders.size() == 0) {
-      val (psd, _) = convertoToPSD(ArrayBuffer[Free](), null, premisesHOL);
-      return psd;
-    } else {
-      val (psd, _) = convertoToPSD(JavaConversions.asScalaBuffer(spiders), spiders.get(0).typ, premisesHOL);
-      return psd;
+    // Handle the case where each premise is a PSD itself (just try each
+    // premise) and then conjunctively connect these primary spider diagrams
+    // with the rest of the premises.
+    val sd = sdFromConjuncts(premisesHOL);
+    if (premisesHOL == null || premisesHOL.length < 1)
+      return sd;
+    else {
+      // There are still some premises left. Extract a spider diagram from them:
+      val psd = if (spiders == null || spiders.size() == 0) {
+        convertoToPSD(ArrayBuffer[Free](), null, premisesHOL)._1;
+      } else {
+        convertoToPSD(JavaConversions.asScalaBuffer(spiders), spiders.get(0).typ, premisesHOL)._1;
+      }
+      if (psd == null)
+        null;
+      else if (sd != null)
+        SpiderDiagrams.createCompoundSD(Operator.Conjunction, sd, psd);
+      else
+        psd;
     }
-    null;
   }
 
-  
-  
   // Everything below here is just implementation detail.
 
   // RECOGNISERS: Just functions of a special type that convert Isabelle terms to spider diagrams.
-  
+
   private type RecogniserIn = ( /*term:*/ Term, /*spiderType:*/ Typ);
   private type RecogniserOut = (SpiderDiagram, /*spiderType:*/ Typ);
   private type Recogniser = PartialFunction[RecogniserIn, RecogniserOut];
@@ -130,6 +155,7 @@ object Translations {
       val spiders = ArrayBuffer[Free]();
       val conjuncts = ArrayBuffer[Term]();
       extractConjuncts(extractSpidersAndBody(term, spiders), conjuncts);
+
       // Make sure that all spiders have the same type:
       if (!spiders.forall { spider => checkSpiderType(spider.typ, spiderType1) }) throw new ReadingException("Not all spiders are of the same type.");
 
@@ -177,6 +203,28 @@ object Translations {
   private val HOLSetComplement = "Groups.uminus_class.uminus";
   private val HOLSetIntersection = "Lattices.inf_class.inf";
   private val HOLSetUnion = "Lattices.sup_class.sup";
+
+  /**
+   * Extracts conjunctively connected spider diagrams from the list of premises.
+   */
+  def sdFromConjuncts(conjuncts: Buffer[Term]): SpiderDiagram = {
+    if (conjuncts == null || conjuncts.isEmpty)
+      return null;
+    var typ: Typ = null;
+    var sds: SpiderDiagram = null;
+    for (i <- (conjuncts.length - 1) to 0 by -1) {
+      try {
+        val (sd, typTmp) = recognise(conjuncts(i), typ)
+        typ = typTmp;
+        if (sds == null) sds = sd;
+        else sds = SpiderDiagrams.createCompoundSD(Operator.Conjunction, sd, sds);
+        conjuncts.remove(i);
+      } catch {
+        case e => println(e);
+      }
+    }
+    sds;
+  }
 
   private def getAndRemove[A, T <: A, B](buffer: Buffer[T], filter: A => Option[B]): ArrayBuffer[B] = {
     val retVal = ArrayBuffer[B]();
