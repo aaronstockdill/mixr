@@ -24,9 +24,6 @@
  */
 package diabelli.ui;
 
-import diabelli.Diabelli;
-import diabelli.FormulaFormatManager;
-import diabelli.components.FormulaPresenter;
 import diabelli.logic.*;
 import diabelli.ui.GoalsTopComponent.ConclusionNode;
 import diabelli.ui.GoalsTopComponent.GeneralGoalNode;
@@ -35,9 +32,7 @@ import diabelli.ui.GoalsTopComponent.PremisesNode;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -203,26 +198,6 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="GUI Update Methods">
-    private static class WrapperChildFactory<T extends Node> extends ChildFactory<T> {
-
-        private final T node;
-
-        public WrapperChildFactory(T node) {
-            this.node = node;
-        }
-
-        @Override
-        protected boolean createKeys(List<T> toPopulate) {
-            toPopulate.add(node);
-            return true;
-        }
-
-        @Override
-        protected Node createNodeForKey(T key) {
-            return key;
-        }
-    }
-
     private void resetRootContextTitle() {
         this.em.getRootContext().setDisplayName(Bundle.CFTC_root_node_display_name());
     }
@@ -233,14 +208,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
     }
 
     private <T extends Node> void wrapAndSetRootNode(final T aNode) {
-        resetRootNode(new AbstractNode(Children.create(new WrapperChildFactory<>(aNode), false)));
-        if (aNode != null) {
-            try {
-                this.em.setSelectedNodes(new Node[]{aNode});
-            } catch (PropertyVetoException ex) {
-                Logger.getLogger(GoalsTopComponent.class.getName()).log(Level.SEVERE, "The topmost formula could not have been selected.", ex);
-            }
-        }
+        resetRootNode(aNode);
     }
 
     private void showConclusion(ConclusionNode conclusionNode) {
