@@ -104,7 +104,7 @@ public class Formula<T> {
      * variable, you have to acquire a lock on {@link Formula#representationsMap}.
      * .</p>
      */
-    private final HashSet<FormulaRepresentation<?>> representationsSet;
+    private final LinkedHashSet<FormulaRepresentation<?>> representationsSet;
     private final FormulaRole role;
     /**
      * The goal that contains this formula.
@@ -134,7 +134,7 @@ public class Formula<T> {
         }
         // Initialise the fields:
         this.representationsMap = new HashMap<>();
-        this.representationsSet = new HashSet<>();
+        this.representationsSet = new LinkedHashSet<>();
         this.mainRepresentation = mainRepresentation;
         if (mainRepresentation != null) {
             // Add the main representation to the registry:

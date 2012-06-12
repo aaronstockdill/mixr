@@ -36,6 +36,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyVetoException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
@@ -60,12 +61,8 @@ import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
 /**
- * This window gives the user the option to select particular representations
- * (formats) of a formula selected in the {@link GoalsTopComponent}. This
- * selection may then consequently be displayed with the help of {@link
- * FormulaPresenter formula presenters}. In fact, the window {@link FormulaPresentationTopComponent}
- * displays the current selection automatically. Additionally, the user may
- * request additional translations through this window.
+ * This window gives the user the option to browse particular representations
+ * (formats) of a formula selected in the {@link GoalsTopComponent}.
  *
  *
  * User's selection of the contents of this component is managed by the provided
@@ -378,7 +375,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         PremiseFormulaNode(PremiseNode premise) {
             super(premise, Children.LEAF);
             setDisplayName(Bundle.CurrentPremiseNode_display_name(premise.getPremiseIndex() + 1, premise.getGoalIndex() + 1));
-            setChildren(Children.create(new FormulaFormatsChildren<>(this), false));
+            setChildren(Children.create(new FormulaRepresentationsChildren<> (this), false));
         }
 
         @Override
@@ -399,7 +396,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         PremisesFormulaNode(PremisesNode premises) {
             super(premises, Children.LEAF);
             setDisplayName(Bundle.PremisesFormulaNode_display_name(premises.getGoalIndex() + 1));
-            setChildren(Children.create(new FormulaFormatsChildren<>(this), false));
+            setChildren(Children.create(new FormulaRepresentationsChildren<>(this), false));
         }
 
         @Override
@@ -416,7 +413,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         ConclusionFormulaNode(ConclusionNode conclusion) {
             super(conclusion, Children.LEAF);
             setDisplayName(Bundle.CurrentConclusionNode_display_name(conclusion.getGoalIndex() + 1));
-            setChildren(Children.create(new FormulaFormatsChildren<>(this), false));
+            setChildren(Children.create(new FormulaRepresentationsChildren<>(this), false));
         }
 
         @Override
@@ -433,7 +430,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         GoalFormulaNode(GeneralGoalNode goal) {
             super(goal, Children.LEAF);
             setDisplayName(Bundle.CurrentGoalNode_display_name(goal.getGoalIndex() + 1));
-            setChildren(Children.create(new FormulaFormatsChildren<>(this), false));
+            setChildren(Children.create(new FormulaRepresentationsChildren<>(this), false));
         }
     }
 
@@ -494,48 +491,23 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         }
     }
 
-    public static class FormatFormulaNode<T extends GeneralGoalNode> extends FormulaDelegateNode<T> {
-
-        final FormulaFormat<?> toFormat;
-
-        @Messages({
-            "FormatNode_displayName=Format: {0}"
-        })
-        FormatFormulaNode(GeneralFormulaNode<T> selection, FormulaFormat<?> toFormat) {
-            super(selection, Children.LEAF);
-            this.toFormat = toFormat;
-            setDisplayName(Bundle.FormatNode_displayName(toFormat.getPrettyName()));
-            setChildren(Children.create(new FormulaRepresentationsChildren<>(this), true));
-        }
-
-        @Override
-        public FormulaRepresentation<?> getSelectedFormulaRepresentation() {
-            ArrayList<? extends FormulaRepresentation<?>> representations = getSelectedFormula().fetchRepresentations(toFormat);
-            return representations == null || representations.isEmpty() ? null : representations.get(0);
-        }
-
-        public final FormulaFormat<?> getSelectedFormat() {
-            return toFormat;
-        }
-    }
-
     public static class RepresentationFormulaNode<T extends GeneralGoalNode> extends FormulaDelegateNode<T> {
 
-        final ArrayList<? extends FormulaRepresentation<?>> representations;
+        final List<? extends FormulaRepresentation<?>> representations;
         final int representationIndex;
 
         @Messages({
-            "FormatRepresentationNode_displayName=Translation {0}",
-            "FormatRepresentationNode_displayName_main_representation=Main representation"
+            "FormatRepresentationNode_displayName=Representation {0}: {1}",
+            "FormatRepresentationNode_displayName_main_representation=Main representation: {0}"
         })
-        RepresentationFormulaNode(FormatFormulaNode<T> selection, ArrayList<? extends FormulaRepresentation<?>> representations, int representationIndex) {
+        RepresentationFormulaNode(GeneralFormulaNode<T> selection, List<? extends FormulaRepresentation<?>> representations, int representationIndex) {
             super(selection, Children.LEAF);
             this.representations = representations;
             this.representationIndex = representationIndex;
             if (selection.getSelectedFormula().getMainRepresentation() == representations.get(representationIndex)) {
-                setDisplayName(Bundle.FormatRepresentationNode_displayName_main_representation());
+                setDisplayName(Bundle.FormatRepresentationNode_displayName_main_representation(representations.get(representationIndex).getFormat().getPrettyName()));
             } else {
-                setDisplayName(Bundle.FormatRepresentationNode_displayName(representationIndex + 1));
+                setDisplayName(Bundle.FormatRepresentationNode_displayName(representationIndex + 1, representations.get(representationIndex).getFormat().getPrettyName()));
             }
         }
 
@@ -546,63 +518,29 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
     }
 
     // <editor-fold defaultstate="collapsed" desc="Formula Format Node Factories">
-    private static class FormulaFormatsChildren<T extends GeneralGoalNode> extends ChildFactory<FormatFormulaNode<T>> {
+    /**
+     * This node children factory produces all the representations of the
+     * given formula.
+     * @param <T> 
+     */
+    private static class FormulaRepresentationsChildren<T extends GeneralGoalNode> extends ChildFactory<RepresentationFormulaNode<T>> {
 
         private final GeneralFormulaNode<T> source;
 
-        private FormulaFormatsChildren(GeneralFormulaNode<T> source) {
-            this.source = source;
-        }
-
-        @Override
-        protected boolean createKeys(List<FormatFormulaNode<T>> toPopulate) {
-            // Go through all known formats and try to translate the selected
-            // formula into all the formats.
-            FormulaFormatManager formatManager = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager();
-            Collection<FormulaFormat<?>> formats = formatManager.getFormulaFormats();
-            for (FormulaFormat<?> format : formats) {
-                toPopulate.add(new FormatFormulaNode<>(source, format));
-            }
-            return true;
-        }
-
-        @Override
-        protected Node createNodeForKey(FormatFormulaNode<T> formatNode) {
-            return formatNode;
-        }
-    }
-
-    private static class FormulaRepresentationsChildren<T extends GeneralGoalNode> extends ChildFactory<RepresentationFormulaNode<T>> {
-
-        private final FormatFormulaNode<T> source;
-
-        FormulaRepresentationsChildren(FormatFormulaNode<T> source) {
+        FormulaRepresentationsChildren(GeneralFormulaNode<T> source) {
             this.source = source;
         }
 
         @Override
         protected boolean createKeys(List<RepresentationFormulaNode<T>> toPopulate) {
-            // Go through all known formats and try to translate the selected
-            // formula into all the formats.
-            // If the selected formula are `premises' and there is no main
-            // representation, then try to translate the whole array of premises
-            // into the selected format.
-            GeneralFormulaNode<T> baseFormulaNode = source.getBaseFormulaNode();
-            if (baseFormulaNode instanceof PremisesFormulaNode && baseFormulaNode.getSelectedFormula().getMainRepresentation() == null) {
-                PremisesFormulaNode premisesFormulaNode = (PremisesFormulaNode) baseFormulaNode;
-                // Okay, now convert the array of formulae into this format and,
-                // if translation was successful, add it as a representation of
-                // the premises formula.
-                @SuppressWarnings("unchecked")
-                final List<? extends Formula<Object>> premises = (List<? extends Formula<Object>>) premisesFormulaNode.getSelectedGoal().getPremises();
-                baseFormulaNode.getSelectedGoal().addPremisesTranslations(premises, source.getSelectedFormat());
-            }
-
-            ArrayList<? extends FormulaRepresentation<?>> representations = source.getSelectedFormula().fetchRepresentations(source.toFormat);
-            if (representations != null && !representations.isEmpty()) {
-                for (int i = 0; i < representations.size(); i++) {
-                    toPopulate.add(new RepresentationFormulaNode<>(source, representations, i));
-                }
+            // Enumerate all the representations of the currently selected
+            // formula:
+            Formula<?> selectedFormula = source.getSelectedFormula();
+            if (selectedFormula == null || selectedFormula.getRepresentationsCount() < 1)
+                return true;
+            List<FormulaRepresentation<?>> representations = Arrays.asList(selectedFormula.getRepresentations());
+            for (int i = 0; i < representations.size(); i++) {
+                toPopulate.add(new RepresentationFormulaNode<>(source, representations, i));
             }
             return true;
         }
