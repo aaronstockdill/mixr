@@ -57,7 +57,7 @@ public final class DiabelliImpl implements Diabelli {
     private final InstanceContent instanceContent;
     private Result<DiabelliComponent> lookupResult;
     private final AbstractLookup componentsLookup;
-    private final HashSet<DiabelliComponent> components = new HashSet<>();
+    private Set<DiabelliComponent> components;
     private final ArrayList<ManagerInternals> managers = new ArrayList<>();
     // </editor-fold>
     // <editor-fold defaultstate="collapsed" desc="Managers Fields">
@@ -92,7 +92,7 @@ public final class DiabelliImpl implements Diabelli {
 
             @Override
             public void resultChanged(LookupEvent ev) {
-                throw new UnsupportedOperationException("Registering/unregistering Diabelli drivers is not yet implemented.");
+                throw new UnsupportedOperationException("Registering/unregistering Diabelli drivers after initialisation is not supported.");
             }
         });
         updateComponentsList();
@@ -124,7 +124,7 @@ public final class DiabelliImpl implements Diabelli {
 
     @Override
     public Set<? extends DiabelliComponent> getRegisteredComponents() {
-        return Collections.unmodifiableSet(components);
+        return components;
     }
 
     @Override
@@ -136,13 +136,6 @@ public final class DiabelliImpl implements Diabelli {
     // <editor-fold defaultstate="collapsed" desc="Lookup Provider Implementation">
     @Override
     public Lookup getLookup() {
-        // TODO: Check if we have to provide synchronisation here.
-//        synchronized (instanceContent) {
-//        if (lookupResult == null) {
-        // Listen for Diabelli component registration (this will update the list
-        // of components in Diabelli.
-//        }
-//        }
         return componentsLookup;
     }
     // </editor-fold>
@@ -156,12 +149,13 @@ public final class DiabelliImpl implements Diabelli {
 
     // <editor-fold defaultstate="collapsed" desc="Components Registration">
     private void updateComponentsList() {
+        components = new HashSet<>();
         Collection<? extends DiabelliComponent> comps = lookupResult.allInstances();
-        components.clear();
         for (DiabelliComponent comp : comps) {
             instanceContent.add(comp);
             components.add(comp);
         }
+        components = Collections.unmodifiableSet(components);
     }
     // </editor-fold>
 }

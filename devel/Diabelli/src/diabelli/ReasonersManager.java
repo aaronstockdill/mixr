@@ -25,8 +25,10 @@
 package diabelli;
 
 import diabelli.components.GoalProvidingReasoner;
+import diabelli.components.GoalTransformingReasoner;
 import diabelli.components.Reasoner;
 import java.beans.PropertyChangeListener;
+import java.util.Set;
 
 /**
  * Manages currently registered {@link Reasoner reasoners}. For example, this
@@ -49,6 +51,18 @@ public interface ReasonersManager {
      * @return the currently active goal-providing reasoner, if any.
      */
     GoalProvidingReasoner getActiveReasoner();
+    
+    /**
+     * Returns the set of all reasoners that are capable of transforming
+     * a formula.
+     * 
+     * <p>These reasoners are also referred to as <span
+     * style="font-style:italic;">slave reasoners</span>.</p>
+     * 
+     * @return the set of all reasoners that are capable of transforming
+     * a formula.
+     */
+    Set<GoalTransformingReasoner> getGoalTransformingReasoners();
     
     /**
      * This method tells the {@link Diabelli#getReasonersManager()

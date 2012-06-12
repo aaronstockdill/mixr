@@ -70,17 +70,18 @@ import java.util.Set;
  */
 public interface GoalTransformingReasoner extends Reasoner {
 
-    /**
-     * Returns a set of formula formats that this reasoner is capable of working
-     * with. If this set contains more than one format, then it is assumed that
-     * this reasoner may be capable of applying heterogeneous inference rules
-     * (i.e., if the user selects multiple formulae of different but supported
-     * formats, then this reasoner will be queried whether it can do something
-     * with it.
-     *
-     * @return
-     */
-    Set<? extends FormulaFormat<?>> getTransformableFormats();
+//    /**
+//     * Returns a set of formula formats that this reasoner is capable of working
+//     * with. If this set contains more than one format, then it is assumed that
+//     * this reasoner may be capable of applying heterogeneous inference rules
+//     * (i.e., if the user selects multiple formulae of different but supported
+//     * formats, then this reasoner will be queried whether it can do something
+//     * with it.
+//     *
+//     * @return a set of formula formats that this reasoner is capable of working
+//     * with.
+//     */
+//    Set<? extends FormulaFormat<?>> getTransformableFormats();
 
     /**
      * Quickly and superficially checks whether this reasoner can work with

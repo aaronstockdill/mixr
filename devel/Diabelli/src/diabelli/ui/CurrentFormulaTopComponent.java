@@ -31,7 +31,6 @@ import diabelli.ui.GoalsTopComponent.PremiseNode;
 import diabelli.ui.GoalsTopComponent.PremisesNode;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyVetoException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;

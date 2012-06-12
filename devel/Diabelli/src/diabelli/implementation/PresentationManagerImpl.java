@@ -28,8 +28,8 @@ import diabelli.PresentationManager;
 import diabelli.components.DiabelliComponent;
 import diabelli.components.FormulaPresenter;
 import diabelli.logic.FormulaFormat;
-import java.util.Map.Entry;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.NbBundle;
@@ -60,7 +60,6 @@ class PresentationManagerImpl implements ManagerInternals, PresentationManager {
     public void onAfterComponentsLoaded() {
         HashSet<FormulaPresenter<?>> ps = new HashSet<>();
         HashMap<FormulaFormat<?>, Set<FormulaPresenter<?>>> f2ps = new HashMap<>();
-        // Set the first goal providing reasoner as the active one:
         for (DiabelliComponent diabelliComponent : host.getRegisteredComponents()) {
             if (diabelliComponent instanceof FormulaPresenter<?>) {
                 final FormulaPresenter<?> fp = (FormulaPresenter<?>) diabelliComponent;

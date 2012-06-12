@@ -28,8 +28,12 @@ import diabelli.Diabelli;
 import diabelli.ReasonersManager;
 import diabelli.components.DiabelliComponent;
 import diabelli.components.GoalProvidingReasoner;
+import diabelli.components.GoalTransformingReasoner;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.NbBundle;
@@ -46,6 +50,7 @@ class ReasonersManagerImpl implements ReasonersManager, ManagerInternals {
     // <editor-fold defaultstate="collapsed" desc="Fields">
     private GoalProvidingReasoner activeReasoner;
     private Diabelli diabelli;
+    private Set<GoalTransformingReasoner> slaveReasoners;
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -61,10 +66,15 @@ class ReasonersManagerImpl implements ReasonersManager, ManagerInternals {
 
     @Override
     public void requestActive(GoalProvidingReasoner reasoner) {
-        // TODO: Somewhen in the future we might want to check whether the
+        // TODO: Some time in the future we might want to check whether the
         // currently active reasoner is busy etc.
         Logger.getLogger(ReasonersManagerImpl.class.getName()).log(Level.INFO, "Reasoner ''{0}'' requested focus.", reasoner.getName());
         setActiveReasoner(reasoner);
+    }
+
+    @Override
+    public Set<GoalTransformingReasoner> getGoalTransformingReasoners() {
+        return slaveReasoners;
     }
     //</editor-fold>
 
@@ -123,6 +133,16 @@ class ReasonersManagerImpl implements ReasonersManager, ManagerInternals {
                 break;
             }
         }
+        
+        // Now populate the list of all goal-transforming reasoners:
+        HashSet<GoalTransformingReasoner> gtrs = new HashSet<>();
+        for (DiabelliComponent diabelliComponent : diabelli.getRegisteredComponents()) {
+            if (diabelliComponent instanceof GoalTransformingReasoner) {
+                GoalTransformingReasoner gtr = (GoalTransformingReasoner) diabelliComponent;
+                gtrs.add(gtr);
+            }
+        }
+        slaveReasoners = Collections.unmodifiableSet(gtrs);
     }
     // </editor-fold>
 }
