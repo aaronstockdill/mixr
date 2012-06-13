@@ -28,10 +28,11 @@ import diabelli.logic.GoalTransformation;
 import diabelli.logic.InferenceTarget;
 import diabelli.GoalsManager;
 import diabelli.logic.Formula;
-import diabelli.logic.FormulaFormat;
 import diabelli.logic.FormulaRepresentation;
 import diabelli.logic.Goal;
-import java.util.Set;
+import diabelli.logic.Goals;
+import diabelli.logic.InferenceRuleDescriptor;
+import java.util.Collection;
 
 /**
  * Goal-transforming reasoners have the basic ability to take {@link Goals goals},
@@ -60,7 +61,7 @@ import java.util.Set;
  * <li>The user picks multiple inference targets and invokes a reasoner to work
  * with it. Not all combinations of inference targets are allowed. For example,
  * the user may select only multiple goals or multiple premises and a conclusion
- * from a single goal. </li>
+ * from a single goal.</li>
  *
  * </ol>
  *
@@ -69,29 +70,37 @@ import java.util.Set;
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public interface GoalTransformingReasoner extends Reasoner {
-
-//    /**
-//     * Returns a set of formula formats that this reasoner is capable of working
-//     * with. If this set contains more than one format, then it is assumed that
-//     * this reasoner may be capable of applying heterogeneous inference rules
-//     * (i.e., if the user selects multiple formulae of different but supported
-//     * formats, then this reasoner will be queried whether it can do something
-//     * with it.
-//     *
-//     * @return a set of formula formats that this reasoner is capable of working
-//     * with.
-//     */
-//    Set<? extends FormulaFormat<?>> getTransformableFormats();
+    
+    /**
+     * Returns a collection of all inference rules that are applicable
+     * on the given target.
+     * 
+     * @param target the target on which we would like to apply the given
+     * inference rules.
+     * 
+     * @return a collection of all inference rules that are applicable
+     * on the given target.
+     */
+    Collection<InferenceRuleDescriptor> getApplicableInferenceRules(InferenceTarget target);
+    
+    /**
+     * Returns the collection of all inference rules provided by this
+     * reasoner.
+     * 
+     * @return the collection of all inference rules provided by this
+     * reasoner.
+     */
+    Collection<InferenceRuleDescriptor> getInferenceRules();
 
     /**
      * Quickly and superficially checks whether this reasoner can work with
-     * the given inference targets.
-     * @param targets the goals, formulae, or formulae representations on which
+     * the given inference target.
+     * @param target the goals, formulae, or formulae representations on which
      * we want to use this reasoner.
      * @return {@code true} if this reasoner can work with the given inference
-     * targets.
+     * target.
      */
-    boolean canActOn(InferenceTarget... targets);
+    boolean canTransform(InferenceTarget target);
     
     /**
      * This is the main method that lets the user reason about the target
@@ -116,6 +125,19 @@ public interface GoalTransformingReasoner extends Reasoner {
      * active for the goal transformations to be successfully applied.</p>
      * 
      * @param targets the formulae on which to invoke this reasoner.
+     * @param inferenceRule the value of inferenceRule
      */
-    void reasonAbout(InferenceTarget... targets);
+    void applyInferenceRule(InferenceTarget targets, InferenceRuleDescriptor inferenceRule);
+    
+    /**
+     * Returns a pretty, human-readable name for the inference system
+     * provided by this goal-transforming reasoner. This will be displayed
+     * in Diabelli's user interface (as a sub-menu of the popup that lists
+     * all applicable inference rules). For example, Speedith returns <span
+     * style="font-style:italic;">Spider diagram rules</span>.
+     * 
+     * @return a pretty, human-readable name for the inference system
+     * provided by this goal-transforming reasoner.
+     */
+    String getInferenceSetName();
 }

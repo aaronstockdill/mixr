@@ -28,18 +28,21 @@ import diabelli.components.GoalProvidingReasoner;
 import diabelli.logic.Goals;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.beans.PropertyVetoException;
 import java.util.RandomAccess;
 import org.openide.util.Lookup;
+import org.openide.util.NbBundle;
 
 /**
- * Provides a <span style="font-style:italic;">bare</span> (partial and convenience)
- * implementation of the {@link GoalProvidingReasoner} interface.
+ * Provides a <span style="font-style:italic;">bare</span> (partial and
+ * convenience) implementation of the {@link GoalProvidingReasoner} interface.
+ *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public abstract class BareGoalProvidingReasoner implements GoalProvidingReasoner, RandomAccess {
-    
+
     // <editor-fold defaultstate="collapsed" desc="Fields">
-    private Goals goals;
+    protected Goals goals;
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Public Properties">
@@ -48,23 +51,31 @@ public abstract class BareGoalProvidingReasoner implements GoalProvidingReasoner
         return goals;
     }
     //</editor-fold>
-    
-    // <editor-fold defaultstate="collapsed" desc="Protected Properties">
+
+    // <editor-fold defaultstate="collapsed" desc="Protected Helper Methods">
     /**
      * Sets the goals and fires the goals changed event if the new goals differ
      * from the current ones.
+     *
+     * <p>The default implementation calls
+     * {@link BareGoalAcceptingReasoner#preCurrentGoalsChanged(diabelli.logic.Goals, diabelli.logic.Goals)}
+     * just before applying the change and then
+     * {@link BareGoalAcceptingReasoner#fireCurrentGoalsChangedEvent(diabelli.logic.Goals)}
+     * if the change actually happens.</p>
+     *
      * @param goals the new goals to be set.
+     * @throws PropertyVetoException thrown if the new goals could not be set
+     * for any reason.
      */
-    protected void setGoals(Goals goals) {
+    protected void setGoals(Goals goals) throws PropertyVetoException {
         if (this.goals != goals) {
+            preCurrentGoalsChanged(this.goals, goals);
             Goals oldGoals = this.goals;
             this.goals = goals;
             fireCurrentGoalsChangedEvent(oldGoals);
         }
     }
-    // </editor-fold>
-    
-    // <editor-fold defaultstate="collapsed" desc="Protected Helper Methods">
+
     /**
      * Asks Diabelli to make this reasoner the active one.
      */
@@ -72,10 +83,24 @@ public abstract class BareGoalProvidingReasoner implements GoalProvidingReasoner
         Lookup.getDefault().lookup(diabelli.Diabelli.class).getReasonersManager().requestActive(this);
     }
     // </editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="Property Changed Event Stuff">
     protected void fireCurrentGoalsChangedEvent(Goals oldGoals) {
         pcs.firePropertyChange(CurrentGoalsChangedEvent, oldGoals, goals);
+    }
+
+    /**
+     * This method is invoked by the default implementation of
+     * {@link BareGoalProvidingReasoner#setGoals(diabelli.logic.Goals)} just
+     * before it actually changes the goals. Subclasses may override this method
+     * to veto the change (by throwing a {@link PropertyVetoException}).
+     *
+     * @param oldGoals goals before the change.
+     * @param newGoals goals after the change.
+     * @throws PropertyVetoException thrown if the new goals could not be set
+     * for any reason.
+     */
+    protected void preCurrentGoalsChanged(Goals oldGoals, Goals newGoals) throws PropertyVetoException {
     }
 
     @Override
@@ -97,6 +122,6 @@ public abstract class BareGoalProvidingReasoner implements GoalProvidingReasoner
     public void removePropertyChangeListener(PropertyChangeListener listener, String event) {
         pcs.removePropertyChangeListener(event, listener);
     }
-    private PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+    protected PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     // </editor-fold>
 }

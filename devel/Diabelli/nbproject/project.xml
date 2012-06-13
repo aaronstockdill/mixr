@@ -88,6 +88,7 @@
                 <package>diabelli.components.util</package>
                 <package>diabelli.logic</package>
                 <package>diabelli.ui</package>
+                <package>diabelli.ui.actions</package>
             </public-packages>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">

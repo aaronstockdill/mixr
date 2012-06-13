@@ -29,10 +29,12 @@ import diabelli.GoalsManager;
 import diabelli.logic.Formula;
 import diabelli.logic.Goal;
 import diabelli.logic.Goals;
+import diabelli.ui.actions.ApplyInferenceRuleAction;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
 import java.util.List;
+import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
@@ -49,13 +51,15 @@ import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
+import org.openide.util.Utilities;
 import org.openide.util.lookup.Lookups;
 import org.openide.windows.TopComponent;
 
 /**
  * This window displays currently active goals and allows the user to select a
- * particular goal or parts of it. User's selection is managed by the provided {@link GoalsTopComponent#getExplorerManager() explorer manager}
- * and the {@link GoalsTopComponent#getLookup() associated lookup}.
+ * particular goal or parts of it. User's selection is managed by the provided
+ * {@link GoalsTopComponent#getExplorerManager() explorer manager} and the
+ * {@link GoalsTopComponent#getLookup() associated lookup}.
  *
  * <p>The nodes that can be found in the explorer manager of this component are
  * of type {@link GeneralGoalNode}.</p>
@@ -272,11 +276,11 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         }
 
         /**
-         * Returns the goals that contain the {@link GeneralGoalNode#getGoal() goal}
-         * connected to this node.
+         * Returns the goals that contain the
+         * {@link GeneralGoalNode#getGoal() goal} connected to this node.
          *
-         * @return the goals that contain the {@link GeneralGoalNode#getGoal() goal}
-         * connected to this node.
+         * @return the goals that contain the
+         * {@link GeneralGoalNode#getGoal() goal} connected to this node.
          */
         public final Goals getGoals() {
             return goals;
@@ -294,12 +298,18 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         public final int getGoalIndex() {
             return goalIndex;
         }
-        
+
         /**
          * Returns the formula that corresponds to this node.
+         *
          * @return the formula that corresponds to this node.
          */
         public abstract Formula<?> getFormula();
+
+        @Override
+        public Action[] getActions(boolean context) {
+            return new ApplyInferenceRuleAction[] { new ApplyInferenceRuleAction(Utilities.actionsGlobalContext()) };
+        }
     }
 
     /**
@@ -321,8 +331,10 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
     }
 
     /**
-     * This node corresponds directly to the {@link Goal#getConclusion() conclusion}
-     * of a particular {@link Goal goal} in the displayed {@link GoalsManager#getCurrentGoals() currently active goals}.
+     * This node corresponds directly to the
+     * {@link Goal#getConclusion() conclusion} of a particular {@link Goal goal}
+     * in the displayed
+     * {@link GoalsManager#getCurrentGoals() currently active goals}.
      */
     @Messages({
         "FN_conclusion_display_name=Conclusion"
@@ -342,7 +354,8 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
 
     /**
      * This node corresponds directly to the {@link Goal#getPremises() premises}
-     * of a particular {@link Goal goal} in the displayed {@link GoalsManager#getCurrentGoals() currently active goals}.
+     * of a particular {@link Goal goal} in the displayed
+     * {@link GoalsManager#getCurrentGoals() currently active goals}.
      */
     @Messages({
         "PN_premises_display_name=Premises"
@@ -362,8 +375,10 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
     }
 
     /**
-     * This node corresponds directly to a {@link Goal#getPremiseAt(int) particular premise}
-     * of a particular {@link Goal goal} in the displayed {@link GoalsManager#getCurrentGoals() currently active goals}.
+     * This node corresponds directly to a
+     * {@link Goal#getPremiseAt(int) particular premise} of a particular
+     * {@link Goal goal} in the displayed
+     * {@link GoalsManager#getCurrentGoals() currently active goals}.
      */
     @Messages({
         "PN_premise_display_name=Premise #{0}"

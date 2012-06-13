@@ -2,7 +2,8 @@
 <!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
 <filesystem>
     <folder name="Menu">
-        <folder name="&amp;Diabelli">
+        <folder name="Diabelli">
+            <attr name="displayName" bundlevalue="diabelli.Bundle#Menu/Diabelli"/>
             <attr name="position" intvalue="410"/>
         </folder>
     </folder>

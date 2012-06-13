@@ -24,6 +24,9 @@
  */
 package diabelli.components;
 
+import diabelli.logic.Goals;
+import java.beans.PropertyVetoException;
+
 /**
  * Reasoners of this kind can accept new goals (which are a product of applying
  * inference rules in other Diabelli reasoners). The new goals should logically
@@ -33,8 +36,9 @@ package diabelli.components;
  * <p>A goal-accepting reasoner provides the following:
  *
  * <ul>
- * 
- * <li>its current goals through the {@link GoalProvidingReasoner goal-providing interface},</li>
+ *
+ * <li>its current goals through the
+ * {@link GoalProvidingReasoner goal-providing interface},</li>
  *
  * <li>an interface for accepting new goals, which entail the {@link
  * GoalProvidingReasoner#getGoals() original ones},</li>
@@ -42,9 +46,9 @@ package diabelli.components;
  * <li>an interface that provides an optional instruction to this reasoner to
  * try and reconstruct the transformation that produced the new goal, and</li>
  *
- * <li>an interface that optionally enables passing prover-specific proof
- * traces that come with the new goals (useful for proof reconstruction).</li>
- * 
+ * <li>an interface that optionally enables passing prover-specific proof traces
+ * that come with the new goals (useful for proof reconstruction).</li>
+ *
  * </ul>
  *
  * </p>
@@ -52,4 +56,22 @@ package diabelli.components;
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public interface GoalAcceptingReasoner extends GoalProvidingReasoner {
+
+    // TODO: This method obviously needs to accept something else rather
+    // than just goals. The method has to be called with an object that contains
+    // the reference to the original goals (as a certification that the
+    // transformed goals are actually connected to the original goals and that
+    // the original goals didn't yet change and so on).
+    /**
+     * Puts the transformed goals back to this reasoner. The driver
+     * may commit the goals to the actually reasoner asynchronously. There
+     * should be no assumption on how the state of the reasoner changes when this
+     * call finishes.
+     *
+     * @param goals the transformed goals.
+     *
+     * @throws UnsupportedOperationException thrown if the new goals could not be set
+     * for any reason.
+     */
+    void commitTransformedGoals(Goals goals) throws UnsupportedOperationException;
 }

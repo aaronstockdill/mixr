@@ -27,6 +27,7 @@ package diabelli.isabelle;
 import diabelli.components.DiabelliComponent;
 import diabelli.components.FormulaFormatsProvider;
 import diabelli.components.FormulaPresenter;
+import diabelli.components.GoalAcceptingReasoner;
 import diabelli.components.util.BareGoalProvidingReasoner;
 import diabelli.isabelle.pure.lib.TermYXML;
 import diabelli.isabelle.terms.*;
@@ -37,11 +38,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyVetoException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Timer;
 import org.isabelle.iapp.facade.CentralEventDispatcher;
 import org.isabelle.iapp.facade.IAPP;
@@ -68,6 +71,7 @@ import org.openide.windows.TopComponent;
  */
 @ServiceProvider(service = DiabelliComponent.class)
 public class IsabelleDriver extends BareGoalProvidingReasoner implements
+        GoalAcceptingReasoner,
         FormulaFormatsProvider,
         FormulaPresenter<StringFormula> {
 
@@ -88,10 +92,100 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
     }
     //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Formula Format Provider">
+    // <editor-fold defaultstate="collapsed" desc="Formula Format Provider Implementation">
     @Override
     public Collection<FormulaFormat<?>> getFormulaFormats() {
         return FormulaFormatsContainer.IsabelleFormats;
+    }
+    //</editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Formula Presenter Implementation">
+    @Override
+    public FormulaFormat<StringFormula> getPresentedFormat() {
+        return StringFormat.getInstance();
+    }
+
+    @Override
+    public Component createVisualiserFor(Goal goal) throws VisualisationException {
+        if (goal == null) {
+            return null;
+        }
+        return createVisualiserFor(goal.asFormula());
+    }
+
+    @Override
+    public Component createVisualiserFor(Formula<?> formula) throws VisualisationException {
+        if (formula == null) {
+            return null;
+        }
+        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
+            if (canPresent(formulaFormat)) {
+                return createVisualiserFor(formula.getRepresentation(formulaFormat));
+            }
+        }
+        return null;
+    }
+
+    public boolean canPresent(FormulaFormat<?> format) {
+        return StringFormat.getInstance() == format;
+    }
+
+    @Override
+    public Component createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException {
+        if (canPresent(formula.getFormat()) && formula.getFormula() instanceof StringFormula) {
+            StringFormula f = (StringFormula) formula.getFormula();
+            MarkedupTextDisplay mtd = new MarkedupTextDisplay(true);
+            mtd.addMessages(new Message[] {f.getMarkedUpFormula()});
+            return mtd;
+        } else {
+            return null;
+        }
+    }
+    // </editor-fold>
+    
+    // <editor-fold defaultstate="collapsed" desc="GoalAcceptingReasoner Implementation">
+    @Override
+    public void commitTransformedGoals(Goals goals) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Protected Properties">
+    /**
+     * Sets the goals and fires the goals changed event if the new goals differ
+     * from the current ones.
+     *
+     * @param goals the new goals to be set.
+     * @throws PropertyVetoException thrown if the new goals could not be set
+     * for any reason.
+     */
+    @NbBundle.Messages(value = {"BGPR_goals_change_vetoed="})
+    public void setGoals(Goals goals) throws PropertyVetoException {
+        if (this.goals != goals) {
+            preCurrentGoalsChanged(this.goals, goals);
+            Goals oldGoals = this.goals;
+            this.goals = goals;
+            fireCurrentGoalsChangedEvent(oldGoals);
+        }
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Property Changed Event Stuff">
+    protected void fireCurrentGoalsChangedEvent(Goals oldGoals) {
+        pcs.firePropertyChange(CurrentGoalsChangedEvent, oldGoals, goals);
+    }
+
+    /**
+     * This method is invoked by the default implementation of {@link BareGoalProvidingReasoner#setGoals(diabelli.logic.Goals)}
+     * just before it actually changes the goals. Subclasses may override this
+     * method to veto the change (by throwing a {@link PropertyVetoException}).
+     *
+     * @param oldGoals goals before the change.
+     * @param newGoals goals after the change.
+     * @throws PropertyVetoException thrown if the new goals could not be set
+     * for any reason.
+     */
+    protected void preCurrentGoalsChanged(Goals oldGoals, Goals newGoals) throws PropertyVetoException {
     }
 
     private static class FormulaFormatsContainer {
@@ -283,50 +377,10 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
     }
 
     private void setGoals(ArrayList<Goal> goals) {
-        setGoals(new Goals(this, goals));
-    }
-    // </editor-fold>
-
-    // <editor-fold defaultstate="collapsed" desc="Formula Presenter Interface">
-    @Override
-    public FormulaFormat<StringFormula> getPresentedFormat() {
-        return StringFormat.getInstance();
-    }
-
-    @Override
-    public Component createVisualiserFor(Goal goal) throws VisualisationException {
-        if (goal == null) {
-            return null;
-        }
-        return createVisualiserFor(goal.asFormula());
-    }
-
-    @Override
-    public Component createVisualiserFor(Formula<?> formula) throws VisualisationException {
-        if (formula == null) {
-            return null;
-        }
-        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
-            if (canPresent(formulaFormat)) {
-                return createVisualiserFor(formula.getRepresentation(formulaFormat));
-            }
-        }
-        return null;
-    }
-
-    public boolean canPresent(FormulaFormat<?> format) {
-        return StringFormat.getInstance() == format;
-    }
-
-    @Override
-    public Component createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException {
-        if (canPresent(formula.getFormat()) && formula.getFormula() instanceof StringFormula) {
-            StringFormula f = (StringFormula) formula.getFormula();
-            MarkedupTextDisplay mtd = new MarkedupTextDisplay(true);
-            mtd.addMessages(new Message[] {f.getMarkedUpFormula()});
-            return mtd;
-        } else {
-            return null;
+        try {
+            setGoals(new Goals(this, goals));
+        } catch (PropertyVetoException ex) {
+            Logger.getLogger(IsabelleDriver.class.getName()).log(Level.WARNING, "Goals could not have been set.", ex);
         }
     }
     // </editor-fold>
