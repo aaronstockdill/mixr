@@ -24,18 +24,23 @@
  */
 package speedith.diabelli.logic;
 
+import diabelli.components.GoalTransformingReasoner;
 import diabelli.logic.InferenceRuleDescriptor;
 import speedith.core.reasoning.InferenceRuleProvider;
 import speedith.core.reasoning.args.RuleArg;
+import speedith.diabelli.SpeedithDriver;
 
 /**
  * Provides inference rule information to Diabelli.
  */
 public class SpeedithInferenceRuleDescriptor implements InferenceRuleDescriptor {
-    private final InferenceRuleProvider<? extends RuleArg> infRuleProvider;
 
-    public SpeedithInferenceRuleDescriptor(InferenceRuleProvider<? extends RuleArg> infRuleProvider) {
+    private final InferenceRuleProvider<? extends RuleArg> infRuleProvider;
+    private final SpeedithDriver owner;
+
+    public SpeedithInferenceRuleDescriptor(SpeedithDriver owner, InferenceRuleProvider<? extends RuleArg> infRuleProvider) {
         this.infRuleProvider = infRuleProvider;
+        this.owner = owner;
     }
 
     @Override
@@ -49,12 +54,16 @@ public class SpeedithInferenceRuleDescriptor implements InferenceRuleDescriptor 
     }
 
     /**
-     * The Speedith inference rule.
+     * A reference to the actual Speedith's inference rule.
      *
      * @return the Speedith inference rule.
      */
     public InferenceRuleProvider<? extends RuleArg> getInfRuleProvider() {
         return infRuleProvider;
     }
-    
+
+    @Override
+    public GoalTransformingReasoner getOwner() {
+        return owner;
+    }
 }

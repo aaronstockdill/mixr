@@ -48,7 +48,7 @@ import org.openide.util.NbBundle;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public class Goal {
+public class Goal implements Sentence {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
     private final ArrayList<? extends Formula<?>> premises;

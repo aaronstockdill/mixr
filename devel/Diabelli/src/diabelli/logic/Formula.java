@@ -64,7 +64,7 @@ import org.openide.util.NbBundle;
 @NbBundle.Messages({
     "F_toFormat_null=A target format has to be specified."
 })
-public class Formula<T> {
+public class Formula<T> implements Sentence {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
     private final FormulaRepresentation<T> mainRepresentation;

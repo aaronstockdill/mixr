@@ -24,10 +24,74 @@
  */
 package diabelli.logic;
 
+import diabelli.components.GoalTransformingReasoner;
+import java.util.List;
+
 /**
+ * Contains a collection of formulae that should be applied on by an inference
+ * rule. See
+ * {@link GoalTransformingReasoner#applyInferenceRule(diabelli.logic.InferenceTarget, diabelli.logic.InferenceRuleDescriptor)}
+ * for more information.
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public class InferenceTarget {
-    
+
+    // <editor-fold defaultstate="collapsed" desc="Fields">
+    /**
+     * This {@link Goals goals} object contains all the selected formulae that
+     * should be the target of the rule application.
+     *
+     * <p>This object also provides a reference to the master reasoner who owns
+     * the formulae and which should accept the transformed goals.</p>
+     */
+    private final Goals goals;
+    /**
+     * A collection of sentences (formulae) the user has selected for rule
+     * application.
+     */
+    private final List<Sentence> sentences;
+    // </editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="comment">
+    /**
+     *
+     * @param goals this {@link Goals goals} object contains all the selected
+     * formulae that should be the target of the rule application.
+     * @param sentences a collection of sentences (formulae) the user has
+     * selected for rule application.
+     */
+    public InferenceTarget(Goals goals, List<Sentence> sentences) {
+        this.goals = goals;
+        this.sentences = sentences;
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Formulae Selection">
+    /**
+     * This {@link Goals goals} object contains all the selected formulae that
+     * should be the target of the rule application.
+     *
+     * <p>This object also provides a reference to the master reasoner who owns
+     * the formulae and which should accept the transformed goals.</p>
+     *
+     * @return returns the {@link Goals goals} object that contains all the
+     * {@link InferenceTarget#getSentences() selected formulae} that should be
+     * the target of the rule application.
+     */
+    public Goals getGoals() {
+        return goals;
+    }
+
+    /**
+     * A collection of sentences (formulae) the user has selected for rule
+     * application.
+     * 
+     * @return a collection of sentences (formulae) the user has selected for rule
+     * application.
+     */
+    public List<Sentence> getSentences() {
+        return sentences;
+    }
+    //</editor-fold>
 }

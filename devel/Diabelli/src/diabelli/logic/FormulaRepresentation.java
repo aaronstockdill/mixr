@@ -34,7 +34,7 @@ import org.openide.util.NbBundle;
  * @param <T> the type of the {@link FormulaRepresentation#getFormula() raw formula}.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public final class FormulaRepresentation<T> {
+public final class FormulaRepresentation<T> implements Sentence {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
     private final T formula;

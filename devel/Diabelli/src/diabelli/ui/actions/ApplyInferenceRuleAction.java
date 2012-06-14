@@ -30,6 +30,7 @@ import diabelli.components.GoalTransformingReasoner;
 import diabelli.logic.Goals;
 import diabelli.logic.InferenceRuleDescriptor;
 import diabelli.logic.InferenceTarget;
+import diabelli.logic.Sentence;
 import diabelli.ui.GoalsTopComponent;
 import diabelli.ui.GoalsTopComponent.GeneralGoalNode;
 import java.awt.event.ActionEvent;
@@ -37,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import javax.swing.AbstractAction;
@@ -68,9 +70,12 @@ import org.openide.util.actions.Presenter;
 @Messages("CTL_ApplyInferenceRuleAction=Apply inference rule")
 public final class ApplyInferenceRuleAction extends AbstractAction implements Presenter.Popup, Presenter.Menu, ContextAwareAction, LookupListener {
 
+    //<editor-fold defaultstate="collapsed" desc="Fields">
     private final Lookup lookup;
     private Result<GeneralGoalNode> lookupInfo;
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Constructors">
     public ApplyInferenceRuleAction() {
         this(Utilities.actionsGlobalContext());
     }
@@ -79,7 +84,9 @@ public final class ApplyInferenceRuleAction extends AbstractAction implements Pr
         putValue(Action.NAME, Bundle.CTL_ApplyInferenceRuleAction());
         this.lookup = lookup;
     }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Initialisation">
     /**
      * Initialises the lookup from which we will get the selected goals/formulae
      * on which to apply the inference rule.
@@ -94,7 +101,9 @@ public final class ApplyInferenceRuleAction extends AbstractAction implements Pr
             resultChanged(null);
         }
     }
+    //</editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Action Implementation">
     @Override
     public void actionPerformed(ActionEvent e) {
         init();
@@ -112,30 +121,33 @@ public final class ApplyInferenceRuleAction extends AbstractAction implements Pr
         JMenu myMenu = new JMenu(this);
         myMenu.setText(Bundle.AIRA_apply_inference_step_menu());
         myMenu.setMnemonic(Bundle.AIRA_apply_inference_step_menu_mnemonic().charAt(0));
-        // TODO: Extract the inference target from the selection in the goals window:
-        InferenceTarget target = null;
+
+        // Extract the inference target from the selection in the goals window:
+        InferenceTarget target = getTarget();
+
         // Check with all goal-transforming reasoners
         Set<GoalTransformingReasoner> goalTransformingReasoners = Lookup.getDefault().lookup(Diabelli.class).getReasonersManager().getGoalTransformingReasoners();
         for (GoalTransformingReasoner goalTransformingReasoner : goalTransformingReasoners) {
             if (goalTransformingReasoner.canTransform(target)) {
-                // Now add all pplicable inference rules to the submenu:
+                // Now add all applicable inference rules to the submenu:
                 Collection<InferenceRuleDescriptor> applicableInferenceRules = goalTransformingReasoner.getApplicableInferenceRules(target);
                 if (applicableInferenceRules != null && !applicableInferenceRules.isEmpty()) {
+                    // Sort the inference rules by their names:
                     final ArrayList<InferenceRuleDescriptor> sortedInfRules = new ArrayList<>(applicableInferenceRules);
                     Collections.sort(sortedInfRules, new Comparator<InferenceRuleDescriptor>() {
                         @Override
                         public int compare(InferenceRuleDescriptor o1, InferenceRuleDescriptor o2) {
-                            return o1 == o2 ? 0
-                                    : o1.getName().compareToIgnoreCase(o2.getName());
+                            return o1.getName().compareToIgnoreCase(o2.getName());
                         }
                     });
+
+                    // Now add the inference rules to a sub-menu:
                     JMenu m = new JMenu(this);
                     m.setText(goalTransformingReasoner.getInferenceSetName());
-                    for (InferenceRuleDescriptor inferenceRuleDescriptor : sortedInfRules) {
-                        JMenuItem infRuleMI = new JMenuItem(this);
+                    for (final InferenceRuleDescriptor inferenceRuleDescriptor : sortedInfRules) {
+                        JMenuItem infRuleMI = new JMenuItem(new AbstractActionImpl(inferenceRuleDescriptor));
                         infRuleMI.setText(inferenceRuleDescriptor.getName());
                         infRuleMI.setToolTipText(inferenceRuleDescriptor.getDescription());
-                        // TODO: Somehow handle the click!
                         m.add(infRuleMI);
                     }
                     myMenu.add(m);
@@ -180,4 +192,73 @@ public final class ApplyInferenceRuleAction extends AbstractAction implements Pr
         Collection<? extends GeneralGoalNode> allInstances = lookupInfo.allInstances();
         setEnabled(allInstances != null && !allInstances.isEmpty());
     }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Rule Application Target Extraction">
+    /**
+     * Returns the rule application target (the formulae as selected in the goal
+     * window).
+     *
+     * @return the rule application target (the formulae as selected in the goal
+     * window).
+     */
+    private InferenceTarget getTarget() {
+        Collection<? extends GeneralGoalNode> allInstances = lookupInfo.allInstances();
+        if (allInstances == null || allInstances.isEmpty()) {
+            return null;
+        } else {
+            // Traverse all selected nodes in the goals window and collect all
+            // sentences:
+            Iterator<? extends GeneralGoalNode> it = allInstances.iterator();
+            GeneralGoalNode ggn = it.next();
+            // All selected nodes should belong to a `Goals` object...
+            // NOTE: maybe we could throw an exception instead of returning a 
+            // null target.
+            if (ggn.getGoals() == null) {
+                return null;
+            }
+
+            // Collect the formulae and check that they all belong to the same
+            // `Goals` object:
+            Goals targetGoals = ggn.getGoals();
+            ArrayList<Sentence> targetFormulae = new ArrayList<>();
+            targetFormulae.add(getSentenceFromNode(ggn));
+            for (; it.hasNext();) {
+                ggn = it.next();
+                // NOTE: maybe we could throw an exception instead of returning a 
+                // null target.
+                if (ggn.getGoals() != targetGoals) {
+                    return null;
+                }
+                targetFormulae.add(getSentenceFromNode(ggn));
+            }
+            return new InferenceTarget(targetGoals, targetFormulae);
+        }
+    }
+
+    private Sentence getSentenceFromNode(GeneralGoalNode ggn) {
+        if (ggn instanceof GoalsTopComponent.GoalNode) {
+            GoalsTopComponent.GoalNode goalNode = (GoalsTopComponent.GoalNode) ggn;
+            return goalNode.getGoal();
+        }
+
+        return ggn.getFormula();
+    }
+    //</editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Helper Classes">
+    private class AbstractActionImpl extends AbstractAction {
+
+        private final InferenceRuleDescriptor inferenceRuleDescriptor;
+
+        public AbstractActionImpl(InferenceRuleDescriptor inferenceRuleDescriptor) {
+            this.inferenceRuleDescriptor = inferenceRuleDescriptor;
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            inferenceRuleDescriptor.getOwner().applyInferenceRule(getTarget(), inferenceRuleDescriptor);
+        }
+    }
+    //</editor-fold>
 }

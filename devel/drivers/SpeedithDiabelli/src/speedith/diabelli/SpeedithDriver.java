@@ -24,7 +24,6 @@
  */
 package speedith.diabelli;
 
-import speedith.diabelli.logic.SpeedithInferenceRuleDescriptor;
 import diabelli.components.DiabelliComponent;
 import diabelli.components.FormulaFormatsProvider;
 import diabelli.components.FormulaTranslationsProvider;
@@ -34,15 +33,20 @@ import diabelli.components.util.BareGoalProvidingReasoner;
 import diabelli.logic.*;
 import java.beans.PropertyVetoException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 import speedith.core.lang.SpiderDiagram;
-import speedith.core.reasoning.InferenceRuleProvider;
 import speedith.core.reasoning.InferenceRules;
-import speedith.core.reasoning.args.RuleArg;
+import speedith.core.reasoning.RuleApplicationException;
+import speedith.core.reasoning.RuleApplicationResult;
 import speedith.diabelli.logic.IsabelleToSpidersTranslator;
 import speedith.diabelli.logic.SpeedithFormatDescriptor;
+import speedith.diabelli.logic.SpeedithInferenceRuleDescriptor;
 import speedith.ui.SpiderDiagramPanel;
+import speedith.ui.rules.InteractiveRuleApplication;
 
 /**
  * This is the main class of the Speedith driver for Diabelli. It provides
@@ -64,6 +68,10 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
         FormulaFormatsProvider,
         FormulaTranslationsProvider,
         diabelli.components.FormulaPresenter<SpiderDiagram> {
+
+    // <editor-fold defaultstate="collapsed" desc="Fields">
+    private List<InferenceRuleDescriptor> knownInferenceRules;
+    // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Diabelli Component Implementation">
     @Override
@@ -146,7 +154,25 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
     // <editor-fold defaultstate="collapsed" desc="GoalTransformingReasoner Implementation">
     @Override
     public boolean canTransform(InferenceTarget target) {
-        return true;
+        return getSpiderDiagramFromTarget(target) != null;
+    }
+
+    private SpiderDiagram getSpiderDiagramFromTarget(InferenceTarget target) {
+        if (target == null || target.getSentences().size() != 1) {
+            return null;
+        } else {
+            Sentence sentence = target.getSentences().get(0);
+            if (sentence instanceof Goal) {
+                Goal goal = (Goal) sentence;
+                ArrayList<? extends FormulaRepresentation<SpiderDiagram>> spiderDiagrams = goal.asFormula().fetchRepresentations(SpeedithFormatDescriptor.getInstance());
+                if (spiderDiagrams == null || spiderDiagrams.isEmpty()) {
+                    return null;
+                }
+                return spiderDiagrams.get(0).getFormula();
+            } else {
+                return null;
+            }
+        }
     }
 
     @Override
@@ -156,7 +182,18 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
 
     @Override
     public Collection<InferenceRuleDescriptor> getInferenceRules() {
-        return InferenceRulesContainer.AllInferenceRules;
+        // NOTE: I decided not to synchronise this piece of lazy initialisation
+        // code.
+        if (knownInferenceRules == null) {
+            ArrayList<InferenceRuleDescriptor> infRules = new ArrayList<>();
+            Set<String> collectedInferenceRules = InferenceRules.getKnownInferenceRules();
+            for (String infRuleName : collectedInferenceRules) {
+                infRules.add(new SpeedithInferenceRuleDescriptor(this, InferenceRules.getProvider(infRuleName)));
+            }
+
+            knownInferenceRules = Collections.unmodifiableList(infRules);
+        }
+        return knownInferenceRules;
     }
 
     @NbBundle.Messages({
@@ -167,8 +204,30 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
         return Bundle.SD_inference_set_name();
     }
 
+    @NbBundle.Messages({
+        "SD_unknown_inf_rule=Speedith could not apply the given inference rule. `{0}` is not known to Speedith.",
+        "SD_null_inf_rule=No inference rule provided.",
+        "SD_application_error_title=Inference rule application failed",
+        "SD_application_error_message=The inference rule `{0}` was not applied. It failed for the following reason:\n\n`{1}`"
+    })
     @Override
-    public void applyInferenceRule(InferenceTarget targets, InferenceRuleDescriptor inferenceRule) {
+    public void applyInferenceRule(InferenceTarget targets, InferenceRuleDescriptor infRuleDescriptor) {
+        if (infRuleDescriptor == null) {
+            Logger.getLogger(SpeedithDriver.class.getName()).log(Level.SEVERE, Bundle.SD_null_inf_rule());
+        } else if (infRuleDescriptor instanceof SpeedithInferenceRuleDescriptor) {
+            SpeedithInferenceRuleDescriptor infRule = (SpeedithInferenceRuleDescriptor) infRuleDescriptor;
+            try {
+                // Apply inference rule interactively:
+                RuleApplicationResult applicationResult = InteractiveRuleApplication.applyRuleInteractively(infRule.getInfRuleProvider().getInferenceRuleName(), getSpiderDiagramFromTarget(targets));
+                // TODO: Commit the result back to Isabelle.
+            } catch (Exception ex) {
+                Logger.getLogger(SpeedithDriver.class.getName()).log(Level.INFO, "", ex);
+                JOptionPane.showMessageDialog(null, Bundle.SD_application_error_message(infRule.getName(), ex.getLocalizedMessage()), Bundle.SD_application_error_title(), JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } else {
+            Logger.getLogger(SpeedithDriver.class.getName()).log(Level.SEVERE, Bundle.SD_unknown_inf_rule(infRuleDescriptor.getName()));
+        }
     }
     // </editor-fold>
 
@@ -211,7 +270,7 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
     protected void preCurrentGoalsChanged(Goals oldGoals, Goals newGoals) throws PropertyVetoException {
     }
     // </editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="Lazy Initialisation Helpers">
     private static class FormulaFormatsContainer {
 
@@ -221,21 +280,6 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
             HashSet<FormulaFormat<?>> tmp = new HashSet<>();
             tmp.add(SpeedithFormatDescriptor.getInstance());
             SpeedithFormats = Collections.unmodifiableSet(tmp);
-        }
-    }
-    
-    private static class InferenceRulesContainer {
-        
-        private static final List<InferenceRuleDescriptor> AllInferenceRules;
-        
-        static {
-            ArrayList<InferenceRuleDescriptor> infRules = new ArrayList<>();
-            Set<String> knownInferenceRules = InferenceRules.getKnownInferenceRules();
-            for (String infRuleName : knownInferenceRules) {
-                infRules.add(new SpeedithInferenceRuleDescriptor(InferenceRules.getProvider(infRuleName)));
-            }
-            
-            AllInferenceRules = Collections.unmodifiableList(infRules);
         }
     }
     // </editor-fold>

@@ -57,6 +57,15 @@ public interface InferenceRuleDescriptor {
      * @return a human-readable description of this inference rule.
      */
     String getDescription();
+    
+    /**
+     * Returns a reference to the goal-transforming reasoner that provides
+     * this inference rule.
+     * 
+     * @return a reference to the goal-transforming reasoner that provides
+     * this inference rule.
+     */
+    GoalTransformingReasoner getOwner();
     // TODO: Add categories at some point in the future...
 //    String getCategoryName();
     // </editor-fold>
