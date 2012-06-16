@@ -163,21 +163,10 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
     @Override
     public void commitTransformedGoals(InferenceStepResult step) throws UnsupportedOperationException {
         if (step instanceof GoalTransformationResult) {
-            // Commit the rule application result back to the Isabelle's proof
-            // script.
-            TheoryEditor editor = getActiveTheoryEditor();
-            Set<TopComponent> opened = TopComponent.getRegistry().getOpened();
-            for (TopComponent topComponent : opened) {
-                if (topComponent instanceof TheoryEditor) {
-                    TheoryEditor theoryEditor = (TheoryEditor) topComponent;
-                    FileState iappFile = theoryEditor.getIAPPFile();
-                    if (iappFile != null) {
-                        editor = theoryEditor;
-                        break;
-                    }
-                }
-            }
+            TheoryEditor editor = getProvingTheoryEditor();
             if (editor != null) {
+                // Commit the rule application result back to the Isabelle's proof
+                // script.
                 ProofDocument proofDocument = editor.getProofDocument();
                 try {
                     proofDocument.insertAfter(proofDocument.getLastLockedElement(), "apply (metis)\n");
@@ -424,7 +413,9 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
             Logger.getLogger(IsabelleDriver.class.getName()).log(Level.WARNING, "Goals could not have been set.", ex);
         }
     }
+    // </editor-fold>
 
+    //<editor-fold defaultstate="collapsed" desc="Private Helper Methods">
     private static TheoryEditor getActiveTheoryEditor() {
         TopComponent activated = TopComponent.getRegistry().getActivated();
         if (activated instanceof TheoryEditor) {
@@ -432,5 +423,21 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
         }
         return null;
     }
-    // </editor-fold>
+    
+    private static TheoryEditor getProvingTheoryEditor() {
+        TheoryEditor editor = getActiveTheoryEditor();
+        Set<TopComponent> opened = TopComponent.getRegistry().getOpened();
+        for (TopComponent topComponent : opened) {
+            if (topComponent instanceof TheoryEditor) {
+                TheoryEditor theoryEditor = (TheoryEditor) topComponent;
+                FileState iappFile = theoryEditor.getIAPPFile();
+                if (iappFile != null) {
+                    editor = theoryEditor;
+                    break;
+                }
+            }
+        }
+        return editor;
+    }
+    //</editor-fold>
 }
