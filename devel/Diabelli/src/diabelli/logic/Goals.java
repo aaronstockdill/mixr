@@ -27,7 +27,9 @@ package diabelli.logic;
 import diabelli.Diabelli;
 import diabelli.GoalsManager;
 import diabelli.components.GoalProvidingReasoner;
+import diabelli.components.GoalTransformingReasoner;
 import java.util.*;
+import org.netbeans.api.annotations.common.NonNull;
 
 /**
  * Contains a set of goals that are provided by {@link GoalProvidingReasoner goal-providing
@@ -50,11 +52,13 @@ public class Goals implements Iterable<Goal> {
      * it).
      *
      * @param owner the {@link GoalProvidingReasoner goal-providing reasoner} that
-     * provided and owns this set of goals.
+     * provided and owns this set of goals. The owner must not be 
+     * {@code null} as it is required by {@link GoalTransformingReasoner goal-transforming
+     * reasoners} to pass back rule application results.
      * @param goals the {@link Goals#getGoals() goals} contained in this
      * collection.
      */
-    public Goals(GoalProvidingReasoner owner, ArrayList<Goal> goals) {
+    public Goals(@NonNull GoalProvidingReasoner owner, ArrayList<Goal> goals) {
         this.goals = goals;
         this.owner = owner;
     }

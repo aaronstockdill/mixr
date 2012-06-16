@@ -96,8 +96,6 @@
                 <package>org.antlr.runtime.misc</package>
                 <package>org.antlr.runtime.tree</package>
                 <package>org.apache.commons.cli</package>
-                <package>speedith</package>
-                <package>speedith.cli</package>
                 <package>speedith.core.i18n</package>
                 <package>speedith.core.lang</package>
                 <package>speedith.core.lang.export</package>
@@ -112,14 +110,6 @@
                 <package>speedith.diabelli.isabelle</package>
                 <package>speedith.diabelli.logic</package>
                 <package>speedith.diabelli.ui</package>
-                <package>speedith.i18n</package>
-                <package>speedith.icircles.util</package>
-                <package>speedith.logging</package>
-                <package>speedith.preferences</package>
-                <package>speedith.ui</package>
-                <package>speedith.ui.rules</package>
-                <package>speedith.ui.selection</package>
-                <package>speedith.ui.selection.helpers</package>
             </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/commons-cli.jar</runtime-relative-path>
@@ -138,12 +128,12 @@
                 <binary-origin>release/modules/ext/SpeedithIsabelle.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/Speedith.Core.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/Speedith.Core.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/Speedith.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Speedith.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/Speedith.Core.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/Speedith.Core.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

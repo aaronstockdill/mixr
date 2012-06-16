@@ -1,5 +1,5 @@
 /*
- * File name: GoalTransformation.java
+ * File name: InferenceStepResult.java
  *    Author: Matej Urbas [matej.urbas@gmail.com]
  * 
  *  Copyright © 2012 Matej Urbas
@@ -24,10 +24,21 @@
  */
 package diabelli.logic;
 
+import diabelli.components.GoalAcceptingReasoner;
+
 /**
+ * When an inference rule is applied this is the result that gets passed back to
+ * the master reasoner.
+ *
+ * <p>There can be many types of inference step results. For example, a simple
+ * transformed goal (or multiple goals) or a special instruction to the master
+ * theorem prover. The latter method is prover-specific. One should read the
+ * documentation of the prover's
+ * {@link GoalAcceptingReasoner#commitTransformedGoals(diabelli.logic.InferenceStepResult) commit method}
+ * in order to find out which inference step results it understands.</p>
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public class GoalTransformation {
-    
+public interface InferenceStepResult {
+
 }

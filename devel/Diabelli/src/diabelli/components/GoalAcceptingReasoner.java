@@ -24,6 +24,7 @@
  */
 package diabelli.components;
 
+import diabelli.logic.InferenceStepResult;
 import diabelli.logic.Goals;
 import java.beans.PropertyVetoException;
 
@@ -67,11 +68,13 @@ public interface GoalAcceptingReasoner extends GoalProvidingReasoner {
      * may commit the goals to the actually reasoner asynchronously. There
      * should be no assumption on how the state of the reasoner changes when this
      * call finishes.
+     * 
+     * <p>This method would be typically called by {@link GoalTransformingReasoner#applyInferenceRule(diabelli.logic.InferenceTarget, diabelli.logic.InferenceRuleDescriptor)}.</p>
      *
-     * @param goals the transformed goals.
+     * @param step the results of an application of an inference rule.
      *
      * @throws UnsupportedOperationException thrown if the new goals could not be set
      * for any reason.
      */
-    void commitTransformedGoals(Goals goals) throws UnsupportedOperationException;
+    void commitTransformedGoals(InferenceStepResult step) throws UnsupportedOperationException;
 }

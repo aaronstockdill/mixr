@@ -39,11 +39,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.DefaultButtonModel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -257,7 +257,12 @@ public final class ApplyInferenceRuleAction extends AbstractAction implements Pr
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            inferenceRuleDescriptor.getOwner().applyInferenceRule(getTarget(), inferenceRuleDescriptor);
+            final InferenceTarget target = getTarget();
+            if (target != null && inferenceRuleDescriptor != null) {
+                inferenceRuleDescriptor.getOwner().applyInferenceRule(target, inferenceRuleDescriptor);
+            } else {
+                Logger.getLogger(AbstractActionImpl.class.getName()).log(Level.SEVERE, "The target formulae or the inference rules were missing for inference rule application.");
+            }
         }
     }
     //</editor-fold>

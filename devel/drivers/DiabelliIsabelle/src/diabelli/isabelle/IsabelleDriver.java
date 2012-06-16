@@ -43,20 +43,24 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Timer;
 import org.isabelle.iapp.facade.CentralEventDispatcher;
 import org.isabelle.iapp.facade.IAPP;
+import org.isabelle.iapp.files.FileState;
 import org.isabelle.iapp.process.Message;
 import org.isabelle.iapp.process.ProverManager;
 import org.isabelle.iapp.process.features.InjectedCommands;
 import org.isabelle.iapp.process.features.InjectionFinishListener;
 import org.isabelle.iapp.process.features.InjectionResult;
 import org.isabelle.iapp.process.features.InjectionResultListener;
+import org.isabelle.iapp.proofdocument.ProofDocument;
 import org.isabelle.iapp.proofdocument.StateChangeEvent;
 import org.isabelle.iapp.proofdocument.StateListener;
 import org.isabelle.resultdisplay.MarkedupTextDisplay;
+import org.isabelle.theoryeditor.TheoryEditor;
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
@@ -135,18 +139,53 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
         if (canPresent(formula.getFormat()) && formula.getFormula() instanceof StringFormula) {
             StringFormula f = (StringFormula) formula.getFormula();
             MarkedupTextDisplay mtd = new MarkedupTextDisplay(true);
-            mtd.addMessages(new Message[] {f.getMarkedUpFormula()});
+            mtd.addMessages(new Message[]{f.getMarkedUpFormula()});
             return mtd;
         } else {
             return null;
         }
     }
     // </editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="GoalAcceptingReasoner Implementation">
+    /**
+     * The Isabelle driver currently understands the following step results:
+     *
+     * <ul>
+     *
+     * <li>{@link GoalTransformationResult}.</li>
+     *
+     * </ul>
+     *
+     * @param step
+     * @throws UnsupportedOperationException
+     */
     @Override
-    public void commitTransformedGoals(Goals goals) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void commitTransformedGoals(InferenceStepResult step) throws UnsupportedOperationException {
+        if (step instanceof GoalTransformationResult) {
+            // Commit the rule application result back to the Isabelle's proof
+            // script.
+            TheoryEditor editor = getActiveTheoryEditor();
+            Set<TopComponent> opened = TopComponent.getRegistry().getOpened();
+            for (TopComponent topComponent : opened) {
+                if (topComponent instanceof TheoryEditor) {
+                    TheoryEditor theoryEditor = (TheoryEditor) topComponent;
+                    FileState iappFile = theoryEditor.getIAPPFile();
+                    if (iappFile != null) {
+                        editor = theoryEditor;
+                        break;
+                    }
+                }
+            }
+            if (editor != null) {
+                ProofDocument proofDocument = editor.getProofDocument();
+                try {
+                    proofDocument.insertAfter(proofDocument.getLastLockedElement(), "apply (metis)\n");
+                } catch (InterruptedException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+        }
     }
     // </editor-fold>
 
@@ -176,9 +215,10 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
     }
 
     /**
-     * This method is invoked by the default implementation of {@link BareGoalProvidingReasoner#setGoals(diabelli.logic.Goals)}
-     * just before it actually changes the goals. Subclasses may override this
-     * method to veto the change (by throwing a {@link PropertyVetoException}).
+     * This method is invoked by the default implementation of
+     * {@link BareGoalProvidingReasoner#setGoals(diabelli.logic.Goals)} just
+     * before it actually changes the goals. Subclasses may override this method
+     * to veto the change (by throwing a {@link PropertyVetoException}).
      *
      * @param oldGoals goals before the change.
      * @param newGoals goals after the change.
@@ -270,7 +310,8 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
 
         /**
          * <span style="font-weight:bold">Do not create new instances of this
-         * class.</span> Use the one provided in {@link IsabelleDriver#isabelleListener}.
+         * class.</span> Use the one provided in
+         * {@link IsabelleDriver#isabelleListener}.
          */
         IsabelleMessageListener() {
             // Start listening for goal changes in Isabelle:
@@ -285,7 +326,8 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
 
         /**
          * This is invoked by the ``delay timer'', which is started (and reset)
-         * upon every {@link IsabelleMessageListener#stateChanged(org.isabelle.iapp.proofdocument.StateChangeEvent) state change event}.
+         * upon every
+         * {@link IsabelleMessageListener#stateChanged(org.isabelle.iapp.proofdocument.StateChangeEvent) state change event}.
          * The reason for delaying this action is to merge an avalanche of state
          * change events into a single request to Isabelle to give us its
          * current goals.
@@ -355,8 +397,7 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             if ("activated".equals(evt.getPropertyName())) {
-                TopComponent activated = TopComponent.getRegistry().getActivated();
-                if (activated instanceof org.isabelle.theoryeditor.TheoryEditor) {
+                if (getActiveTheoryEditor() != null) {
                     requestActive();
                 }
             }
@@ -382,6 +423,14 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
         } catch (PropertyVetoException ex) {
             Logger.getLogger(IsabelleDriver.class.getName()).log(Level.WARNING, "Goals could not have been set.", ex);
         }
+    }
+
+    private static TheoryEditor getActiveTheoryEditor() {
+        TopComponent activated = TopComponent.getRegistry().getActivated();
+        if (activated instanceof TheoryEditor) {
+            return (TheoryEditor) activated;
+        }
+        return null;
     }
     // </editor-fold>
 }

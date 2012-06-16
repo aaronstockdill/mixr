@@ -25,7 +25,10 @@
 package diabelli.logic;
 
 import diabelli.components.GoalTransformingReasoner;
+import java.util.Collections;
 import java.util.List;
+import org.netbeans.api.annotations.common.NonNull;
+import org.openide.util.NbBundle;
 
 /**
  * Contains a collection of formulae that should be applied on by an inference
@@ -53,17 +56,24 @@ public class InferenceTarget {
     private final List<Sentence> sentences;
     // </editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="comment">
+    //<editor-fold defaultstate="collapsed" desc="Constructors">
     /**
      *
      * @param goals this {@link Goals goals} object contains all the selected
      * formulae that should be the target of the rule application.
      * @param sentences a collection of sentences (formulae) the user has
-     * selected for rule application.
+     * selected for rule application. Can be {@code null}, which indicates
+     * that the inference rule should be applied on all goals.
      */
-    public InferenceTarget(Goals goals, List<Sentence> sentences) {
+    @NbBundle.Messages({
+        "IT_goals_null=Goals are missing from the inference target."
+    })
+    public InferenceTarget(@NonNull Goals goals, List<Sentence> sentences) {
+        if (goals == null) {
+            throw new IllegalArgumentException(Bundle.IT_goals_null());
+        }
         this.goals = goals;
-        this.sentences = sentences;
+        this.sentences = Collections.unmodifiableList(sentences);
     }
     //</editor-fold>
 

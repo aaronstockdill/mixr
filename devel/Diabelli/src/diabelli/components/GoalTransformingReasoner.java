@@ -24,15 +24,16 @@
  */
 package diabelli.components;
 
-import diabelli.logic.GoalTransformation;
-import diabelli.logic.InferenceTarget;
 import diabelli.GoalsManager;
 import diabelli.logic.Formula;
 import diabelli.logic.FormulaRepresentation;
 import diabelli.logic.Goal;
+import diabelli.logic.InferenceStepResult;
 import diabelli.logic.Goals;
 import diabelli.logic.InferenceRuleDescriptor;
+import diabelli.logic.InferenceTarget;
 import java.util.Collection;
+import org.netbeans.api.annotations.common.NonNull;
 
 /**
  * Goal-transforming reasoners have the basic ability to take {@link Goals goals},
@@ -107,7 +108,7 @@ public interface GoalTransformingReasoner extends Reasoner {
      * formulae in this reasoner. This method may ask the user to work with this
      * reasoner interactively, or it may apply the transformation entirely
      * automatically. In any case, once the reasoning is done and once the user
-     * is happy to commit the {@link GoalTransformation resulting changes of
+     * is happy to commit the {@link InferenceStepResult resulting changes of
      * the goal}, this reasoner must commit the changes through the {@link
      * GoalsManager goals manager}.
      * 
@@ -127,7 +128,7 @@ public interface GoalTransformingReasoner extends Reasoner {
      * @param targets the formulae on which to invoke this reasoner.
      * @param inferenceRule the value of inferenceRule
      */
-    void applyInferenceRule(InferenceTarget targets, InferenceRuleDescriptor inferenceRule);
+    void applyInferenceRule(@NonNull InferenceTarget targets, @NonNull InferenceRuleDescriptor inferenceRule);
     
     /**
      * Returns a pretty, human-readable name for the inference system

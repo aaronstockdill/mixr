@@ -28,6 +28,7 @@ import diabelli.components.DiabelliComponent;
 import diabelli.components.FormulaFormatsProvider;
 import diabelli.components.FormulaTranslationsProvider;
 import diabelli.components.GoalAcceptingReasoner;
+import diabelli.components.GoalProvidingReasoner;
 import diabelli.components.GoalTransformingReasoner;
 import diabelli.components.util.BareGoalProvidingReasoner;
 import diabelli.logic.*;
@@ -40,11 +41,11 @@ import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 import speedith.core.lang.SpiderDiagram;
 import speedith.core.reasoning.InferenceRules;
-import speedith.core.reasoning.RuleApplicationException;
 import speedith.core.reasoning.RuleApplicationResult;
 import speedith.diabelli.logic.IsabelleToSpidersTranslator;
 import speedith.diabelli.logic.SpeedithFormatDescriptor;
 import speedith.diabelli.logic.SpeedithInferenceRuleDescriptor;
+import speedith.diabelli.ui.SpiderDiagramDialog;
 import speedith.ui.SpiderDiagramPanel;
 import speedith.ui.rules.InteractiveRuleApplication;
 
@@ -183,7 +184,9 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
     @Override
     public Collection<InferenceRuleDescriptor> getInferenceRules() {
         // NOTE: I decided not to synchronise this piece of lazy initialisation
-        // code.
+        // code. Since the usual case is to be called from the UI thread and
+        // this list will never be modified at all it is okay if it gets
+        // constructed multiple times.
         if (knownInferenceRules == null) {
             ArrayList<InferenceRuleDescriptor> infRules = new ArrayList<>();
             Set<String> collectedInferenceRules = InferenceRules.getKnownInferenceRules();
@@ -205,26 +208,35 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
     }
 
     @NbBundle.Messages({
-        "SD_unknown_inf_rule=Speedith could not apply the given inference rule. `{0}` is not known to Speedith.",
-        "SD_null_inf_rule=No inference rule provided.",
+        "SD_unknown_inf_rule=Speedith could not apply the given inference rule. The rule `{0}` is not known to Speedith.",
         "SD_application_error_title=Inference rule application failed",
-        "SD_application_error_message=The inference rule `{0}` was not applied. It failed for the following reason:\n\n`{1}`"
+        "SD_application_error_message=The inference rule `{0}` was not applied.\nIt failed for the following reason:\n\n`{1}`"
     })
     @Override
     public void applyInferenceRule(InferenceTarget targets, InferenceRuleDescriptor infRuleDescriptor) {
-        if (infRuleDescriptor == null) {
-            Logger.getLogger(SpeedithDriver.class.getName()).log(Level.SEVERE, Bundle.SD_null_inf_rule());
-        } else if (infRuleDescriptor instanceof SpeedithInferenceRuleDescriptor) {
+        if (infRuleDescriptor instanceof SpeedithInferenceRuleDescriptor) {
             SpeedithInferenceRuleDescriptor infRule = (SpeedithInferenceRuleDescriptor) infRuleDescriptor;
             try {
                 // Apply inference rule interactively:
+                speedith.ui.SpeedithMainForm a;
                 RuleApplicationResult applicationResult = InteractiveRuleApplication.applyRuleInteractively(infRule.getInfRuleProvider().getInferenceRuleName(), getSpiderDiagramFromTarget(targets));
-                // TODO: Commit the result back to Isabelle.
+                // Show the user the results and aske them whether the results
+                // should be passed back to the master reasoner.
+                SpiderDiagramDialog sdd = new SpiderDiagramDialog(null, true, applicationResult.getGoals());
+                sdd.pack();
+                sdd.setVisible(true);
+                if (sdd.isCancelled())
+                    return;
+                // Put the result back to the master reasoner:
+                GoalProvidingReasoner masterReasoner = targets.getGoals().getOwner();
+                if (masterReasoner instanceof GoalAcceptingReasoner) {
+                    GoalAcceptingReasoner goalAcceptingReasoner = (GoalAcceptingReasoner) masterReasoner;
+                    goalAcceptingReasoner.commitTransformedGoals(new GoalTransformationResult(this, targets.getGoals(), null));
+                }
             } catch (Exception ex) {
-                Logger.getLogger(SpeedithDriver.class.getName()).log(Level.INFO, "", ex);
+                Logger.getLogger(SpeedithDriver.class.getName()).log(Level.INFO, Bundle.SD_application_error_message(infRule.getName(), ex.getLocalizedMessage()), ex);
                 JOptionPane.showMessageDialog(null, Bundle.SD_application_error_message(infRule.getName(), ex.getLocalizedMessage()), Bundle.SD_application_error_title(), JOptionPane.INFORMATION_MESSAGE);
             }
-
         } else {
             Logger.getLogger(SpeedithDriver.class.getName()).log(Level.SEVERE, Bundle.SD_unknown_inf_rule(infRuleDescriptor.getName()));
         }
