@@ -26,6 +26,8 @@ package speedith.diabelli;
 
 import diabelli.components.DiabelliComponent;
 import diabelli.components.FormulaFormatsProvider;
+import diabelli.components.FormulaPresenter;
+import diabelli.components.FormulaPresenter.VisualisationException;
 import diabelli.components.FormulaTranslationsProvider;
 import diabelli.components.GoalAcceptingReasoner;
 import diabelli.components.GoalProvidingReasoner;
@@ -39,12 +41,14 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
+import propity.util.MovableArrayList;
 import speedith.core.lang.SpiderDiagram;
 import speedith.core.reasoning.InferenceRules;
 import speedith.core.reasoning.RuleApplicationResult;
 import speedith.diabelli.logic.IsabelleToSpidersTranslator;
 import speedith.diabelli.logic.SpeedithFormatDescriptor;
 import speedith.diabelli.logic.SpeedithInferenceRuleDescriptor;
+import speedith.diabelli.logic.SpiderToIsabelleStringTranslator;
 import speedith.diabelli.ui.SpiderDiagramDialog;
 import speedith.ui.SpiderDiagramPanel;
 import speedith.ui.rules.InteractiveRuleApplication;
@@ -68,7 +72,7 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
         GoalTransformingReasoner,
         FormulaFormatsProvider,
         FormulaTranslationsProvider,
-        diabelli.components.FormulaPresenter<SpiderDiagram> {
+        FormulaPresenter<SpiderDiagram> {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
     private List<InferenceRuleDescriptor> knownInferenceRules;
@@ -137,18 +141,7 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
     //<editor-fold defaultstate="collapsed" desc="Formula Translations Provider Implementation">
     @Override
     public Collection<FormulaTranslator<?, ?>> getFormulaTranslators() {
-        return FormulaTranslatorsContainer.SpeedithTranslator;
-    }
-
-    private static class FormulaTranslatorsContainer {
-
-        private static final List<FormulaTranslator<?, ?>> SpeedithTranslator;
-
-        static {
-            ArrayList<FormulaTranslator<?, ?>> tmp = new ArrayList<>();
-            tmp.add(IsabelleToSpidersTranslator.getInstance());
-            SpeedithTranslator = Collections.unmodifiableList(tmp);
-        }
+        return FormulaTranslatorsContainer.SpeedithTranslators;
     }
     //</editor-fold>
 
@@ -225,13 +218,21 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
                 SpiderDiagramDialog sdd = new SpiderDiagramDialog(null, true, applicationResult.getGoals());
                 sdd.pack();
                 sdd.setVisible(true);
-                if (sdd.isCancelled())
+                if (sdd.isCancelled()) {
                     return;
+                }
                 // Put the result back to the master reasoner:
                 GoalProvidingReasoner masterReasoner = targets.getGoals().getOwner();
                 if (masterReasoner instanceof GoalAcceptingReasoner) {
                     GoalAcceptingReasoner goalAcceptingReasoner = (GoalAcceptingReasoner) masterReasoner;
-                    goalAcceptingReasoner.commitTransformedGoals(new GoalTransformationResult(this, targets.getGoals(), null));
+                    targets.getGoals().toArray();
+                    @SuppressWarnings({"rawtypes", "unchecked"})
+                    GoalTransformationResult goalTransformationResult = new GoalTransformationResult(this, targets.getGoals(), new MovableArrayList[]{
+                                new MovableArrayList<Goal>(Arrays.asList(new Goal[]{
+                                    new Goal(null, null, null, new Formula<>(new FormulaRepresentation<>(applicationResult.getGoals().getGoalAt(0), SpeedithFormatDescriptor.getInstance()), Formula.FormulaRole.Goal))
+                                }))
+                            });
+                    goalAcceptingReasoner.commitTransformedGoals(goalTransformationResult);
                 }
             } catch (Exception ex) {
                 Logger.getLogger(SpeedithDriver.class.getName()).log(Level.INFO, Bundle.SD_application_error_message(infRule.getName(), ex.getLocalizedMessage()), ex);
@@ -292,6 +293,18 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
             HashSet<FormulaFormat<?>> tmp = new HashSet<>();
             tmp.add(SpeedithFormatDescriptor.getInstance());
             SpeedithFormats = Collections.unmodifiableSet(tmp);
+        }
+    }
+
+    private static class FormulaTranslatorsContainer {
+
+        private static final List<FormulaTranslator<?, ?>> SpeedithTranslators;
+
+        static {
+            ArrayList<FormulaTranslator<?, ?>> tmp = new ArrayList<>();
+            tmp.add(IsabelleToSpidersTranslator.getInstance());
+            tmp.add(SpiderToIsabelleStringTranslator.getInstance());
+            SpeedithTranslators = Collections.unmodifiableList(tmp);
         }
     }
     // </editor-fold>

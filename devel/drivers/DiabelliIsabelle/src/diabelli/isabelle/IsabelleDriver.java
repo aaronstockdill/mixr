@@ -138,6 +138,9 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
     public Component createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException {
         if (canPresent(formula.getFormat()) && formula.getFormula() instanceof StringFormula) {
             StringFormula f = (StringFormula) formula.getFormula();
+            if (f.getMarkedUpFormula() == null) {
+                return null;
+            }
             MarkedupTextDisplay mtd = new MarkedupTextDisplay(true);
             mtd.addMessages(new Message[]{f.getMarkedUpFormula()});
             return mtd;
@@ -161,17 +164,59 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
      * @throws UnsupportedOperationException
      */
     @Override
+    @NbBundle.Messages({
+        "ID_multiple_goals_unsupported=The Isabelle driver does currently not support changes to multiple goals.",
+        "ID_transformed_goal_unknown=The Isabelle driver canno commit the inference step since the transformed goal is in an unknown format."
+    })
     public void commitTransformedGoals(InferenceStepResult step) throws UnsupportedOperationException {
+        // Insert the changed goals if the committed inference step transformed them:
         if (step instanceof GoalTransformationResult) {
+            // Get the proof script document into which we will insert the
+            // Isabelle command:
             TheoryEditor editor = getProvingTheoryEditor();
             if (editor != null) {
-                // Commit the rule application result back to the Isabelle's proof
-                // script.
                 ProofDocument proofDocument = editor.getProofDocument();
-                try {
-                    proofDocument.insertAfter(proofDocument.getLastLockedElement(), "apply (metis)\n");
-                } catch (InterruptedException ex) {
-                    Exceptions.printStackTrace(ex);
+                // Get the transformed goals:
+                GoalTransformationResult goalTransformationResult = (GoalTransformationResult) step;
+                // TODO: Handle multiple goals:
+                if (goalTransformationResult.getGoalChangesCount() > 1) {
+                    throw new UnsupportedOperationException(Bundle.ID_multiple_goals_unsupported());
+                }
+                // Find the only goal that was changed:
+                List<Goal> transformedGoals = null;
+                for (int i = 0; i < goalTransformationResult.getOriginalGoals().size(); i++) {
+                    if (goalTransformationResult.isGoalChanged(i)) {
+                        transformedGoals = goalTransformationResult.getTransformedGoalsFor(i);
+                        break;
+                    }
+                }
+                // Has the goal been discharged?
+                if (transformedGoals == null || transformedGoals.isEmpty()) {
+                    throw new UnsupportedOperationException("Discharging of goals not yet supported by the Isabelle driver.");
+                } else {
+                    // No, the goal been changed.
+                    if (transformedGoals.size() > 1) {
+                        throw new UnsupportedOperationException("The Isabelle driver does not yet support creation of multiple sub-goals from a single one.");
+                    }
+                    // Okay, now get the Isabelle string formula and submit it to
+                    // the proof script:
+                    Formula<?> goalFormula = transformedGoals.get(0).asFormula();
+                    if (goalFormula == null) {
+                        throw new RuntimeException(Bundle.ID_transformed_goal_unknown());
+                    }
+                    ArrayList<? extends FormulaRepresentation<StringFormula>> isabelleStringRepresentation = goalFormula.fetchRepresentations(StringFormat.getInstance());
+                    if (isabelleStringRepresentation == null || isabelleStringRepresentation.isEmpty()) {
+                        throw new RuntimeException(Bundle.ID_transformed_goal_unknown());
+                    }
+                    // We now have the corresponding Isabelle string formula, which
+                    // can be printed back to the proof script:
+                    try {
+                        // Commit the rule application result back to the Isabelle's proof
+                        // script:
+                        proofDocument.insertAfter(proofDocument.getLastLockedElement(), String.format("apply (diabelli \"%s\")\n", isabelleStringRepresentation.get(0).getFormula()));
+                    } catch (InterruptedException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
                 }
             }
         }
@@ -423,7 +468,7 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
         }
         return null;
     }
-    
+
     private static TheoryEditor getProvingTheoryEditor() {
         TheoryEditor editor = getActiveTheoryEditor();
         Set<TopComponent> opened = TopComponent.getRegistry().getOpened();

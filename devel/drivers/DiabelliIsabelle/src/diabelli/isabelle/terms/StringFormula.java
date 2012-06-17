@@ -40,7 +40,7 @@ public final class StringFormula implements CharSequence, Comparable<CharSequenc
     //</editor-fold>
 
     /**
-     * Creates a new raw Isabelle string formula with a markup.
+     * Creates a new raw Isabelle string formula with markup.
      * @param markedUpFormula the markup (that contains the string as well as
      * the formatting markup of the formula). Must not be {@code null}.
      * 
@@ -62,6 +62,19 @@ public final class StringFormula implements CharSequence, Comparable<CharSequenc
         }
     }
 
+    /**
+     * Creates a new raw Isabelle string formula without markup.
+     * 
+     * @param formula the raw string formula.
+     */
+    public StringFormula(String formula) {
+        if (formula == null) {
+            throw new IllegalArgumentException(Bundle.SF_formula_null());
+        }
+        this.formulaString = formula;
+        this.markedUpFormula = null;
+    }
+    
     /**
      * Returns the raw string representation of the Isabelle formula.
      * @return the raw string representation of the Isabelle formula.

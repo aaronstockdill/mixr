@@ -38,7 +38,7 @@ import org.netbeans.api.annotations.common.NonNull;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public class Goals implements Iterable<Goal> {
+public class Goals implements Iterable<Goal>, RandomAccess {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
     private final ArrayList<Goal> goals;
@@ -147,7 +147,7 @@ public class Goals implements Iterable<Goal> {
      * @return an array containing all the goals.
      */
     public Goal[] toArray() {
-        return isEmpty() ? new Goal[0] : goals.toArray(new Goal[0]);
+        return isEmpty() ? new Goal[0] : goals.toArray(new Goal[goals.size()]);
     }
 
     /**
