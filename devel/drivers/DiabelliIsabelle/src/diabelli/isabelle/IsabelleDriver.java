@@ -459,7 +459,7 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
 
     private void setGoals(ArrayList<Goal> goals) {
         try {
-            if (goals == null && goals.isEmpty()) {
+            if (goals == null || goals.isEmpty()) {
                 setGoals((Goals) null);
             } else {
                 setGoals(new Goals(this, goals));
