@@ -53,6 +53,7 @@ import org.isabelle.iapp.files.FileState;
 import org.isabelle.iapp.process.Message;
 import org.isabelle.iapp.process.ProverManager;
 import org.isabelle.iapp.process.features.InjectedCommands;
+import org.isabelle.iapp.process.features.InjectionContext;
 import org.isabelle.iapp.process.features.InjectionFinishListener;
 import org.isabelle.iapp.process.features.InjectionResult;
 import org.isabelle.iapp.process.features.InjectionResultListener;
@@ -171,20 +172,22 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
     public void commitTransformedGoals(InferenceStepResult step) throws UnsupportedOperationException {
         // Insert the changed goals if the committed inference step transformed them:
         if (step instanceof GoalTransformationResult) {
+            GoalTransformationResult goalTransformationResult = (GoalTransformationResult) step;
+            Goals originalGoals = goalTransformationResult.getOriginalGoals();
+            if (originalGoals == null || originalGoals.isEmpty() || !(originalGoals.get(0) instanceof TermGoal))
+                return;
             // Get the proof script document into which we will insert the
             // Isabelle command:
-            TheoryEditor editor = getProvingTheoryEditor();
-            if (editor != null) {
-                ProofDocument proofDocument = editor.getProofDocument();
+            ProofDocument proofDocument = ((TermGoal)originalGoals.get(0)).getProofContext();
+            if (proofDocument != null) {
                 // Get the transformed goals:
-                GoalTransformationResult goalTransformationResult = (GoalTransformationResult) step;
                 // TODO: Handle multiple goals:
                 if (goalTransformationResult.getGoalChangesCount() > 1) {
                     throw new UnsupportedOperationException(Bundle.ID_multiple_goals_unsupported());
                 }
                 // Find the only goal that was changed:
                 List<Goal> transformedGoals = null;
-                for (int i = 0; i < goalTransformationResult.getOriginalGoals().size(); i++) {
+                for (int i = 0; i < originalGoals.size(); i++) {
                     if (goalTransformationResult.isGoalChanged(i)) {
                         transformedGoals = goalTransformationResult.getTransformedGoalsFor(i);
                         break;
@@ -385,26 +388,29 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
             "ID_isabelle_goals_not_obtained=Could not fetch the list of goals from Isabelle. A communication error occurred."
         })
         public void injectedFinished(InjectionResult inj) {
+            ArrayList<Goal> goals = null;
             try {
                 Message[] results = inj.getResults();
-                if (results != null && (results.length & 1) == 0) {
-                    ArrayList<Goal> goals = new ArrayList<>();
+                InjectionContext injectionContext = inj.getInjectionContext();
+                if (results != null && (results.length & 1) == 0 && injectionContext != null) {
+                    goals = new ArrayList<>();
                     for (int i = 0; i < results.length; i += 2) {
                         Message message = results[i];
                         if (message.getText() != null && message.getText().startsWith(DIABELLI_ISABELLE_RESPONSE_GOAL)) {
                             String escapedYXML = message.getText().substring(DIABELLI_ISABELLE_RESPONSE_GOAL.length());
                             String unescapedYXML = TermYXML.unescapeControlChars(escapedYXML);
                             Term term = TermYXML.parseYXML(unescapedYXML);
-                            final TermGoal toGoal = TermsToDiabelli.toGoal(term);
+                            final TermGoal toGoal = TermsToDiabelli.toGoal(term, injectionContext.getProofDocument());
                             // Get the string version of this goal:
                             toGoal.asFormula().addRepresentation(new FormulaRepresentation<>(new StringFormula(results[i + 1]), StringFormat.getInstance()));
                             goals.add(toGoal);
                         }
                     }
-                    setGoals(goals);
                 }
             } catch (InterruptedException ex) {
                 throw new RuntimeException(Bundle.ID_isabelle_goals_not_obtained(), ex);
+            } finally {
+                setGoals(goals);
             }
         }
 
@@ -453,7 +459,11 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
 
     private void setGoals(ArrayList<Goal> goals) {
         try {
-            setGoals(new Goals(this, goals));
+            if (goals == null && goals.isEmpty()) {
+                setGoals((Goals) null);
+            } else {
+                setGoals(new Goals(this, goals));
+            }
         } catch (PropertyVetoException ex) {
             Logger.getLogger(IsabelleDriver.class.getName()).log(Level.WARNING, "Goals could not have been set.", ex);
         }
@@ -467,22 +477,6 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
             return (TheoryEditor) activated;
         }
         return null;
-    }
-
-    private static TheoryEditor getProvingTheoryEditor() {
-        TheoryEditor editor = getActiveTheoryEditor();
-        Set<TopComponent> opened = TopComponent.getRegistry().getOpened();
-        for (TopComponent topComponent : opened) {
-            if (topComponent instanceof TheoryEditor) {
-                TheoryEditor theoryEditor = (TheoryEditor) topComponent;
-                FileState iappFile = theoryEditor.getIAPPFile();
-                if (iappFile != null) {
-                    editor = theoryEditor;
-                    break;
-                }
-            }
-        }
-        return editor;
     }
     //</editor-fold>
 }

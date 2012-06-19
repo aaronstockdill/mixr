@@ -31,6 +31,7 @@ import isabelle.Term.Term;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.isabelle.iapp.proofdocument.ProofDocument;
 
 /**
  * A Diabelli goal in the form of Isabelle terms.
@@ -41,15 +42,17 @@ public class TermGoal extends Goal {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
     private final ArrayList<Free> variables;
+    private final ProofDocument proofContext;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructor">
-    TermGoal(ArrayList<Free> variables, ArrayList<Term> premises, Term conclusion, Term term) {
+    TermGoal(ProofDocument proofContext, ArrayList<Free> variables, ArrayList<Term> premises, Term conclusion, Term goalTerm) {
         super(TermsToDiabelli.toFormulae(premises, Formula.FormulaRole.Premise),
                 null,
                 TermsToDiabelli.toFormula(conclusion, Formula.FormulaRole.Conclusion),
-                TermsToDiabelli.toFormula(term, Formula.FormulaRole.Goal));
+                TermsToDiabelli.toFormula(goalTerm, Formula.FormulaRole.Goal));
         this.variables = variables;
+        this.proofContext = proofContext;
     }
     //</editor-fold>
 
@@ -69,6 +72,19 @@ public class TermGoal extends Goal {
      */
     public List<Free> getVariables() {
         return variables == null || variables.isEmpty() ? null : Collections.unmodifiableList(variables);
+    }
+
+    /**
+     * Returns the Isabelle proof script from which this goal originates.
+     * One can obtain further theory information through this context.
+     * 
+     * <p><span style="font-weight:bold">Note</span>: this method may
+     * return {@code null}</p>
+     * 
+     * @return the Isabelle proof script from which this goal originates.
+     */
+    public ProofDocument getProofContext() {
+        return proofContext;
     }
 
     /**

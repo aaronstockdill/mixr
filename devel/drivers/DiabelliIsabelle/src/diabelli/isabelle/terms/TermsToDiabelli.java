@@ -31,6 +31,7 @@ import diabelli.logic.Goal;
 import isabelle.Term;
 import java.util.ArrayList;
 import java.util.Collection;
+import org.isabelle.iapp.proofdocument.ProofDocument;
 import org.openide.util.NbBundle;
 
 /**
@@ -52,12 +53,13 @@ public final class TermsToDiabelli {
      * puts them into a Diabelli goal.
      *
      * @param term well, the term to make into a goal.
+     * @param proofContext the context in which the proof lives.
      * @return a Diabelli goal (with the extracted premises and conclusions.
      */
     @NbBundle.Messages({
         "TTDG_term_null=Cannot convert a null term into a goal."
     })
-    public static TermGoal toGoal(Term.Term term) {
+    public static TermGoal toGoal(Term.Term term, ProofDocument proofContext) {
         if (term == null) {
             throw new IllegalArgumentException(Bundle.TTDG_term_null());
         }
@@ -65,7 +67,7 @@ public final class TermsToDiabelli {
         ArrayList<Term.Free> variables = new ArrayList<>();
         Term.Term body = TermUtils.findQuantifiedVarsAndBody(term, variables);
         Term.Term conclusion = TermUtils.findPremisesAndConclusion(body, premises);
-        return new TermGoal(variables, premises, conclusion, term);
+        return new TermGoal(proofContext, variables, premises, conclusion, term);
     }
 
     /**
