@@ -49,6 +49,7 @@ public class SpiderToIsabelleStringTranslator extends FormulaTranslator<SpiderDi
     
     //<editor-fold defaultstate="collapsed" desc="Fields">
     private final SDExporter SDPrettyExporter;
+    private final SDExporter SDNormalExporter;
     //</editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Singleton stuff">
@@ -61,6 +62,8 @@ public class SpiderToIsabelleStringTranslator extends FormulaTranslator<SpiderDi
         SDPrettyExporter = SDExporting.getExporter(Isabelle2011ExportProvider.FormatName, Maps.createTreeMap(new String[]{
                                        Isabelle2011ExportProvider.Parameter_UseXSymbols
                                    }, "true"));
+        
+        SDNormalExporter = SDExporting.getExporter(Isabelle2011ExportProvider.FormatName, null);
     }
 
     public static SpiderToIsabelleStringTranslator getInstance() {
@@ -101,7 +104,7 @@ public class SpiderToIsabelleStringTranslator extends FormulaTranslator<SpiderDi
         }
         FormulaRepresentation<SpiderDiagram> sdFormula = sdFormulae.get(0);
         try {
-            String export = SDPrettyExporter.export(sdFormula.getFormula());
+            String export = SDNormalExporter.export(sdFormula.getFormula());
             return new FormulaRepresentation<>(new StringFormula(export), StringFormat.getInstance());
         } catch (ExportException ex) {
             throw new TranslationException(Bundle.STIST_translation_failed(), ex);
