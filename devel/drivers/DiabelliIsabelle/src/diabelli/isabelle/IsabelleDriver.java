@@ -217,6 +217,7 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
                         // Commit the rule application result back to the Isabelle's proof
                         // script:
                         proofDocument.insertAfter(proofDocument.getLastLockedElement(), String.format("apply (diabelli \"%s\")\n", isabelleStringRepresentation.get(0).getFormula()));
+                        proofDocument.awaitStable();
                     } catch (InterruptedException ex) {
                         Exceptions.printStackTrace(ex);
                     }

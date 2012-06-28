@@ -26,6 +26,7 @@
  */
 package propity.util;
 
+import java.lang.annotation.Documented;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -76,6 +77,7 @@ public final class Maps {
      * and {@code v_i} are <span style="font-style:italic;">i</span>-th elements
      * of {@code keys} and {@code values} respectively.
      */
+    @SuppressWarnings("unchecked")
     public static <K, V> TreeMap<K, V> createTreeMap(K[] keys, V... values) {
         TreeMap<K, V> theMap = new TreeMap<>();
         if (keys == null || values == null || keys.length != values.length) {
@@ -102,6 +104,7 @@ public final class Maps {
      * and {@code v_i} are <span style="font-style:italic;">i</span>-th elements
      * of {@code keys} and {@code values} respectively.
      */
+    @SuppressWarnings("unchecked")
     public static <K, V> Map<K, V> addToMap(Map<K, V> theMap, K[] keys, V... values) {
         if (keys == null || values == null || keys.length != values.length) {
             throw new IllegalArgumentException(i18n("MAPS_CREATE_ILLEGAL_ARGS"));
