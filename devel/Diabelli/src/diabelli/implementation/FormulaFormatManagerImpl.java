@@ -156,9 +156,9 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
         if (from == null || to == null) {
             return null;
         } else {
-            HashSet<? extends FormulaTranslator<TFrom, ?>> fromClone = (HashSet<? extends FormulaTranslator<TFrom, ?>>) from.clone();
-            from.retainAll(to);
-            return (Set<FormulaTranslator<TFrom, TTo>>) fromClone;
+            HashSet<? extends FormulaTranslator<TFrom, ?>> fromTo = (HashSet<? extends FormulaTranslator<TFrom, ?>>) from.clone();
+            fromTo.retainAll(to);
+            return (Set<FormulaTranslator<TFrom, TTo>>) fromTo;
         }
     }
 
