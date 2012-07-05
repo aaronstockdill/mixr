@@ -46,11 +46,13 @@ import java.util.*;
  * reference-escape.</p>
  *
  * <p><span style="font-weight:bold">Important</span>: this class is not
- * thread-safe. Wrapping it into {@link Collections#synchronizedList(java.util.List) a synchronised wrapper}
- * helps only if no {@link MovableArrayList#swapWith(propity.util.MovableArrayList) swapping}
- * or {@link MovableArrayList#moveTo(propity.util.MovableArrayList) moving}
- * is performed (as this may change the backing array while it is being accessed
- * in any way).</p>
+ * thread-safe. Wrapping it into
+ * {@link Collections#synchronizedList(java.util.List) a synchronised wrapper}
+ * helps only if no
+ * {@link MovableArrayList#swapWith(propity.util.MovableArrayList) swapping} or
+ * {@link MovableArrayList#moveTo(propity.util.MovableArrayList) moving} is
+ * performed (as this may change the backing array while it is being accessed in
+ * any way).</p>
  *
  * <p>To prevent a leaked reference from the {@link MovableArrayList#iterator()
  * }, {@link MovableArrayList#listIterator()}, and {@link MovableArrayList#listIterator(int)
@@ -74,7 +76,7 @@ public final class MovableArrayList<E> implements List<E>, RandomAccess {
      * Creates a new empty movable array list.
      */
     public MovableArrayList() {
-        store = new ArrayList<>();
+        store = new ArrayList<E>();
     }
 
     /**
@@ -84,17 +86,18 @@ public final class MovableArrayList<E> implements List<E>, RandomAccess {
      * @param c the collection from which to copy the contents.
      */
     public MovableArrayList(Collection<? extends E> c) {
-        store = new ArrayList<>(c);
+        store = new ArrayList<E>(c);
     }
 
     /**
      * Creates an instance of the movable array list and initialises its backing
      * array list to the given capacity.
      *
-     * @param initialCapacity the initial capacity of the backing {@link ArrayList}.
+     * @param initialCapacity the initial capacity of the backing
+     * {@link ArrayList}.
      */
     public MovableArrayList(int initialCapacity) {
-        store = new ArrayList<>(initialCapacity);
+        store = new ArrayList<E>(initialCapacity);
     }
 
     /**
@@ -121,14 +124,15 @@ public final class MovableArrayList<E> implements List<E>, RandomAccess {
             // okay.
             move(c, this);
         } else {
-            store = new ArrayList<>(c.store);
+            store = new ArrayList<E>(c.store);
         }
     }
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Move Semantics">
     /**
-     * Moves the contents (the backing array) of this list to {@code destination}.
+     * Moves the contents (the backing array) of this list to
+     * {@code destination}.
      *
      * <p>This collection will be empty after this operation finishes.</p>
      *
@@ -154,7 +158,8 @@ public final class MovableArrayList<E> implements List<E>, RandomAccess {
     }
 
     /**
-     * This method moves the backing array of {@code source} to {@code destination}.
+     * This method moves the backing array of {@code source} to
+     * {@code destination}.
      *
      * <p>Additionally, {@code source}'s backing array is initialised with a new
      * empty {@link ArrayList}.</p>
@@ -168,12 +173,12 @@ public final class MovableArrayList<E> implements List<E>, RandomAccess {
      * @param destination the collection of which the old backing array will be
      * forfeited and replaced by the backing array of {@code source}.
      */
+    @SuppressWarnings("unchecked")
     public static <TDestination> void move(
             MovableArrayList<? extends TDestination> source,
             MovableArrayList<TDestination> destination) {
-        @SuppressWarnings("unchecked")
         ArrayList<TDestination> tmp = (ArrayList<TDestination>) source.store;
-        source.store = new ArrayList<>();
+        source.store = new ArrayList();
         destination.store = tmp;
     }
 
@@ -197,14 +202,16 @@ public final class MovableArrayList<E> implements List<E>, RandomAccess {
 
     // <editor-fold defaultstate="collapsed" desc="Other Public Interface">
     /**
-     * Returns an unmodifiable view of the backing store (which is an {@link ArrayList}).
+     * Returns an unmodifiable view of the backing store (which is an
+     * {@link ArrayList}).
      *
      * <p>The list returned by this method wraps the backing store directly.
      * Thus, if the backing store changes in this movable array, this does not
      * affect the returned list (i.e., the returned list will still wrap the old
      * backing store).</p>
      *
-     * @return an unmodifiable view of the backing store (which is an {@link ArrayList}).
+     * @return an unmodifiable view of the backing store (which is an
+     * {@link ArrayList}).
      */
     public List<E> getReadOnlyStore() {
         return Collections.unmodifiableList(store);

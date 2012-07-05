@@ -79,7 +79,7 @@ public final class Maps {
      */
     @SuppressWarnings("unchecked")
     public static <K, V> TreeMap<K, V> createTreeMap(K[] keys, V... values) {
-        TreeMap<K, V> theMap = new TreeMap<>();
+        TreeMap<K, V> theMap = new TreeMap<K, V>();
         if (keys == null || values == null || keys.length != values.length) {
             throw new IllegalArgumentException(i18n("MAPS_CREATE_ILLEGAL_ARGS"));
         }
