@@ -24,9 +24,7 @@
  */
 package diabelli.isabelle.terms;
 
-import diabelli.isabelle.IsabelleDriver;
 import diabelli.isabelle.pure.lib.TermYXML;
-import diabelli.logic.Goal;
 import isabelle.Term;
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -75,17 +73,17 @@ public class TermsToDiabelliTest {
     @Test
     public void testToGoal() {
         Term.Term t = checkAndParseTerm(Example1_escapedYXML, Example1_unescapedYXML);
-        TermGoal goal = TermsToDiabelli.toGoal(t);
+        TermGoal goal = TermsToDiabelli.toGoal(t, null);
         assertEquals(1, goal.getPremisesCount());
         assertEquals(0, goal.getVariablesCount());
         
         t = checkAndParseTerm(Example2_escapedYXML, Example2_unescapedYXML);
-        goal = TermsToDiabelli.toGoal(t);
+        goal = TermsToDiabelli.toGoal(t, null);
         assertEquals(4, goal.getPremisesCount());
         assertEquals(0, goal.getVariablesCount());
         
         t = checkAndParseTerm(Example3_escapedYXML, Example3_unescapedYXML);
-        goal = TermsToDiabelli.toGoal(t);
+        goal = TermsToDiabelli.toGoal(t, null);
         assertEquals(4, goal.getPremisesCount());
         assertEquals(3, goal.getVariablesCount());
     }
