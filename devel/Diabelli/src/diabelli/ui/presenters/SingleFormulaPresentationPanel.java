@@ -46,6 +46,7 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
     private static final long serialVersionUID = 0x1906271867d69be1L;
     private final GeneralGoalNode presentedNode;
     private final FormulaRepresentation<?> formula;
+    private final int goalIndex;
     private final int representationIndex;
     private final Component presenterPanel;
     private final FormulaPresenter<?> presenter;
@@ -55,9 +56,10 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
     /**
      * Creates new form SingleFormulaPresentationPanel
      */
-    public SingleFormulaPresentationPanel(GeneralGoalNode presentedNode, FormulaRepresentation<?> formula, int representationIndex, Component presenterPanel, FormulaPresenter<?> presenter) {
+    public SingleFormulaPresentationPanel(GeneralGoalNode presentedNode, FormulaRepresentation<?> formula, int goalIndex, int representationIndex, Component presenterPanel, FormulaPresenter<?> presenter) {
         this.presentedNode = presentedNode;
         this.formula = formula;
+        this.goalIndex = goalIndex;
         this.representationIndex = representationIndex;
         this.presenterPanel = presenterPanel;
         this.presenter = presenter;
@@ -68,7 +70,7 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
     }
 
     public SingleFormulaPresentationPanel() {
-        this(null, null, -1, null, null);
+        this(null, null, 0, -1, null, null);
     }
     //</editor-fold>
 
@@ -131,20 +133,18 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
         if (formula != null && presenter != null) {
             StringBuilder sb = new StringBuilder("<html>");
 
-            if (presentedNode != null) {
-                // Print something like this: Goal 1 > Premise 2  Format: <format>  Visualiser: <presenter>
+            // Print something like this: Goal 1 > Premise 2  Format: <format>  Visualiser: <presenter>
 
-                // First print out the selected goal:
-                sb.append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_goal(presentedNode.getGoalIndex() + 1)).append(BoldItalicEndTag);
+            // First print out the selected goal:
+            sb.append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_goal(goalIndex + 1)).append(BoldItalicEndTag);
 
-                if (presentedNode instanceof PremiseNode) {
-                    PremiseNode premiseFormulaNode = (PremiseNode) presentedNode;
-                    sb.append(" > ").append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_premise(premiseFormulaNode.getPremiseIndex() + 1)).append(BoldItalicEndTag);
-                } else if (presentedNode instanceof PremisesNode) {
-                    sb.append(" > ").append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_premises()).append(BoldItalicEndTag);
-                } else if (presentedNode instanceof ConclusionNode) {
-                    sb.append(" > ").append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_conclusion()).append(BoldItalicEndTag);
-                }
+            if (presentedNode instanceof PremiseNode) {
+                PremiseNode premiseFormulaNode = (PremiseNode) presentedNode;
+                sb.append(" > ").append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_premise(premiseFormulaNode.getPremiseIndex() + 1)).append(BoldItalicEndTag);
+            } else if (presentedNode instanceof PremisesNode) {
+                sb.append(" > ").append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_premises()).append(BoldItalicEndTag);
+            } else if (presentedNode instanceof ConclusionNode) {
+                sb.append(" > ").append(BoldItalicStartTag).append(Bundle.Visualisation_DetailLabel_conclusion()).append(BoldItalicEndTag);
             }
 
             if (formula != null) {

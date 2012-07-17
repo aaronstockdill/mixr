@@ -25,10 +25,13 @@
 package diabelli.ui;
 
 import diabelli.Diabelli;
+import diabelli.GoalsManager;
 import diabelli.components.FormulaPresenter;
 import diabelli.logic.Formula;
 import diabelli.logic.FormulaFormat;
 import diabelli.logic.FormulaRepresentation;
+import diabelli.logic.Goal;
+import diabelli.logic.Goals;
 import diabelli.ui.GoalsTopComponent.GeneralGoalNode;
 import diabelli.ui.presenters.SingleFormulaPresentationPanel;
 import java.awt.Component;
@@ -36,6 +39,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,6 +79,7 @@ public final class FormulaPresentationTopComponent extends TopComponent {
     public static final String PreferredId = "FormulaPresentationTopComponent";
     private static final long serialVersionUID = 0x5db50c513aa41536L;
     private final FormulaSelectionListener selectedFormulaListener = new FormulaSelectionListener();
+    private GoalsChangedListener goalsChangedListener = new GoalsChangedListener();
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -114,6 +119,8 @@ public final class FormulaPresentationTopComponent extends TopComponent {
     //<editor-fold defaultstate="collapsed" desc="TopComponent Stuff">
     @Override
     public void componentOpened() {
+        // Listen for selection changes in the GoalsTopComponent (when the user
+        // clicks on a particular part of the goal):
         GoalsTopComponent goalsWindow = (GoalsTopComponent) WindowManager.getDefault().findTopComponent(GoalsTopComponent.PreferredID);
         if (goalsWindow != null) {
             goalsWindow.getExplorerManager().addPropertyChangeListener(selectedFormulaListener);
@@ -121,6 +128,9 @@ public final class FormulaPresentationTopComponent extends TopComponent {
         } else {
             throw new IllegalStateException(Bundle.FPTC_CurrentFormulaTopComponent_notFound());
         }
+        // Listen for goal changes in Diabelli's goal manager:
+        GoalsManager goalManager = Lookup.getDefault().lookup(Diabelli.class).getGoalManager();
+        goalManager.addPropertyChangeListener(goalsChangedListener, GoalsManager.CurrentGoalsChangedEvent);
     }
 
     @Override
@@ -131,6 +141,9 @@ public final class FormulaPresentationTopComponent extends TopComponent {
         } else {
             throw new IllegalStateException(Bundle.FPTC_CurrentFormulaTopComponent_notFound());
         }
+        // Stop listening for goal changes in Diabelli's goal manager:
+        GoalsManager goalManager = Lookup.getDefault().lookup(Diabelli.class).getGoalManager();
+        goalManager.removePropertyChangeListener(goalsChangedListener, GoalsManager.CurrentGoalsChangedEvent);
     }
 
     void writeProperties(java.util.Properties p) {
@@ -156,21 +169,28 @@ public final class FormulaPresentationTopComponent extends TopComponent {
                 inFormats = getAllFormats();
             }
             Formula<?> formula = goalNode.getFormula();
-            // Go through every format, every representation, and every
-            // visualiser and display all these combinations
-            for (FormulaFormat<?> formulaFormat : inFormats) {
-                ArrayList<? extends FormulaRepresentation<?>> reps = formula.fetchRepresentations(formulaFormat);
-                if (reps != null && reps.size() > 0) {
-                    Set<FormulaPresenter<?>> presenters = getPresentersFor(formulaFormat);
-                    if (presenters != null && presenters.size() > 0) {
-                        for (FormulaRepresentation<?> rep : reps) {
-                            for (FormulaPresenter<?> presenter : presenters) {
-                                try {
-                                    Component visualiser = presenter.createVisualiserFor(rep);
-                                    addVisualisation(goalNode, formulaFormat, rep, presenter, visualiser);
-                                } catch (FormulaPresenter.VisualisationException visEx) {
-                                    Logger.getLogger(FormulaPresentationTopComponent.class.getName()).log(Level.WARNING, Bundle.FPTC_visualiser_failed(presenter.getName(), formulaFormat.getPrettyName()), visEx);
-                                }
+            addVisualisationsOf(formula, inFormats, goalNode, goalNode.getGoalIndex());
+        }
+    }
+
+    private void addVisualisationsOf(Formula<?> formula, Collection<FormulaFormat<?>> inFormats, GeneralGoalNode goalNode, int goalIndex) {
+        if (inFormats == null) {
+            inFormats = getAllFormats();
+        }
+        // Go through every format, every representation, and every
+        // visualiser and display all these combinations
+        for (FormulaFormat<?> formulaFormat : inFormats) {
+            ArrayList<? extends FormulaRepresentation<?>> reps = formula.fetchRepresentations(formulaFormat);
+            if (reps != null && reps.size() > 0) {
+                Set<FormulaPresenter<?>> presenters = getPresentersFor(formulaFormat);
+                if (presenters != null && presenters.size() > 0) {
+                    for (FormulaRepresentation<?> rep : reps) {
+                        for (FormulaPresenter<?> presenter : presenters) {
+                            try {
+                                Component visualiser = presenter.createVisualiserFor(rep);
+                                addVisualisation(goalNode, goalIndex, formulaFormat, rep, presenter, visualiser);
+                            } catch (FormulaPresenter.VisualisationException visEx) {
+                                Logger.getLogger(FormulaPresentationTopComponent.class.getName()).log(Level.WARNING, Bundle.FPTC_visualiser_failed(presenter.getName(), formulaFormat.getPrettyName()), visEx);
                             }
                         }
                     }
@@ -179,9 +199,9 @@ public final class FormulaPresentationTopComponent extends TopComponent {
         }
     }
 
-    private void addVisualisation(GeneralGoalNode goalNode, FormulaFormat<?> formulaFormat, FormulaRepresentation<?> rep, FormulaPresenter<?> presenter, Component visualiser) {
+    private void addVisualisation(GeneralGoalNode goalNode, int goalIndex, FormulaFormat<?> formulaFormat, FormulaRepresentation<?> rep, FormulaPresenter<?> presenter, Component visualiser) {
         // Now put the panel onto this panel:
-        SingleFormulaPresentationPanel pnl = new SingleFormulaPresentationPanel(goalNode, rep, -1, visualiser, presenter);
+        SingleFormulaPresentationPanel pnl = new SingleFormulaPresentationPanel(goalNode, rep, goalIndex, -1, visualiser, presenter);
         visualisationsPanel.add(pnl);
     }
 
@@ -221,12 +241,33 @@ public final class FormulaPresentationTopComponent extends TopComponent {
         updatePresented(extractGoalNodes(nodes));
     }
 
+    /**
+     * This method uses the explorer nodes from the GoalsTopComponent to show
+     * only the user-selected formulae instead of using Diabelli formulae.
+     *
+     * @param formulae
+     */
     private void updatePresented(ArrayList<GeneralGoalNode> formulae) {
         clearVisualisations();
         if (formulae != null && formulae.size() > 0) {
             Collection<FormulaFormat<?>> allFormats = getAllFormats();
             for (GeneralGoalNode formula : formulae) {
                 addVisualisationsOf(formula, allFormats);
+            }
+        }
+        validate();
+        // NOTE: We have to repaint if nothing has been added onto the panel.
+        // I guess `validate` does nothing if the panel has been just emptied.
+        repaint();
+    }
+
+    private void presentGoals(List<Goal> goals) {
+        clearVisualisations();
+        if (goals != null && goals.size() > 0) {
+            Collection<FormulaFormat<?>> allFormats = getAllFormats();
+            for (int i = 0; i < goals.size(); i++) {
+                Goal goal = goals.get(i);
+                addVisualisationsOf(goal.asFormula(), allFormats, null, i);
             }
         }
         validate();
@@ -247,11 +288,26 @@ public final class FormulaPresentationTopComponent extends TopComponent {
                     updateFromSelectedIn(em);
                     break;
                 }
-                case ExplorerManager.PROP_ROOT_CONTEXT: {
-                    ExplorerManager em = (ExplorerManager) evt.getSource();
-                    updateFromAllIn(em);
-                    break;
-                }
+//                case ExplorerManager.PROP_ROOT_CONTEXT: {
+//                    ExplorerManager em = (ExplorerManager) evt.getSource();
+//                    updateFromAllIn(em);
+//                    break;
+//                }
+            }
+        }
+    }
+
+    private class GoalsChangedListener implements PropertyChangeListener {
+
+        public GoalsChangedListener() {
+        }
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+            // Goals have changed. Update them:
+            Goals currentGoals = Lookup.getDefault().lookup(Diabelli.class).getGoalManager().getCurrentGoals();
+            if (currentGoals != null) {
+                presentGoals(currentGoals.getGoals());
             }
         }
     }

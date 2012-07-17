@@ -29,10 +29,9 @@ import diabelli.components.DiabelliComponent;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openide.modules.OnStart;
 import org.openide.util.Lookup;
 import org.openide.util.Lookup.Result;
-import org.openide.util.LookupEvent;
-import org.openide.util.LookupListener;
 import org.openide.util.lookup.AbstractLookup;
 import org.openide.util.lookup.InstanceContent;
 import org.openide.util.lookup.ServiceProvider;
@@ -51,60 +50,28 @@ import org.openide.util.lookup.ServiceProvider;
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 @ServiceProvider(service = Diabelli.class)
-public final class DiabelliImpl implements Diabelli {
+@OnStart
+public final class DiabelliImpl implements Diabelli, Runnable {
 
     // <editor-fold defaultstate="collapsed" desc="Private Fields">
-    private final InstanceContent instanceContent;
+    private InstanceContent instanceContent;
     private Result<DiabelliComponent> lookupResult;
-    private final AbstractLookup componentsLookup;
+    private AbstractLookup componentsLookup;
     private Set<DiabelliComponent> components;
     private final ArrayList<ManagerInternals> managers = new ArrayList<>();
+    private boolean initialised = false;
     // </editor-fold>
     // <editor-fold defaultstate="collapsed" desc="Managers Fields">
-    final ReasonersManagerImpl reasonersManager;
-    final GoalsManagerImpl goalManager;
-    final FormulaFormatManagerImpl formulaFormatManager;
-    final PresentationManagerImpl presentationManager;
+    final ReasonersManagerImpl reasonersManager = new ReasonersManagerImpl();
+    final GoalsManagerImpl goalManager = new GoalsManagerImpl();
+    final FormulaFormatManagerImpl formulaFormatManager = new FormulaFormatManagerImpl();
+    final PresentationManagerImpl presentationManager = new PresentationManagerImpl();
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Constructor">
     public DiabelliImpl() {
-
-        // Initialise all managers:
-        managers.add(reasonersManager = new ReasonersManagerImpl());
-        managers.add(goalManager = new GoalsManagerImpl());
-        managers.add(formulaFormatManager = new FormulaFormatManagerImpl());
-        managers.add(presentationManager = new PresentationManagerImpl());
-
-        // First create an empty list of components (then wait for them to
-        // register or deregister).
-        instanceContent = new InstanceContent();
-        componentsLookup = new AbstractLookup(instanceContent);
-
-        // Initialise the particular managers:
-        for (ManagerInternals manager : managers) {
-            manager.initialise(this);
-        }
-
-        // Find all Diabelli components and register them.
-        lookupResult = Lookup.getDefault().lookupResult(DiabelliComponent.class);
-        lookupResult.addLookupListener(new LookupListener() {
-
-            @Override
-            public void resultChanged(LookupEvent ev) {
-                throw new UnsupportedOperationException("Registering/unregistering Diabelli drivers after initialisation is not supported.");
-            }
-        });
-        updateComponentsList();
-
-        // Now call the final stage in the initialisation of managers:
-        for (ManagerInternals manager : managers) {
-            manager.onAfterComponentsLoaded();
-        }
-        
-        Logger.getLogger(DiabelliImpl.class.getName()).log(Level.INFO, "Diabelli initialised.");
+        initialise();
     }
-    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Diabelli Interface Implementation">
     @Override
@@ -158,4 +125,51 @@ public final class DiabelliImpl implements Diabelli {
         components = Collections.unmodifiableSet(components);
     }
     // </editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="Diabelli Startup">
+    @Override
+    public void run() {
+        if (!initialised) {
+            updateComponentsList();
+
+            // Now call the final stage in the initialisation of managers:
+            for (ManagerInternals manager : managers) {
+                manager.onAfterComponentsLoaded();
+            }
+
+            initialised = true;
+            Logger.getLogger(DiabelliImpl.class.getName()).log(Level.INFO, "Diabelli initialised.");
+        } else {
+            Logger.getLogger(DiabelliImpl.class.getName()).log(Level.SEVERE, "Diabelli is already initiallised.");
+        }
+    }
+
+    private void initialise() {
+        // Initialise all managers:
+        managers.add(reasonersManager);
+        managers.add(goalManager);
+        managers.add(formulaFormatManager);
+        managers.add(presentationManager);
+
+        // First create an empty list of components (then wait for them to
+        // register or deregister).
+        instanceContent = new InstanceContent();
+        componentsLookup = new AbstractLookup(instanceContent);
+
+        // Initialise the particular managers:
+        for (ManagerInternals manager : managers) {
+            manager.initialise(this);
+        }
+
+        // Find all Diabelli components and register them.
+        lookupResult = Lookup.getDefault().lookupResult(DiabelliComponent.class);
+//        lookupResult.addLookupListener(new LookupListener() {
+//
+//            @Override
+//            public void resultChanged(LookupEvent ev) {
+//                Logger.getLogger(DiabelliImpl.class.getName()).log(Level.INFO, "Diabelli initialised.");
+//            }
+//        });
+    }
+    //</editor-fold>
 }
