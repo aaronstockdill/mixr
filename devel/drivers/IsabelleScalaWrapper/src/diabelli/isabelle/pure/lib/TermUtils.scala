@@ -61,7 +61,7 @@ object TermUtils {
    * Extracts the premises and the conclusion from the given term `t`. This
    * method puts the premises into the given array and returns the conclusion.
    */
-  def findPremisesAndConclusion(t: Term, premises: Buffer[Term]): Term = findPremisesAndConclusion(t, JavaConversions.asJavaList(premises))
+  def findPremisesAndConclusion(t: Term, premises: Buffer[Term]): Term = findPremisesAndConclusion(t, JavaConversions.bufferAsJavaList(premises))
 
   /**
    * Extracts the globally meta-quantified variables from the term, puts them
@@ -95,7 +95,7 @@ object TermUtils {
    *
    * The quantified variables in the body are still retained as bound.
    */
-  def findQuantifiedVarsAndBody(t: Term, variables: Buffer[Free]): Term = findQuantifiedVarsAndBody(t, JavaConversions.asJavaList(variables))
+  def findQuantifiedVarsAndBody(t: Term, variables: Buffer[Free]): Term = findQuantifiedVarsAndBody(t, JavaConversions.bufferAsJavaList(variables))
 
   /**
    * The constant name for the HOL list Cons constructor.
@@ -125,7 +125,7 @@ object TermUtils {
    * be an HOL list.
    */
   def getListElements(listTerm: Term, outElements: Buffer[Term] = ArrayBuffer[Term]()): Buffer[Term] = {
-    getListElements(listTerm, JavaConversions.asJavaList(outElements));
+    getListElements(listTerm, JavaConversions.bufferAsJavaList(outElements));
     outElements;
   }
 }

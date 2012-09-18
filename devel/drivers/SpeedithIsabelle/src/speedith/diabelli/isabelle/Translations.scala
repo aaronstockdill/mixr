@@ -47,7 +47,7 @@ object Translations {
       case App(App(Const(MetaImplication, _), lhs), _) => {
         // Now find all premises and the conclusion:
         val premises = ArrayBuffer[Term](lhs);
-        val sd = termToSpiderDiagram(scala.collection.JavaConversions.asJavaList(premises), null);
+        val sd = termToSpiderDiagram(scala.collection.JavaConversions.bufferAsJavaList(premises), null);
         println(sd);
         sd;
       }
@@ -307,7 +307,7 @@ object Translations {
       rlRemoveWhere(conjuncts, (t: Term) => {
         t match {
           case App(Const(HOLNot, _), App(App(Const(HOLEquality, Type(_, List(spiderType1, Type(_, List(spiderType2, _))))), Bound(spider1)), Bound(spider2))) if spiderType1.equals(spiderType2) && checkSpiderType(spiderType1, spiderType) => {
-            inequalities(Math.min(spider1, spider2) * spiders.length + Math.max(spider1, spider2)) = true;
+            inequalities(scala.math.min(spider1, spider2) * spiders.length + scala.math.max(spider1, spider2)) = true;
             true;
           }
           case _ => false;
@@ -514,7 +514,7 @@ object Translations {
     // Check that no other terms are left in the conjuncts. Otherwise the translation must fail:
     if (conjuncts.length != 0) throw new ReadingException("The formula is not in the SNF form. There is an unknown term in the specification of a unitary spider diagram: %s".format(conjuncts(0)));
 
-    (SpiderDiagrams.createPrimarySD(new java.util.TreeSet[String](scala.collection.JavaConversions.asCollection(spiders.map(s => s.name))), habitats, null, null), spiderType1);
+    (SpiderDiagrams.createPrimarySD(new java.util.TreeSet[String](scala.collection.JavaConversions.asJavaCollection(spiders.map(s => s.name))), habitats, null, null), spiderType1);
   }
 
 }

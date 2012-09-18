@@ -105,9 +105,7 @@
                 <package>speedith.core.reasoning.args.selection</package>
                 <package>speedith.core.reasoning.rules</package>
                 <package>speedith.core.reasoning.rules.instructions</package>
-                <package>speedith.core.util</package>
                 <package>speedith.diabelli</package>
-                <package>speedith.diabelli.isabelle</package>
                 <package>speedith.diabelli.logic</package>
                 <package>speedith.diabelli.ui</package>
             </public-packages>
@@ -124,16 +122,16 @@
                 <binary-origin>release/modules/ext/antlr3-runtime.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/SpeedithIsabelle.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/SpeedithIsabelle.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/Speedith.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Speedith.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/Speedith.Core.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Speedith.Core.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/libSdIsaWrapper.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/libSdIsaWrapper.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

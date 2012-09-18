@@ -90,6 +90,7 @@
                 </test-type>
             </test-dependencies>
             <public-packages>
+                <package>diabelli.isabelle</package>
                 <package>diabelli.isabelle.pure.lib</package>
                 <package>diabelli.isabelle.terms</package>
                 <package>isabelle</package>
@@ -108,13 +109,16 @@
                 <package>scala.collection.immutable</package>
                 <package>scala.collection.interfaces</package>
                 <package>scala.collection.mutable</package>
+                <package>scala.collection.parallel</package>
+                <package>scala.collection.parallel.immutable</package>
+                <package>scala.collection.parallel.mutable</package>
                 <package>scala.collection.script</package>
                 <package>scala.compat</package>
                 <package>scala.concurrent</package>
                 <package>scala.concurrent.forkjoin</package>
                 <package>scala.io</package>
                 <package>scala.math</package>
-                <package>scala.mobile</package>
+                <package>scala.parallel</package>
                 <package>scala.ref</package>
                 <package>scala.reflect</package>
                 <package>scala.reflect.generic</package>
@@ -123,6 +127,8 @@
                 <package>scala.swing.event</package>
                 <package>scala.swing.model</package>
                 <package>scala.swing.test</package>
+                <package>scala.sys</package>
+                <package>scala.sys.process</package>
                 <package>scala.testing</package>
                 <package>scala.text</package>
                 <package>scala.util</package>
@@ -153,16 +159,16 @@
                 <package>scala.xml.transform</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/DiabellliIsabelleScalaWrapper.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/DiabellliIsabelleScalaWrapper.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/Pure.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/Pure.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/scala-library.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/scala-library.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/libIsaWrapper.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/libIsaWrapper.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/scala-swing.jar</runtime-relative-path>
