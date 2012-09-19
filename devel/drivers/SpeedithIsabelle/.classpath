@@ -6,7 +6,7 @@
 	<classpathentry kind="lib" path="/home/matej/bin/Isabelle2012/lib/classes/ext/Pure.jar"/>
 	<classpathentry kind="lib" path="/home/matej/Documents/speedith/devel/Speedith.Core/dist/Speedith.Core.jar"/>
 	<classpathentry kind="lib" path="/home/matej/Documents/speedith/devel/Speedith.Core/dist/lib/antlr3-runtime.jar"/>
-	<classpathentry kind="lib" path="/IsabelleScalaWrapper/dist/DiabellliIsabelleScalaWrapper.jar" sourcepath="/IsabelleScalaWrapper/src"/>
+	<classpathentry kind="lib" path="/home/matej/Documents/diabelli/devel/drivers/IsabelleScalaWrapper/dist/libIsaWrapper.jar" sourcepath="/IsabelleScalaWrapper/src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/IsabelleScalaWrapper"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

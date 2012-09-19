@@ -29,6 +29,11 @@ object Translations {
    * This main method is used only for testing.
    */
   def main(args: Array[String]): Unit = {
+    println("Malfunctioning example:");
+    testExample(Example10_unescapedYXML_isa2012);
+    
+    println("Test something quickly:");
+    
     testExample(Example6_unescapedYXML);
     testExample(Example7_unescapedYXML);
     testExample(Example8_unescapedYXML);

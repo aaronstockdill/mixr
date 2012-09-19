@@ -130,7 +130,7 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
             if (spiderDiagram.isValid()) {
                 return new SpiderDiagramPanel(spiderDiagram);
             } else {
-                throw new VisualisationException();
+                throw new VisualisationException("The spider diagram is not valid and it cannot be drawn.");
             }
         } else {
             return null;
