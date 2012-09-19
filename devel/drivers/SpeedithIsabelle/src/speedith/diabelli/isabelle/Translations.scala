@@ -32,7 +32,7 @@ object Translations {
     println("Malfunctioning example:");
     testExample(Example10_unescapedYXML_isa2012);
     
-    println("Test something quickly:");
+    /*println("Test something quickly:");
     
     testExample(Example6_unescapedYXML);
     testExample(Example7_unescapedYXML);
@@ -43,7 +43,7 @@ object Translations {
     testExample(Example5_unescapedYXML);
     testExample(Example3_unescapedYXML);
     testExample(Example2_unescapedYXML);
-    testExample(Example1_unescapedYXML);
+    testExample(Example1_unescapedYXML);*/
   }
 
   private def testPremises(s: String): SpiderDiagram = {
@@ -182,7 +182,7 @@ object Translations {
       val body = findQuantifiedVarsAndBody(term, spiders);
       // Make sure that all spiders have the same type:
       if (!spiders.forall { spiders => checkSpiderType(spiders.typ, spiderType1) }) throw new ReadingException("Not all spiders are of the same type.");
-
+      
       // Now find all premises and the conclusion:
       val premises = ArrayBuffer[Term]();
       val conclusion = findPremisesAndConclusion(body, premises);
@@ -352,7 +352,7 @@ object Translations {
 
   private def findContoursInTerm(term: Term, spiderType: Typ, outContours: HashSet[Free] = HashSet[Free]()): Typ = {
     term match {
-      case t @ Free(predicateName, Type(fun, List(spiderType1, Type(HOLTypeBool, List())))) => {
+      case t @ Free(predicateName, Type(fun, List(spiderType1))) => {
         if (!checkSpiderType(spiderType1, spiderType)) throw new ReadingException("A contour's type '%s' does not match the spider's type '%s'.".format(spiderType1, spiderType));
         outContours += t;
         spiderType1;
@@ -505,12 +505,12 @@ object Translations {
   private def convertoToPSD(spiders: Buffer[Free], spiderType: Typ, conjuncts: Buffer[Term]): (PrimarySpiderDiagram, Typ) = {
     // Check spider inequalities:
     checkSpiderInequalities(spiders, conjuncts);
-
+    
     // Get all contour names mentioned in this unitary spider diagram, the
     // predicates are of this form:
     //		Free(B,Type(fun,List(<spiderType>, Type(HOL.bool,List()))))
     val (contours, spiderType1) = findContours(conjuncts, spiderType);
-
+    
     // Get spider habitats:
     val (habitats, spiderType2) = extractHabitats(conjuncts, spiders, contours, spiderType1);
 
