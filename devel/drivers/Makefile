@@ -12,3 +12,6 @@ run-all:
 
 spisa-run:
 	@(cd SpeedithIsabelle; $(MAKE) run);
+
+isa-run:
+	@(cd IsabelleScalaWrapper; $(MAKE) run);

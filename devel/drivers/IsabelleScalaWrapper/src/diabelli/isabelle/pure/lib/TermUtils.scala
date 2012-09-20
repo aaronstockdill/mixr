@@ -1,10 +1,13 @@
 package diabelli.isabelle.pure.lib
 import java.util.ArrayList
-import java.util.List
 import isabelle.Term._
 import scala.collection.mutable.Buffer
 import scala.collection.JavaConversions
 import scala.collection.mutable.ArrayBuffer
+
+sealed abstract class Placeholder;
+case class PlaceholderWithoutVars(formulaFormat: String, payloadFormula: String) extends Placeholder;
+case class PlaceholderWithVars(variables: List[Term], formulaFormat: String, payloadFormula: String) extends Placeholder;
 
 /**
  * Provides a bunch of methods for
@@ -29,25 +32,27 @@ object TermUtils {
   val HOLFalse = "HOL.False";
   // Types
   val HOLTypeBool = "HOL.bool";
+  val HOL_bool = HOLTypeBool;
 
   def main(args: Array[String]): Unit = {
-    val premises: ArrayList[Term] = new ArrayList();
-    val conclusion: Term = findPremisesAndConclusion(TermYXML.parseYXML(TermYXML.Example2_unescapedYXML), premises);
-    println(conclusion);
-    println(premises);
-    println(premises.size());
-    val variables: ArrayList[Free] = new ArrayList();
-    val body: Term = findQuantifiedVarsAndBody(TermYXML.parseYXML(TermYXML.Example3_unescapedYXML), variables);
-    println(body);
-    println(variables);
-    println(variables.size());
+    val t = TermYXML.parseYXML(TermYXML.Examples_unescaped(4));
+    traverseTermTree(t, t => {
+      val ph = extractPlaceholder(t);
+      if (ph == null) {
+        println("Not a placeholder.");
+        false;
+      } else {
+        println("Placeholder: %s".format(ph));
+        true;
+      }
+    });
   }
 
   /**
    * Extracts the premises and the conclusion from the given term `t`. This
    * method puts the premises into the given array and returns the conclusion.
    */
-  def findPremisesAndConclusion(t: Term, premises: List[Term]): Term = {
+  def findPremisesAndConclusion(t: Term, premises: java.util.List[Term]): Term = {
     t match {
       case App(App(Const(MetaImplication, _), lhsTerm), rhsTerm) => {
         premises.add(lhsTerm);
@@ -74,7 +79,7 @@ object TermUtils {
    *
    * The quantified variables in the body are still retained as bound.
    */
-  def findQuantifiedVarsAndBody(t: Term, variables: List[Free]): Term = {
+  def findQuantifiedVarsAndBody(t: Term, variables: java.util.List[Free]): Term = {
     t match {
       case App(Const(MetaAll, _), Abs(varName, varType, body)) => {
         variables.add(Free(varName, varType));
@@ -111,13 +116,21 @@ object TermUtils {
    * Returns the terms that represent the elements of the `listTerm` which must
    * be an HOL list.
    */
-  def getListElements(listTerm: Term, outElements: List[Term]): List[Term] = {
+  def getListElements(listTerm: Term, outElements: java.util.List[Term]): java.util.List[Term] = {
     listTerm match {
       case App(App(Const(HOLListCons, _), element), rest) => { outElements.add(element); getListElements(rest, outElements); }
       case Const(HOLListNil, _) => {}
       case x => throw new IllegalArgumentException("The given term is not an HOL list. It contained the term '%s'.".format(x));
     }
     outElements;
+  }
+
+  def traverseListElements(listTerm: Term, visitor: Term => Unit): Unit = {
+    listTerm match {
+      case App(App(Const(HOLListCons, _), element), rest) => { visitor(element); traverseListElements(rest, visitor); }
+      case Const(HOLListNil, _) => {}
+      case _ => throw new IllegalArgumentException("The given term is not an HOL list. It contained the term '%s'.".format(listTerm));
+    }
   }
 
   /**
@@ -127,5 +140,96 @@ object TermUtils {
   def getListElements(listTerm: Term, outElements: Buffer[Term] = ArrayBuffer[Term]()): Buffer[Term] = {
     getListElements(listTerm, JavaConversions.bufferAsJavaList(outElements));
     outElements;
+  }
+
+  /**
+   * Visits every term in the given term tree.
+   */
+  def traverseTermTree(t: Term, visitor: Term => Boolean): Boolean = {
+    if (visitor(t)) return true;
+    t match {
+      case Abs(_, _, t1) => traverseTermTree(t1, visitor);
+      case App(t1, t2) => { if (traverseTermTree(t1, visitor)) return true; traverseTermTree(t2, visitor); }
+      case _ => false;
+    }
+  }
+
+  /**
+   * If the term represents a string it will extract the string from it. Otherwise it will return `null`.
+   */
+  def extractString(t: Term): String = {
+    t match {
+      case App(App(NonEmptyStringTerm, firstChar), otherChars) => {
+        val sb = new StringBuilder();
+        sb.append(extractChar(firstChar));
+        traverseListElements(otherChars, ch => {
+          sb.append(extractChar(ch));
+        });
+        sb.toString();
+      }
+      case EmptyStringTerm => "";
+      case _ => null;
+    }
+  }
+
+  val Placeholder_Diabelli = "HeterogeneousStatements.Diabelli";
+  val Placeholder_DiabelliWithVars = "HeterogeneousStatements.Dbli";
+  val Placeholder_Vars = "HeterogeneousStatements.diabelli_var";
+
+  /**
+   * If the term is a placeholder then this method extracts and returns it. If it is not a placeholder, it returns `null`.
+   */
+  def extractPlaceholder(t: Term): Placeholder = {
+    t match {
+      case App(Const(Placeholder_Diabelli, Type(Fun, List(CharListType, BoolType))), payload) => {
+        val payloadString = extractString(payload);
+        val delimiterIndex = payloadString.indexOf(':');
+        if (delimiterIndex < 0) return null;
+        PlaceholderWithoutVars(payloadString.substring(0, delimiterIndex), payloadString.substring(delimiterIndex + 1));
+      }
+      case App(App(Const(Placeholder_DiabelliWithVars, Type(Fun, List(Type(List_list, List(Type(Placeholder_Vars, List()))), Type(Fun, List(CharListType, BoolType))))), vars), payload) => {
+        val payloadString = extractString(payload);
+        val delimiterIndex = payloadString.indexOf(':');
+        if (delimiterIndex < 0) return null;
+        PlaceholderWithVars(Nil, payloadString.substring(0, delimiterIndex), payloadString.substring(delimiterIndex + 1));
+      }
+      case _ => null;
+    }
+  }
+
+  private val Fun = "fun";
+  private val String_nibble = "String.nibble";
+  private val String_char = "String.char";
+  private val String_char_Char = "String.char.Char";
+  private val List_list_Cons = "List.list.Cons";
+  private val List_list_Nil = "List.list.Nil";
+  private val List_list = "List.list";
+  private val NibbleType = Type(String_nibble, List());
+  private val CharType = Type(String_char, List());
+  private val CharListType = Type(List_list, List(CharType));
+  private val EmptyStringTerm = Const(List_list_Nil, CharListType);
+  private val BoolType = Type(HOL_bool, List());
+  private val NonEmptyStringTerm = Const(List_list_Cons, Type(Fun, List(CharType, Type(Fun, List(CharListType, CharListType)))));
+
+  private def extractChar(t: Term): Char = {
+    t match {
+      case App(App(Const(String_char_Char, Type(Fun, List(NibbleType, Type(Fun, List(NibbleType, CharType))))), Const(n1, NibbleType)), Const(n2, NibbleType)) => extractCharFromNibbles(n1, n2);
+      case _ => throw new IllegalArgumentException("Expected a character term. Got '%s'.".format(t));
+    }
+  }
+
+  private def extractCharFromNibbles(n1: String, n2: String): Char = {
+    val hexChar1 = n1.charAt(n1.length() - 1);
+    val hexChar2 = n2.charAt(n2.length() - 1);
+    ((hexCharToInt(hexChar1) << 4) + hexCharToInt(hexChar2)).toChar;
+  }
+
+  private def hexCharToInt(hex: Char): Int = {
+    if (hex >= '0' && hex <= '9')
+      hex - '0';
+    else if (hex >= 'A' && hex <= 'F')
+      hex - 'A' + 10;
+    else
+      throw new IllegalArgumentException("Not a hexadecimal character.");
   }
 }
