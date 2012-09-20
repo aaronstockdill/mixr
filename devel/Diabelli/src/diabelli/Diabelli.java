@@ -28,7 +28,6 @@ import diabelli.components.DiabelliComponent;
 import diabelli.components.FormulaPresenter;
 import diabelli.components.GoalProvidingReasoner;
 import diabelli.components.Reasoner;
-import diabelli.components.RuleApplicationReasoner;
 import diabelli.logic.FormulaFormat;
 import java.util.Set;
 import org.openide.util.Lookup;

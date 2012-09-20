@@ -14,6 +14,6 @@ SCALA_CLASSPATH=$(libPure):../IsabelleScalaWrapper/dist/libIsaWrapper.jar:../../
 .PHONY : all build clean
 all: build
 
-clean: cleanClasses
+clean: clean-all
 
 build: mkClassDir $(CLASSES) mkJar
