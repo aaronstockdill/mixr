@@ -172,9 +172,12 @@ object TermUtils {
     }
   }
 
-  val Placeholder_Diabelli = "HeterogeneousStatements.Diabelli";
-  val Placeholder_DiabelliWithVars = "HeterogeneousStatements.Dbli";
-  val Placeholder_Vars = "HeterogeneousStatements.diabelli_var";
+  private val Placeholder_Diabelli = "HeterogeneousStatements.Diabelli";
+  private val Placeholder_DiabelliWithVars = "HeterogeneousStatements.Dbli";
+  private val Placeholder_Vars = "HeterogeneousStatements.diabelli_var";
+  private val Type_PlaceholderVars = Type(Placeholder_Vars, List());
+  private val Type_PlaceholderVars_List = List(Type_PlaceholderVars);
+  private val HeterogeneousStatements_About = "HeterogeneousStatements.About";
 
   /**
    * If the term is a placeholder then this method extracts and returns it. If it is not a placeholder, it returns `null`.
@@ -185,15 +188,41 @@ object TermUtils {
         val payloadString = extractString(payload);
         val delimiterIndex = payloadString.indexOf(':');
         if (delimiterIndex < 0) return null;
-        PlaceholderWithoutVars(payloadString.substring(0, delimiterIndex), payloadString.substring(delimiterIndex + 1));
+        new PlaceholderWithoutVars(payloadString.substring(0, delimiterIndex), payloadString.substring(delimiterIndex + 1));
       }
-      case App(App(Const(Placeholder_DiabelliWithVars, Type(Fun, List(Type(List_list, List(Type(Placeholder_Vars, List()))), Type(Fun, List(CharListType, BoolType))))), vars), payload) => {
+      case App(App(Const(Placeholder_DiabelliWithVars, Type(Fun, List(Type(List_list, Type_PlaceholderVars_List), Type(Fun, List(CharListType, BoolType))))), vars), payload) => {
         val payloadString = extractString(payload);
         val delimiterIndex = payloadString.indexOf(':');
         if (delimiterIndex < 0) return null;
-        PlaceholderWithVars(Nil, payloadString.substring(0, delimiterIndex), payloadString.substring(delimiterIndex + 1));
+        val varList = extractPlaceholderVars(vars);
+        PlaceholderWithVars(varList, payloadString.substring(0, delimiterIndex), payloadString.substring(delimiterIndex + 1));
       }
       case _ => null;
+    }
+  }
+
+  def extractPlaceholderVars(t: Term): List[Term] = {
+    t match {
+      case App(App(Const(List_list_Cons, Type(Fun, List(Type_PlaceholderVars, Type(Fun, List(Type(List_list, Type_PlaceholderVars_List), Type(List_list, Type_PlaceholderVars_List)))))), first), other) => {
+        val outVars = Buffer[Term]();
+        extractPlaceholderVarGroup(first, outVars);
+        traverseListElements(other, t => {
+          extractPlaceholderVarGroup(t, outVars);
+        });
+        outVars.toList;
+      }
+      case _ => throw new IllegalArgumentException("Not a valid list of placeholder variables.");
+    }
+  }
+
+  def extractPlaceholderVarGroup(t: Term, outVars: Buffer[Term]) = {
+    t match {
+      case App(Const(HeterogeneousStatements_About, Type(Fun, List(Type(List_list, List(TFree_a)), Type_PlaceholderVars))), vars) => {
+        traverseListElements(vars, t => {
+          outVars += t;
+        });
+      }
+      case _ => throw new IllegalArgumentException("Not a valid group of placeholder variables.");
     }
   }
 
@@ -210,6 +239,9 @@ object TermUtils {
   private val EmptyStringTerm = Const(List_list_Nil, CharListType);
   private val BoolType = Type(HOL_bool, List());
   private val NonEmptyStringTerm = Const(List_list_Cons, Type(Fun, List(CharType, Type(Fun, List(CharListType, CharListType)))));
+  private val HOL_type = "HOL.type";
+  private val HOL_type_List = List(HOL_type);
+  private val TFree_a = TFree("'a", HOL_type_List);
 
   private def extractChar(t: Term): Char = {
     t match {
