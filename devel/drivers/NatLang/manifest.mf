@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module: diabelli.demo.driver.natlang
+OpenIDE-Module-Localizing-Bundle: diabelli/demo/driver/natlang/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+

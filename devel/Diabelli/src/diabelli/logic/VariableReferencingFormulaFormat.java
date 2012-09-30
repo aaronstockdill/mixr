@@ -30,7 +30,8 @@ import java.util.Set;
  * Formulae of this format may contain free variables (or variables that are
  * bound outside of the scope of the formula).
  *
- * @param <T> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}.
+ * @param <T> the
+ * {@link FormulaFormat#getRawFormulaType() type of the raw formula}.
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
@@ -38,14 +39,16 @@ public interface VariableReferencingFormulaFormat<T> extends FormulaFormat<T> {
 
     /**
      * Returns the names of variables that are free in the formula (or that are
-     * bound outside of the scope of the formula). The context goal may be used
-     * to determine the names of globally bound variables.
+     * bound outside of the scope of the formula).
+     *
+     * <p>This function may return {@code null}, which denotes that there are no
+     * externally referenced variables in this formula.</p>
      *
      * @param formula the formula from which we want to extract free variables.
-     * @param context the context which the variable extraction algorithm may
-     * use to find the proper names.
      * @return the names of variables that are free in the formula (or that are
-     * bound outside of the scope of the formula).
+     * bound outside of the scope of the formula). May be {@code null}, which
+     * denotes that there are no externally referenced variables in this
+     * formula.
      */
-    Set<String> getFreeVariables(Formula<T> formula, Goal context);
+    Set<String> getFreeVariables(FormulaRepresentation<T> formula);
 }

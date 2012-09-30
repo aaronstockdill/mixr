@@ -64,8 +64,8 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_ReasonersListAction",
 preferredID = "ReasonersListTopComponent")
 @Messages({
-    "CTL_ReasonersListAction=Diabelli Reasoners",
-    "CTL_ReasonersListTopComponent=Diabelli Reasoners",
+    "CTL_ReasonersListAction=Diabelli Components",
+    "CTL_ReasonersListTopComponent=Diabelli Components",
     "HINT_ReasonersListTopComponent=This is a list of all Diabelli components (reasoners, presenters, etc.)."
 })
 public final class ReasonersListTopComponent extends TopComponent implements ExplorerManager.Provider {
@@ -87,9 +87,9 @@ public final class ReasonersListTopComponent extends TopComponent implements Exp
         InputMap keys = this.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
         this.lookup = ExplorerUtils.createLookup(this.em, map);
         this.associateLookup(this.lookup);
-        
-        
-        Children children = new ReasonersRootNode();
+
+
+        Children children = new ComponentsRootNode();
         Node root = new AbstractNode(children);
         this.em.setRootContext(root);
         this.em.getRootContext().setDisplayName("DiabelliReasonersList");
@@ -149,42 +149,48 @@ public final class ReasonersListTopComponent extends TopComponent implements Exp
     //</editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Explorer Nodes">
-    private static class ReasonersNode extends AbstractNode implements Comparable<ReasonersNode> {
-        
-        private Reasoner reasoner;
+    private static class ReasonersNode extends ComponentNode {
 
-        @Messages({
-            "ReasonersNode_reasoner_null=The reasoner must not be null."
-        })
         public ReasonersNode(Reasoner reasoner) {
-            super(Children.LEAF, Lookups.singleton(reasoner));
-            if (reasoner == null) {
-                throw new IllegalArgumentException(Bundle.ReasonersNode_reasoner_null());
-            }
-            this.reasoner = reasoner;
-            setName(reasoner.toString());
-            setDisplayName(reasoner.getName());
-        }
-
-        public Reasoner getReasoner() {
-            return reasoner;
-        }
-
-        @Override
-        public int compareTo(ReasonersNode o) {
-            return getReasoner().getName().compareToIgnoreCase(o.getReasoner().getName());
+            super(reasoner);
         }
     }
 
-    private static class ReasonersRootNode extends Children.Array {
+    private static class ComponentNode extends AbstractNode implements Comparable<ComponentNode> {
+
+        private DiabelliComponent component;
+
+        public DiabelliComponent getComponent() {
+            return component;
+        }
+
+        @Messages({
+            "ComponentNode_component_null=The component must not be null."
+        })
+        public ComponentNode(DiabelliComponent component) {
+            super(Children.LEAF, Lookups.singleton(component));
+            if (component == null) {
+                throw new IllegalArgumentException(Bundle.ComponentNode_component_null());
+            }
+            this.component = component;
+            setName(component.toString());
+            setDisplayName(component.getName());
+        }
+
+        @Override
+        public int compareTo(ComponentNode o) {
+            return getComponent().getName().compareToIgnoreCase(o.getComponent().getName());
+        }
+    }
+
+    private static class ComponentsRootNode extends Children.Array {
 
         private Lookup.Result<DiabelliComponent> reasonersLookupResult;
 
-        public ReasonersRootNode() {
+        public ComponentsRootNode() {
             Diabelli diabelli = Lookup.getDefault().lookup(Diabelli.class);
             reasonersLookupResult = diabelli.getLookup().lookupResult(DiabelliComponent.class);
             reasonersLookupResult.addLookupListener(new LookupListener() {
-
                 @Override
                 public void resultChanged(LookupEvent ev) {
                     updateReasonersList();
@@ -202,14 +208,15 @@ public final class ReasonersListTopComponent extends TopComponent implements Exp
                     if (reasoner instanceof Reasoner) {
                         Reasoner r = (Reasoner) reasoner;
                         reasonerNodes.add(new ReasonersNode(r));
+                    } else {
+                        reasonerNodes.add(new ComponentNode(reasoner));
                     }
                 }
             }
             Collections.sort(reasonerNodes, new Comparator<Node>() {
-
                 @Override
                 public int compare(Node o1, Node o2) {
-                    return ((ReasonersNode)o1).compareTo((ReasonersNode)o2);
+                    return ((ComponentNode) o1).compareTo((ComponentNode) o2);
                 }
             });
             return reasonerNodes;

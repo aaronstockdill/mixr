@@ -130,6 +130,9 @@ public final class DiabelliImpl implements Diabelli, Runnable {
     @Override
     public void run() {
         if (!initialised) {
+            // Set the build number:
+            System.setProperty("netbeans.buildnumber", "1.0.5"); 
+            
             updateComponentsList();
 
             // Now call the final stage in the initialisation of managers:

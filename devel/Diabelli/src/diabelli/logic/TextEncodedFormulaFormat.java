@@ -33,19 +33,6 @@ package diabelli.logic;
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public interface TextEncodedFormulaFormat<T> extends FormulaFormat<T> {
-
-    /**
-     * Encodes the given formula into a Unicode string.
-     *
-     * @param formula the formula to be encoded as a string.
-     * @return the Unicode string that encodes the given formula.
-     * @throws diabelli.logic.TextEncodedFormulaFormat.FormulaEncodingException
-     * thrown if the encoding failed for any reason (for example, if the given
-     * formula is not of this format). <p>The message in this exception will be
-     * shown to the user in the GUI, it is therefore desired that the message be
-     * localised and human-readable.</p>
-     */
-    String encodeAsString(Formula<T> formula) throws FormulaEncodingException;
     
     /**
      * Encodes the given formula into a Unicode string.
@@ -70,7 +57,7 @@ public interface TextEncodedFormulaFormat<T> extends FormulaFormat<T> {
      * exception will be shown to the user in the GUI, it is therefore desired
      * that the message be localised and human-readable.</p>
      */
-    Formula<T> decodeFromString(String encodedFormula) throws FormulaEncodingException;
+    FormulaRepresentation<T> decodeFromString(String encodedFormula) throws FormulaEncodingException;
 
     //<editor-fold defaultstate="collapsed" desc="Exception Class">
     /**
