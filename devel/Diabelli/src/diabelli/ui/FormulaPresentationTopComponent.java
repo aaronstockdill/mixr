@@ -182,10 +182,10 @@ public final class FormulaPresentationTopComponent extends TopComponent {
         for (FormulaFormat<?> formulaFormat : inFormats) {
             ArrayList<? extends FormulaRepresentation<?>> reps = formula.fetchRepresentations(formulaFormat);
             if (reps != null && reps.size() > 0) {
-                Set<FormulaPresenter<?>> presenters = getPresentersFor(formulaFormat);
+                Set<FormulaPresenter> presenters = getPresentersFor(formulaFormat);
                 if (presenters != null && presenters.size() > 0) {
                     for (FormulaRepresentation<?> rep : reps) {
-                        for (FormulaPresenter<?> presenter : presenters) {
+                        for (FormulaPresenter presenter : presenters) {
                             try {
                                 Component visualiser = presenter.createVisualiserFor(rep);
                                 addVisualisation(goalNode, goalIndex, formulaFormat, rep, presenter, visualiser);
@@ -199,7 +199,7 @@ public final class FormulaPresentationTopComponent extends TopComponent {
         }
     }
 
-    private void addVisualisation(GeneralGoalNode goalNode, int goalIndex, FormulaFormat<?> formulaFormat, FormulaRepresentation<?> rep, FormulaPresenter<?> presenter, Component visualiser) {
+    private void addVisualisation(GeneralGoalNode goalNode, int goalIndex, FormulaFormat<?> formulaFormat, FormulaRepresentation<?> rep, FormulaPresenter presenter, Component visualiser) {
         // Now put the panel onto this panel:
         SingleFormulaPresentationPanel pnl = new SingleFormulaPresentationPanel(goalNode, rep, goalIndex, -1, visualiser, presenter);
         visualisationsPanel.add(pnl);
@@ -314,7 +314,7 @@ public final class FormulaPresentationTopComponent extends TopComponent {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Private Helper Methods">
-    private static Set<FormulaPresenter<?>> getAllPresenters() {
+    private static Set<FormulaPresenter> getAllPresenters() {
         return Lookup.getDefault().lookup(Diabelli.class).getPresentationManager().getPresenters();
     }
 
@@ -322,7 +322,7 @@ public final class FormulaPresentationTopComponent extends TopComponent {
         return Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager().getFormulaFormats();
     }
 
-    private Set<FormulaPresenter<?>> getPresentersFor(FormulaFormat<?> format) {
+    private Set<FormulaPresenter> getPresentersFor(FormulaFormat<?> format) {
         return Lookup.getDefault().lookup(Diabelli.class).getPresentationManager().getPresenters(format);
     }
     // </editor-fold>

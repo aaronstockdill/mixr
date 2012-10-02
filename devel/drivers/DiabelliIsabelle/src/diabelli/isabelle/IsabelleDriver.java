@@ -42,6 +42,7 @@ import java.beans.PropertyVetoException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -78,7 +79,7 @@ import org.openide.windows.TopComponent;
 public class IsabelleDriver extends BareGoalProvidingReasoner implements
         GoalAcceptingReasoner,
         FormulaFormatsProvider,
-        FormulaPresenter<StringFormula> {
+        FormulaPresenter {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
     private IsabelleMessageListener isabelleListener;
@@ -102,33 +103,24 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
     public Collection<FormulaFormat<?>> getFormulaFormats() {
         return FormulaFormatsContainer.IsabelleFormats;
     }
+
+    private static class FormulaFormatsContainer {
+
+        private static final List<FormulaFormat<?>> IsabelleFormats;
+
+        static {
+            ArrayList<FormulaFormat<?>> tmp = new ArrayList<>();
+            tmp.add(TermFormatDescriptor.getInstance());
+            tmp.add(StringFormat.getInstance());
+            IsabelleFormats = Collections.unmodifiableList(tmp);
+        }
+    }
     //</editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Formula Presenter Implementation">
     @Override
-    public FormulaFormat<StringFormula> getPresentedFormat() {
-        return StringFormat.getInstance();
-    }
-
-    @Override
-    public Component createVisualiserFor(Goal goal) throws VisualisationException {
-        if (goal == null) {
-            return null;
-        }
-        return createVisualiserFor(goal.asFormula());
-    }
-
-    @Override
-    public Component createVisualiserFor(Formula<?> formula) throws VisualisationException {
-        if (formula == null) {
-            return null;
-        }
-        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
-            if (canPresent(formulaFormat)) {
-                return createVisualiserFor(formula.getRepresentation(formulaFormat));
-            }
-        }
-        return null;
+    public Set<FormulaFormat<?>> getPresentedFormats() {
+        return PresentedFormatsContainer.PresentedFormats;
     }
 
     public boolean canPresent(FormulaFormat<?> format) {
@@ -147,6 +139,17 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
             return mtd;
         } else {
             return null;
+        }
+    }
+
+    private static class PresentedFormatsContainer {
+
+        private static final Set<FormulaFormat<?>> PresentedFormats;
+
+        static {
+            Set<FormulaFormat<?>> tmp = new HashSet<>();
+            tmp.add(StringFormat.getInstance());
+            PresentedFormats = Collections.unmodifiableSet(tmp);
         }
     }
     // </editor-fold>
@@ -174,11 +177,12 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
         if (step instanceof GoalTransformationResult) {
             GoalTransformationResult goalTransformationResult = (GoalTransformationResult) step;
             Goals originalGoals = goalTransformationResult.getOriginalGoals();
-            if (originalGoals == null || originalGoals.isEmpty() || !(originalGoals.get(0) instanceof TermGoal))
+            if (originalGoals == null || originalGoals.isEmpty() || !(originalGoals.get(0) instanceof TermGoal)) {
                 return;
+            }
             // Get the proof script document into which we will insert the
             // Isabelle command:
-            ProofDocument proofDocument = ((TermGoal)originalGoals.get(0)).getProofContext();
+            ProofDocument proofDocument = ((TermGoal) originalGoals.get(0)).getProofContext();
             if (proofDocument != null) {
                 // Get the transformed goals:
                 // TODO: Handle multiple goals:
@@ -264,18 +268,6 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
      * for any reason.
      */
     protected void preCurrentGoalsChanged(Goals oldGoals, Goals newGoals) throws PropertyVetoException {
-    }
-
-    private static class FormulaFormatsContainer {
-
-        private static final List<FormulaFormat<?>> IsabelleFormats;
-
-        static {
-            ArrayList<FormulaFormat<?>> tmp = new ArrayList<>();
-            tmp.add(TermFormatDescriptor.getInstance());
-            tmp.add(StringFormat.getInstance());
-            IsabelleFormats = Collections.unmodifiableList(tmp);
-        }
     }
     // </editor-fold>
 

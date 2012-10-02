@@ -27,10 +27,9 @@ package diabelli.components;
 import diabelli.logic.Formula;
 import diabelli.logic.FormulaFormat;
 import diabelli.logic.FormulaRepresentation;
-import diabelli.logic.Goal;
 import diabelli.ui.CurrentFormulaTopComponent;
 import java.awt.Component;
-import javax.swing.JPanel;
+import java.util.Set;
 import org.netbeans.api.annotations.common.NonNull;
 
 /**
@@ -48,7 +47,7 @@ import org.netbeans.api.annotations.common.NonNull;
  * visualising.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface FormulaPresenter<T> extends DiabelliComponent {
+public interface FormulaPresenter extends DiabelliComponent {
 
     /**
      * Returns the format type of formulae this presenter is capable of
@@ -61,38 +60,7 @@ public interface FormulaPresenter<T> extends DiabelliComponent {
      * visualising.
      */
     @NonNull
-    FormulaFormat<T> getPresentedFormat();
-
-    /**
-     * Returns a panel which displays the given goal. The returned panel will be
-     * placed in a sub-window in the main GUI of Diabelli.
-     *
-     * <p>This method may return {@code null} if the visualisation was not
-     * possible for expected reasons, if the given formula is {@code null}, or
-     * if the given goal does not have a representation in the right format.</p>
-     *
-     * @param goal the formula to be visualised.
-     * @return a panel which displays the given goal.
-     * @throws diabelli.components.FormulaPresenter.VisualisationException see {@link VisualisationException}
-     * for info on when this exception is thrown.
-     */
-    Component createVisualiserFor(Goal goal) throws VisualisationException;
-
-    /**
-     * Returns a panel which displays the given goal. The returned panel will be
-     * placed in a sub-window in the main GUI of Diabelli.
-     *
-     * <p>This method may return {@code null} if the visualisation was not
-     * possible for expected reasons, if the given formula is {@code null}, or
-     * if the given formula does not have a representation in the right
-     * format.</p>
-     *
-     * @param formula the formula to be visualised.
-     * @return a panel which displays the given goal.
-     * @throws diabelli.components.FormulaPresenter.VisualisationException see {@link VisualisationException}
-     * for info on when this exception is thrown.
-     */
-    Component createVisualiserFor(Formula<?> formula) throws VisualisationException;
+    Set<FormulaFormat<?>> getPresentedFormats();
 
     /**
      * Returns a panel which displays the given goal. The returned panel will be

@@ -46,7 +46,7 @@ public interface PresentationManager {
      * @return a collection of all registered {@link FormulaPresenter formula
      * presenters}.
      */
-    Set<FormulaPresenter<?>> getPresenters();
+    Set<FormulaPresenter> getPresenters();
 
     /**
      * Returns formula presenters that can visualise formulae of the given
@@ -56,7 +56,7 @@ public interface PresentationManager {
      * @return formula presenters that can visualise formulae of the given
      * format.
      */
-    Set<FormulaPresenter<?>> getPresenters(FormulaFormat<?> format);
+    Set<FormulaPresenter> getPresenters(FormulaFormat<?> format);
 
     /**
      * Returns the number of {@link PresentationManager#getPresenters() registered

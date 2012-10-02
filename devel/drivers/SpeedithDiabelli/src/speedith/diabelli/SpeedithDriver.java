@@ -72,7 +72,7 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
         GoalTransformingReasoner,
         FormulaFormatsProvider,
         FormulaTranslationsProvider,
-        FormulaPresenter<SpiderDiagram> {
+        FormulaPresenter {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
     private List<InferenceRuleDescriptor> knownInferenceRules;
@@ -94,29 +94,8 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
 
     // <editor-fold defaultstate="collapsed" desc="Formula Presenter Implementation">
     @Override
-    public SpiderDiagramPanel createVisualiserFor(Goal goal) throws VisualisationException {
-        if (goal == null) {
-            return null;
-        }
-        return createVisualiserFor(goal.asFormula());
-    }
-
-    @Override
-    public SpiderDiagramPanel createVisualiserFor(Formula<?> formula) throws VisualisationException {
-        if (formula == null) {
-            return null;
-        }
-        for (FormulaFormat<?> formulaFormat : formula.getFormats()) {
-            if (canPresent(formulaFormat)) {
-                return createVisualiserFor(formula.getRepresentation(formulaFormat));
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public FormulaFormat<SpiderDiagram> getPresentedFormat() {
-        return SpeedithFormatDescriptor.getInstance();
+    public Set<FormulaFormat<?>> getPresentedFormats() {
+        return PresentedFormatsContainer.PresentedFormats;
     }
 
     public boolean canPresent(FormulaFormat<?> format) {
@@ -134,6 +113,17 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
             }
         } else {
             return null;
+        }
+    }
+
+    private static class PresentedFormatsContainer {
+
+        private static final Set<FormulaFormat<?>> PresentedFormats;
+
+        static {
+            Set<FormulaFormat<?>> tmp = new HashSet<>();
+            tmp.add(SpeedithFormatDescriptor.getInstance());
+            PresentedFormats = Collections.unmodifiableSet(tmp);
         }
     }
     // </editor-fold>
