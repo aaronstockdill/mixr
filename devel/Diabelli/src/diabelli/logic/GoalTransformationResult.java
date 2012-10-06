@@ -25,7 +25,6 @@
 package diabelli.logic;
 
 import diabelli.components.GoalTransformer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
