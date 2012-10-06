@@ -24,7 +24,7 @@
  */
 package diabelli.components.util;
 
-import diabelli.components.GoalProvidingReasoner;
+import diabelli.components.GoalProvider;
 import diabelli.logic.Goals;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -35,11 +35,11 @@ import org.openide.util.NbBundle;
 
 /**
  * Provides a <span style="font-style:italic;">bare</span> (partial and
- * convenience) implementation of the {@link GoalProvidingReasoner} interface.
+ * convenience) implementation of the {@link GoalProvider} interface.
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public abstract class BareGoalProvidingReasoner implements GoalProvidingReasoner, RandomAccess {
+public abstract class BareGoalProvidingReasoner implements GoalProvider, RandomAccess {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
     protected Goals goals;

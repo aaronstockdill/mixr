@@ -26,7 +26,7 @@ package diabelli.ui.actions;
 
 import diabelli.Diabelli;
 import diabelli.components.GoalAcceptingReasoner;
-import diabelli.components.GoalTransformingReasoner;
+import diabelli.components.GoalTransformer;
 import diabelli.logic.Goals;
 import diabelli.logic.InferenceRuleDescriptor;
 import diabelli.logic.InferenceTarget;
@@ -126,8 +126,8 @@ public final class ApplyInferenceRuleAction extends AbstractAction implements Pr
         InferenceTarget target = getTarget();
 
         // Check with all goal-transforming reasoners
-        Set<GoalTransformingReasoner> goalTransformingReasoners = Lookup.getDefault().lookup(Diabelli.class).getReasonersManager().getGoalTransformingReasoners();
-        for (GoalTransformingReasoner goalTransformingReasoner : goalTransformingReasoners) {
+        Set<GoalTransformer> goalTransformingReasoners = Lookup.getDefault().lookup(Diabelli.class).getReasonersManager().getGoalTransformingReasoners();
+        for (GoalTransformer goalTransformingReasoner : goalTransformingReasoners) {
             if (goalTransformingReasoner.canTransform(target)) {
                 // Now add all applicable inference rules to the submenu:
                 Collection<InferenceRuleDescriptor> applicableInferenceRules = goalTransformingReasoner.getApplicableInferenceRules(target);

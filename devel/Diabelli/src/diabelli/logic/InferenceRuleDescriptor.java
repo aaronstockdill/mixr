@@ -24,16 +24,16 @@
  */
 package diabelli.logic;
 
-import diabelli.components.GoalTransformingReasoner;
+import diabelli.components.GoalTransformer;
 
 /**
  * A simple object that describes an inference rule. Instances of this class are
- * provided by {@link GoalTransformingReasoner goal-transforming
+ * provided by {@link GoalTransformer goal-transforming
  * reasoners} to identify and describe all its inference rules to the user.
  *
  * <p>Instances of this class are also used to choose the inference rule to be
  * applied in
- * {@link GoalTransformingReasoner#applyInferenceRule(diabelli.logic.InferenceTarget, diabelli.logic.InferenceRuleDescriptor)}.</p>
+ * {@link GoalTransformer#applyInferenceRule(diabelli.logic.InferenceTarget, diabelli.logic.InferenceRuleDescriptor)}.</p>
  *
  * <p>This class is immutable.</p>
  *
@@ -57,15 +57,26 @@ public interface InferenceRuleDescriptor {
      * @return a human-readable description of this inference rule.
      */
     String getDescription();
-    
+
     /**
-     * Returns a reference to the goal-transforming reasoner that provides
-     * this inference rule.
-     * 
-     * @return a reference to the goal-transforming reasoner that provides
-     * this inference rule.
+     * Indicates whether this rule can be used non-interactively, that is,
+     * whether this rule can be called by other drivers without the need of
+     * user's intervention.
+     *
+     * @return a value that indicates whether this rule can be used
+     * non-interactively, that is, whether this rule can be called by other
+     * drivers without the need of user's intervention.
      */
-    GoalTransformingReasoner getOwner();
+    boolean isFullyAutomated();
+
+    /**
+     * Returns a reference to the goal-transforming reasoner that provides this
+     * inference rule.
+     *
+     * @return a reference to the goal-transforming reasoner that provides this
+     * inference rule.
+     */
+    GoalTransformer getOwner();
     // TODO: Add categories at some point in the future...
 //    String getCategoryName();
     // </editor-fold>

@@ -1,5 +1,5 @@
 /*
- * File name: GoalProvidingReasoner.java
+ * File name: GoalProvider.java
  *    Author: Matej Urbas [matej.urbas@gmail.com]
  * 
  *  Copyright © 2012 Matej Urbas
@@ -54,7 +54,7 @@ import java.beans.PropertyChangeListener;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface GoalProvidingReasoner extends Reasoner {
+public interface GoalProvider extends Reasoner {
 
     /**
      * Returns this reasoner's current goals (the ones the user is currently
@@ -68,7 +68,7 @@ public interface GoalProvidingReasoner extends Reasoner {
     //<editor-fold defaultstate="collapsed" desc="Property Changed Stuff">
     /**
      * Registers a property listener. This manager provides the following
-     * events: <ul><li>{@link GoalProvidingReasoner#CurrentGoalsChangedEvent}</li></ul>
+     * events: <ul><li>{@link GoalProvider#CurrentGoalsChangedEvent}</li></ul>
      *
      * @param listener the object that will receive the property changed events.
      */
@@ -79,7 +79,7 @@ public interface GoalProvidingReasoner extends Reasoner {
      *
      * @param listener the object that will receive the property changed events.
      * @param event the event to which the listener wants to be registered (see
-     * {@link GoalProvidingReasoner#addPropertyChangeListener(java.beans.PropertyChangeListener)}
+     * {@link GoalProvider#addPropertyChangeListener(java.beans.PropertyChangeListener)}
      * for a list of available events).
      */
     void addPropertyChangeListener(PropertyChangeListener listener, String event);
@@ -101,7 +101,7 @@ public interface GoalProvidingReasoner extends Reasoner {
      */
     void removePropertyChangeListener(PropertyChangeListener listener, String event);
     /**
-     * The identifier that will come with the {@link GoalProvidingReasoner#addPropertyChangeListener(java.beans.PropertyChangeListener) property
+     * The identifier that will come with the {@link GoalProvider#addPropertyChangeListener(java.beans.PropertyChangeListener) property
      * change event} that indicates that the current goals have changed.
      */
     static final String CurrentGoalsChangedEvent = "current_goals_changed";

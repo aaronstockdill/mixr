@@ -27,8 +27,8 @@ package diabelli.implementation;
 import diabelli.Diabelli;
 import diabelli.ReasonersManager;
 import diabelli.components.DiabelliComponent;
-import diabelli.components.GoalProvidingReasoner;
-import diabelli.components.GoalTransformingReasoner;
+import diabelli.components.GoalProvider;
+import diabelli.components.GoalTransformer;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Collections;
@@ -48,9 +48,9 @@ import org.openide.util.NbBundle;
 class ReasonersManagerImpl implements ReasonersManager, ManagerInternals {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
-    private GoalProvidingReasoner activeReasoner;
+    private GoalProvider activeReasoner;
     private Diabelli diabelli;
-    private Set<GoalTransformingReasoner> slaveReasoners;
+    private Set<GoalTransformer> slaveReasoners;
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -60,12 +60,12 @@ class ReasonersManagerImpl implements ReasonersManager, ManagerInternals {
 
     //<editor-fold defaultstate="collapsed" desc="ReasonersManager Interface Implementation">
     @Override
-    public GoalProvidingReasoner getActiveReasoner() {
+    public GoalProvider getActiveReasoner() {
         return activeReasoner;
     }
 
     @Override
-    public void requestActive(GoalProvidingReasoner reasoner) {
+    public void requestActive(GoalProvider reasoner) {
         // TODO: Some time in the future we might want to check whether the
         // currently active reasoner is busy etc.
         Logger.getLogger(ReasonersManagerImpl.class.getName()).log(Level.INFO, "Reasoner ''{0}'' requested focus.", reasoner.getName());
@@ -73,15 +73,15 @@ class ReasonersManagerImpl implements ReasonersManager, ManagerInternals {
     }
 
     @Override
-    public Set<GoalTransformingReasoner> getGoalTransformingReasoners() {
+    public Set<GoalTransformer> getGoalTransformingReasoners() {
         return slaveReasoners;
     }
     //</editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Private Properties">
-    private void setActiveReasoner(GoalProvidingReasoner reasoner) {
+    private void setActiveReasoner(GoalProvider reasoner) {
         if (reasoner != activeReasoner) {
-            GoalProvidingReasoner oldReasoner = activeReasoner;
+            GoalProvider oldReasoner = activeReasoner;
             activeReasoner = reasoner;
             fireActiveReasonerChangedEvent(oldReasoner);
         }
@@ -89,7 +89,7 @@ class ReasonersManagerImpl implements ReasonersManager, ManagerInternals {
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Property Changed Event Stuff">
-    private void fireActiveReasonerChangedEvent(GoalProvidingReasoner oldReasoner) {
+    private void fireActiveReasonerChangedEvent(GoalProvider oldReasoner) {
         pcs.firePropertyChange(ActiveReasonerChangedEvent, oldReasoner, activeReasoner);
     }
 
@@ -128,17 +128,17 @@ class ReasonersManagerImpl implements ReasonersManager, ManagerInternals {
     public void onAfterComponentsLoaded() {
         // Set the first goal providing reasoner as the active one:
         for (DiabelliComponent diabelliComponent : diabelli.getRegisteredComponents()) {
-            if (diabelliComponent instanceof GoalProvidingReasoner) {
-                requestActive((GoalProvidingReasoner)diabelliComponent);
+            if (diabelliComponent instanceof GoalProvider) {
+                requestActive((GoalProvider)diabelliComponent);
                 break;
             }
         }
         
         // Now populate the list of all goal-transforming reasoners:
-        HashSet<GoalTransformingReasoner> gtrs = new HashSet<>();
+        HashSet<GoalTransformer> gtrs = new HashSet<>();
         for (DiabelliComponent diabelliComponent : diabelli.getRegisteredComponents()) {
-            if (diabelliComponent instanceof GoalTransformingReasoner) {
-                GoalTransformingReasoner gtr = (GoalTransformingReasoner) diabelliComponent;
+            if (diabelliComponent instanceof GoalTransformer) {
+                GoalTransformer gtr = (GoalTransformer) diabelliComponent;
                 gtrs.add(gtr);
             }
         }

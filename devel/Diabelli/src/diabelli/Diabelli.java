@@ -26,7 +26,7 @@ package diabelli;
 
 import diabelli.components.DiabelliComponent;
 import diabelli.components.FormulaPresenter;
-import diabelli.components.GoalProvidingReasoner;
+import diabelli.components.GoalProvider;
 import diabelli.components.Reasoner;
 import diabelli.logic.FormulaFormat;
 import java.util.Set;
@@ -43,7 +43,7 @@ import org.openide.util.Lookup.Provider;
  *
  * <p>Additionally, this class provides central access to, for example, </p>
  *
- * {@link Reasoner Reasoners} can register themselves here, currently opened {@link GoalProvidingReasoner
+ * {@link Reasoner Reasoners} can register themselves here, currently opened {@link GoalProvider
  * standalone reasoners} (the ones that host a proof) can also be found here,
  * additionally, the {@link RuleApplicationReasoner supporting reasoners} (the
  * ones which can apply inference steps on goals or prove them outright) will

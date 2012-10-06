@@ -26,7 +26,7 @@ package diabelli.logic;
 
 import diabelli.Diabelli;
 import diabelli.FormulaFormatManager;
-import diabelli.components.GoalProvidingReasoner;
+import diabelli.components.GoalProvider;
 import diabelli.logic.FormulaTranslator.TranslationException;
 import java.util.*;
 import java.util.logging.Level;
@@ -37,7 +37,7 @@ import org.openide.util.NbBundle;
 
 /**
  * Represents a general formula. It can be a diagrammatic, sentential, or both
- * at the same time (if the {@link GoalProvidingReasoner reasoner} provides more
+ * at the same time (if the {@link GoalProvider reasoner} provides more
  * than one representation of this formula). This class can thus carry many
  * representations, or formats, of the same formula. For example, a formula can
  * be represented with many strings (using syntaxes of many theorem provers),
@@ -45,7 +45,7 @@ import org.openide.util.NbBundle;
  *
  * <p>A formula may also have the optional {@link Formula#getMainRepresentation()
  * main representation}. This representation is the original one as produced by
- * the {@link GoalProvidingReasoner goal-providing reasoner} that {@link
+ * the {@link GoalProvider goal-providing reasoner} that {@link
  * Goals#getOwner() owns} this formula. What it exactly means for a particular
  * goal-providing reasoner to have an <span style="font-style:italic;">original
  * representation</span> is up to the reasoner itself. However, the main
@@ -185,7 +185,7 @@ public class Formula<T> implements Sentence {
     // <editor-fold defaultstate="collapsed" desc="Public Properties">
     /**
      * Returns the main representation of this formula. This is usually the
-     * native formula representation of the {@link GoalProvidingReasoner
+     * native formula representation of the {@link GoalProvider
      * reasoner} that provided this formula.
      *
      * <p>Other representations must be either entailed by this representation

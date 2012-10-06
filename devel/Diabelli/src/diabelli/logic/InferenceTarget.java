@@ -24,7 +24,7 @@
  */
 package diabelli.logic;
 
-import diabelli.components.GoalTransformingReasoner;
+import diabelli.components.GoalTransformer;
 import java.util.Collections;
 import java.util.List;
 import org.netbeans.api.annotations.common.NonNull;
@@ -33,7 +33,7 @@ import org.openide.util.NbBundle;
 /**
  * Contains a collection of formulae that should be applied on by an inference
  * rule. See
- * {@link GoalTransformingReasoner#applyInferenceRule(diabelli.logic.InferenceTarget, diabelli.logic.InferenceRuleDescriptor)}
+ * {@link GoalTransformer#applyInferenceRule(diabelli.logic.InferenceTarget, diabelli.logic.InferenceRuleDescriptor)}
  * for more information.
  *
  * @author Matej Urbas [matej.urbas@gmail.com]

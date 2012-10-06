@@ -27,7 +27,7 @@ package diabelli.implementation;
 import diabelli.Diabelli;
 import diabelli.GoalsManager;
 import diabelli.ReasonersManager;
-import diabelli.components.GoalProvidingReasoner;
+import diabelli.components.GoalProvider;
 import diabelli.logic.Goals;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -116,8 +116,8 @@ class GoalsManagerImpl implements GoalsManager, ManagerInternals {
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
-            assert (evt.getOldValue() == null || evt.getOldValue() instanceof GoalProvidingReasoner);
-            unregisterGoalsListener((GoalProvidingReasoner) evt.getOldValue());
+            assert (evt.getOldValue() == null || evt.getOldValue() instanceof GoalProvider);
+            unregisterGoalsListener((GoalProvider) evt.getOldValue());
             if (diabelli.reasonersManager.getActiveReasoner() != null) {
                 registerGoalsListener(diabelli.reasonersManager.getActiveReasoner());
                 setCurrentGoals(diabelli.reasonersManager.getActiveReasoner().getGoals());
@@ -139,15 +139,15 @@ class GoalsManagerImpl implements GoalsManager, ManagerInternals {
         }
     }
 
-    public void unregisterGoalsListener(GoalProvidingReasoner reasoner) {
+    public void unregisterGoalsListener(GoalProvider reasoner) {
         if (reasoner != null) {
-            reasoner.removePropertyChangeListener(goalsChangedListener, GoalProvidingReasoner.CurrentGoalsChangedEvent);
+            reasoner.removePropertyChangeListener(goalsChangedListener, GoalProvider.CurrentGoalsChangedEvent);
         }
     }
 
-    public void registerGoalsListener(GoalProvidingReasoner reasoner) {
+    public void registerGoalsListener(GoalProvider reasoner) {
         if (reasoner != null) {
-            reasoner.addPropertyChangeListener(goalsChangedListener, GoalProvidingReasoner.CurrentGoalsChangedEvent);
+            reasoner.addPropertyChangeListener(goalsChangedListener, GoalProvider.CurrentGoalsChangedEvent);
         }
     }
     //</editor-fold>
@@ -169,7 +169,7 @@ class GoalsManagerImpl implements GoalsManager, ManagerInternals {
     @Override
     public void onAfterComponentsLoaded() {
         // Check whether the currently active reasoner has a goal:
-        GoalProvidingReasoner activeReasoner = diabelli.reasonersManager.getActiveReasoner();
+        GoalProvider activeReasoner = diabelli.reasonersManager.getActiveReasoner();
         if (activeReasoner != null && activeReasoner.getGoals() != null) {
             setCurrentGoals(activeReasoner.getGoals());
         }

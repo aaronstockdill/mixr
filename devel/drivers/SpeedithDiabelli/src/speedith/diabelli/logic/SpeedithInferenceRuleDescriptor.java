@@ -24,7 +24,7 @@
  */
 package speedith.diabelli.logic;
 
-import diabelli.components.GoalTransformingReasoner;
+import diabelli.components.GoalTransformer;
 import diabelli.logic.InferenceRuleDescriptor;
 import speedith.core.reasoning.InferenceRuleProvider;
 import speedith.core.reasoning.args.RuleArg;
@@ -63,7 +63,12 @@ public class SpeedithInferenceRuleDescriptor implements InferenceRuleDescriptor 
     }
 
     @Override
-    public GoalTransformingReasoner getOwner() {
+    public GoalTransformer getOwner() {
         return owner;
+    }
+
+    @Override
+    public boolean isFullyAutomated() {
+        return false;
     }
 }

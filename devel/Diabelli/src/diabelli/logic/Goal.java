@@ -25,7 +25,7 @@
 package diabelli.logic;
 
 import diabelli.Diabelli;
-import diabelli.components.GoalProvidingReasoner;
+import diabelli.components.GoalProvider;
 import diabelli.logic.FormulaTranslator.TranslationException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +39,7 @@ import org.openide.util.NbBundle;
 
 /**
  * Represents a proof goal (with premises and conclusions) that are being
- * tackled in a {@link GoalProvidingReasoner goal-providing reasoner}. <p>A goal
+ * tackled in a {@link GoalProvider goal-providing reasoner}. <p>A goal
  * consists of a list of premise formulae and a single conclusion formula. In
  * short, a goal is a Horn clause: <div style="padding-left: 2em;"><pre>(&#x22C0;<sub>[1 &#x2264;
  * <span style="font-style:italic;">i</span> &#x2264; n]</sub>

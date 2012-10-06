@@ -26,13 +26,13 @@ package diabelli.logic;
 
 import diabelli.Diabelli;
 import diabelli.GoalsManager;
-import diabelli.components.GoalProvidingReasoner;
-import diabelli.components.GoalTransformingReasoner;
+import diabelli.components.GoalProvider;
+import diabelli.components.GoalTransformer;
 import java.util.*;
 import org.netbeans.api.annotations.common.NonNull;
 
 /**
- * Contains a set of goals that are provided by {@link GoalProvidingReasoner goal-providing
+ * Contains a set of goals that are provided by {@link GoalProvider goal-providing
  * reasoners}. Use the {@link GoalsManager} in the {@link Diabelli} service to
  * find the currently active goals in Diabelli.
  *
@@ -42,7 +42,7 @@ public class Goals implements Iterable<Goal>, RandomAccess {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
     private final ArrayList<Goal> goals;
-    private final GoalProvidingReasoner owner;
+    private final GoalProvider owner;
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Constructors">
@@ -51,14 +51,14 @@ public class Goals implements Iterable<Goal>, RandomAccess {
      * is (i.e., it stores the reference and does not make a copy before storing
      * it).
      *
-     * @param owner the {@link GoalProvidingReasoner goal-providing reasoner} that
+     * @param owner the {@link GoalProvider goal-providing reasoner} that
      * provided and owns this set of goals. The owner must not be 
-     * {@code null} as it is required by {@link GoalTransformingReasoner goal-transforming
+     * {@code null} as it is required by {@link GoalTransformer goal-transforming
      * reasoners} to pass back rule application results.
      * @param goals the {@link Goals#getGoals() goals} contained in this
      * collection.
      */
-    public Goals(@NonNull GoalProvidingReasoner owner, ArrayList<Goal> goals) {
+    public Goals(@NonNull GoalProvider owner, ArrayList<Goal> goals) {
         this.goals = goals;
         this.owner = owner;
     }
@@ -76,12 +76,12 @@ public class Goals implements Iterable<Goal>, RandomAccess {
     }
 
     /**
-     * Returns the {@link GoalProvidingReasoner goal-providing reasoner} that
+     * Returns the {@link GoalProvider goal-providing reasoner} that
      * provided and owns this set of goals.
-     * @return the {@link GoalProvidingReasoner goal-providing reasoner} that
+     * @return the {@link GoalProvider goal-providing reasoner} that
      * provided and owns this set of goals.
      */
-    public GoalProvidingReasoner getOwner() {
+    public GoalProvider getOwner() {
         return owner;
     }
     // </editor-fold>

@@ -25,8 +25,6 @@
 package diabelli.components;
 
 import diabelli.logic.InferenceStepResult;
-import diabelli.logic.Goals;
-import java.beans.PropertyVetoException;
 
 /**
  * Reasoners of this kind can accept new goals (which are a product of applying
@@ -39,10 +37,10 @@ import java.beans.PropertyVetoException;
  * <ul>
  *
  * <li>its current goals through the
- * {@link GoalProvidingReasoner goal-providing interface},</li>
+ * {@link GoalProvider goal-providing interface},</li>
  *
  * <li>an interface for accepting new goals, which entail the {@link
- * GoalProvidingReasoner#getGoals() original ones},</li>
+ * GoalProvider#getGoals() original ones},</li>
  *
  * <li>an interface that provides an optional instruction to this reasoner to
  * try and reconstruct the transformation that produced the new goal, and</li>
@@ -56,7 +54,7 @@ import java.beans.PropertyVetoException;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface GoalAcceptingReasoner extends GoalProvidingReasoner {
+public interface GoalAcceptingReasoner extends GoalProvider {
 
     // TODO: This method obviously needs to accept something else rather
     // than just goals. The method has to be called with an object that contains

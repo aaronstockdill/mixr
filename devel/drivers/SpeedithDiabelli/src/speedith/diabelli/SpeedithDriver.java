@@ -30,8 +30,8 @@ import diabelli.components.FormulaPresenter;
 import diabelli.components.FormulaPresenter.VisualisationException;
 import diabelli.components.FormulaTranslationsProvider;
 import diabelli.components.GoalAcceptingReasoner;
-import diabelli.components.GoalProvidingReasoner;
-import diabelli.components.GoalTransformingReasoner;
+import diabelli.components.GoalProvider;
+import diabelli.components.GoalTransformer;
 import diabelli.components.util.BareGoalProvidingReasoner;
 import diabelli.logic.*;
 import java.beans.PropertyVetoException;
@@ -44,6 +44,7 @@ import org.openide.util.lookup.ServiceProvider;
 import propity.util.MovableArrayList;
 import speedith.core.lang.SpiderDiagram;
 import speedith.core.reasoning.InferenceRules;
+import speedith.core.reasoning.RuleApplicationException;
 import speedith.core.reasoning.RuleApplicationResult;
 import speedith.diabelli.logic.IsabelleToSpidersTranslator;
 import speedith.diabelli.logic.SpeedithFormatDescriptor;
@@ -69,7 +70,7 @@ import speedith.ui.rules.InteractiveRuleApplication;
  */
 @ServiceProvider(service = DiabelliComponent.class)
 public class SpeedithDriver extends BareGoalProvidingReasoner implements
-        GoalTransformingReasoner,
+        GoalTransformer,
         FormulaFormatsProvider,
         FormulaTranslationsProvider,
         FormulaPresenter {
@@ -135,10 +136,15 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
     }
     //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="GoalTransformingReasoner Implementation">
+    // <editor-fold defaultstate="collapsed" desc="GoalTransformer Implementation">
     @Override
     public boolean canTransform(InferenceTarget target) {
         return getSpiderDiagramFromTarget(target) != null;
+    }
+
+    @Override
+    public InferenceStepResult applyAutomatedInferenceRule(InferenceTarget targets, InferenceRuleDescriptor inferenceRule) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private SpiderDiagram getSpiderDiagramFromTarget(InferenceTarget target) {
@@ -212,19 +218,19 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
                     return;
                 }
                 // Put the result back to the master reasoner:
-                GoalProvidingReasoner masterReasoner = targets.getGoals().getOwner();
+                GoalProvider masterReasoner = targets.getGoals().getOwner();
                 if (masterReasoner instanceof GoalAcceptingReasoner) {
                     GoalAcceptingReasoner goalAcceptingReasoner = (GoalAcceptingReasoner) masterReasoner;
                     targets.getGoals().toArray();
                     @SuppressWarnings({"rawtypes", "unchecked"})
                     GoalTransformationResult goalTransformationResult = new GoalTransformationResult(this, targets.getGoals(), new MovableArrayList[]{
-                                new MovableArrayList<Goal>(Arrays.asList(new Goal[]{
+                                new MovableArrayList<>(Arrays.asList(new Goal[]{
                                     new Goal(null, null, null, new Formula<>(new FormulaRepresentation<>(applicationResult.getGoals().getGoalAt(0), SpeedithFormatDescriptor.getInstance()), Formula.FormulaRole.Goal))
                                 }))
                             });
                     goalAcceptingReasoner.commitTransformedGoals(goalTransformationResult);
                 }
-            } catch (Exception ex) {
+            } catch (RuleApplicationException | UnsupportedOperationException ex) {
                 Logger.getLogger(SpeedithDriver.class.getName()).log(Level.INFO, Bundle.SD_application_error_message(infRule.getName(), ex.getLocalizedMessage()), ex);
                 JOptionPane.showMessageDialog(null, Bundle.SD_application_error_message(infRule.getName(), ex.getLocalizedMessage()), Bundle.SD_application_error_title(), JOptionPane.INFORMATION_MESSAGE);
             }

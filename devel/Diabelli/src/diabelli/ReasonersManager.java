@@ -24,15 +24,15 @@
  */
 package diabelli;
 
-import diabelli.components.GoalProvidingReasoner;
-import diabelli.components.GoalTransformingReasoner;
+import diabelli.components.GoalProvider;
+import diabelli.components.GoalTransformer;
 import diabelli.components.Reasoner;
 import java.beans.PropertyChangeListener;
 import java.util.Set;
 
 /**
  * Manages currently registered {@link Reasoner reasoners}. For example, this
- * manager tracks which {@link GoalProvidingReasoner goal-providing
+ * manager tracks which {@link GoalProvider goal-providing
  * reasoner} is currently active (if any). The goals of the currently active
  * goal-providing reasoner are available in the {@link Diabelli#getGoalManager()
  * goal manager}.
@@ -46,11 +46,11 @@ public interface ReasonersManager {
      * Returns the currently active goal-providing reasoner, if any. This method
      * returns {@code null} if there is currently no active goal-providing
      * reasoner. Reasoners can request to become active via {@link
-     * ReasonersManager#requestActive(diabelli.components.GoalProvidingReasoner)}.
+     * ReasonersManager#requestActive(diabelli.components.GoalProvider)}.
      *
      * @return the currently active goal-providing reasoner, if any.
      */
-    GoalProvidingReasoner getActiveReasoner();
+    GoalProvider getActiveReasoner();
     
     /**
      * Returns the set of all reasoners that are capable of transforming
@@ -62,11 +62,11 @@ public interface ReasonersManager {
      * @return the set of all reasoners that are capable of transforming
      * a formula.
      */
-    Set<GoalTransformingReasoner> getGoalTransformingReasoners();
+    Set<GoalTransformer> getGoalTransformingReasoners();
     
     /**
      * This method tells the {@link Diabelli#getReasonersManager()
-     * reasoners manager} to make the given {@link GoalProvidingReasoner} the
+     * reasoners manager} to make the given {@link GoalProvider} the
      * active one. In turn, this will put its goals into the {@link
      * Diabelli#getGoalManager() goals manager}.
      *
@@ -76,7 +76,7 @@ public interface ReasonersManager {
      *
      * @param reasoner the reasoner that should become the active one.
      */
-    void requestActive(GoalProvidingReasoner reasoner);
+    void requestActive(GoalProvider reasoner);
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Property Changed Stuff">

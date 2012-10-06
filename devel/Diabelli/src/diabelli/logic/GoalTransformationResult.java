@@ -24,7 +24,7 @@
  */
 package diabelli.logic;
 
-import diabelli.components.GoalTransformingReasoner;
+import diabelli.components.GoalTransformer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,7 +36,7 @@ import propity.util.MovableArrayList;
 
 /**
  * This inference step result is produced by
- * {@link GoalTransformingReasoner goal-transforming reasoners} by applying an
+ * {@link GoalTransformer goal-transforming reasoners} by applying an
  * inference rule on the
  * {@link GoalTransformationResult#getOriginalGoals() original goals} and
  * producing
@@ -47,7 +47,7 @@ import propity.util.MovableArrayList;
 public class GoalTransformationResult implements InferenceStepResult {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
-    private final GoalTransformingReasoner slaveReasoner;
+    private final GoalTransformer slaveReasoner;
     private final Goals originalGoals;
     /**
      * Semantics of the transformed goals list are as follows:
@@ -106,7 +106,7 @@ public class GoalTransformationResult implements InferenceStepResult {
         "GTR_original_goals_null=Original goals must not be null.",
         "GTR_transformed_goals_mismatch=The list of transformed goals must have at most as many elements as there are original goals."
     })
-    public GoalTransformationResult(@NonNull GoalTransformingReasoner slaveReasoner, @NonNull Goals originalGoals, MovableArrayList<Goal>[] transformedGoals) {
+    public GoalTransformationResult(@NonNull GoalTransformer slaveReasoner, @NonNull Goals originalGoals, MovableArrayList<Goal>[] transformedGoals) {
         if (slaveReasoner == null) {
             throw new IllegalArgumentException(Bundle.GTR_slave_reasoner_null());
         }
@@ -186,7 +186,7 @@ public class GoalTransformationResult implements InferenceStepResult {
      *
      * @return the reasoner that produced the transformed goals.
      */
-    public GoalTransformingReasoner getSlaveReasoner() {
+    public GoalTransformer getSlaveReasoner() {
         return slaveReasoner;
     }
 

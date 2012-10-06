@@ -24,14 +24,14 @@
  */
 package diabelli;
 
-import diabelli.components.GoalProvidingReasoner;
+import diabelli.components.GoalProvider;
 import diabelli.logic.Goal;
 import diabelli.logic.Goals;
 import java.beans.PropertyChangeListener;
 
 /**
  * Keeps a list of currently pending {@link Goal goals} for the currently
- * focused {@link GoalProvidingReasoner goal-providing resoner}. It provides the
+ * focused {@link GoalProvider goal-providing resoner}. It provides the
  * goals through the lookup provider API (which proxies the lookup of goals in
  * the currently focused goal-providing reasoner).
  *
