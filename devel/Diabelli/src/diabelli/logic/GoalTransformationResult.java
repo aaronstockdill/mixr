@@ -285,4 +285,11 @@ public class GoalTransformationResult implements InferenceStepResult {
         return transformedGoals == null ? 0 : transformedGoals.size();
     }
     // </editor-fold>
+
+    //<editor-fold defaultstate="collapsed" desc="InferenceStepResult Implementation">
+    @Override
+    public ProofTrace getProofTrace() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    //</editor-fold>
 }

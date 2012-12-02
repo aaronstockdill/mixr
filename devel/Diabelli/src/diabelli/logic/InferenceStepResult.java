@@ -41,4 +41,14 @@ import diabelli.components.GoalAcceptingReasoner;
  */
 public interface InferenceStepResult {
 
+    /**
+     * Returns an object containing a series of steps that were performed to
+     * achieve the result of this inference.
+     *
+     * @return a collection of inference steps that were performed on the goals
+     * in order to achieve the end result. <p>May return {@code null} to
+     * indicate that there is no proof trace associated with this inference step
+     * result.</p>
+     */
+    ProofTrace getProofTrace();
 }
