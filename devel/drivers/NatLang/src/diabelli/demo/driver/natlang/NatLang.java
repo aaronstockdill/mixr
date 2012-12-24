@@ -41,21 +41,16 @@ import org.openide.util.lookup.ServiceProvider;
 @ServiceProvider(service = DiabelliComponent.class)
 public class NatLang implements DiabelliComponent, FormulaFormatsProvider {
 
-    //<editor-fold defaultstate="collapsed" desc="Diabelli Component Implementation">
     @Override
     public String getName() {
         return "NatLang";
     }
-    //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Formula Format Provider Implementation">
     @Override
     public Collection<FormulaFormat<?>> getFormulaFormats() {
         return FormulaFormatsContainer.FormulaFormats;
     }
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Lazy Initialisation Helpers">
     private static class FormulaFormatsContainer {
 
         private static final Set<FormulaFormat<?>> FormulaFormats;
@@ -66,6 +61,5 @@ public class NatLang implements DiabelliComponent, FormulaFormatsProvider {
             FormulaFormats = Collections.unmodifiableSet(tmp);
         }
     }
-    // </editor-fold>
     
 }

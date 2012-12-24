@@ -97,6 +97,7 @@
                 <package>diabelli.logic</package>
                 <package>diabelli.ui</package>
                 <package>diabelli.ui.actions</package>
+                <package>diabelli.ui.presenters</package>
                 <package>propity.i18n</package>
                 <package>propity.util</package>
             </public-packages>

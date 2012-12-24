@@ -173,7 +173,7 @@ object TermUtils {
   }
 
   private val Placeholder_Diabelli = "HeterogeneousStatements.Diabelli";
-  private val Placeholder_DiabelliWithVars = "HeterogeneousStatements.Dbli";
+  private val Placeholder_DiabelliVars = "HeterogeneousStatements.DiabelliVars";
   private val Placeholder_Vars = "HeterogeneousStatements.diabelli_var";
   private val Type_PlaceholderVars = Type(Placeholder_Vars, List());
   private val Type_PlaceholderVars_List = List(Type_PlaceholderVars);
@@ -190,7 +190,7 @@ object TermUtils {
         if (delimiterIndex < 0) return null;
         new PlaceholderWithoutVars(payloadString.substring(0, delimiterIndex), payloadString.substring(delimiterIndex + 1));
       }
-      case App(App(Const(Placeholder_DiabelliWithVars, Type(Fun, List(Type(List_list, Type_PlaceholderVars_List), Type(Fun, List(CharListType, BoolType))))), vars), payload) => {
+      case App(App(Const(Placeholder_DiabelliVars, Type(Fun, List(Type(List_list, Type_PlaceholderVars_List), Type(Fun, List(CharListType, BoolType))))), vars), payload) => {
         val payloadString = extractString(payload);
         val delimiterIndex = payloadString.indexOf(':');
         if (delimiterIndex < 0) return null;

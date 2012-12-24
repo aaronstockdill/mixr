@@ -207,28 +207,30 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
             SpeedithInferenceRuleDescriptor infRule = (SpeedithInferenceRuleDescriptor) infRuleDescriptor;
             try {
                 // Apply inference rule interactively:
-                speedith.ui.SpeedithMainForm a;
                 RuleApplicationResult applicationResult = InteractiveRuleApplication.applyRuleInteractively(infRule.getInfRuleProvider().getInferenceRuleName(), getSpiderDiagramFromTarget(targets));
-                // Show the user the results and aske them whether the results
-                // should be passed back to the master reasoner.
-                SpiderDiagramDialog sdd = new SpiderDiagramDialog(null, true, applicationResult.getGoals());
-                sdd.pack();
-                sdd.setVisible(true);
-                if (sdd.isCancelled()) {
-                    return;
-                }
-                // Put the result back to the master reasoner:
-                GoalProvider masterReasoner = targets.getGoals().getOwner();
-                if (masterReasoner instanceof GoalAcceptingReasoner) {
-                    GoalAcceptingReasoner goalAcceptingReasoner = (GoalAcceptingReasoner) masterReasoner;
-                    targets.getGoals().toArray();
-                    @SuppressWarnings({"rawtypes", "unchecked"})
-                    GoalTransformationResult goalTransformationResult = new GoalTransformationResult(this, targets.getGoals(), new MovableArrayList[]{
-                                new MovableArrayList<>(Arrays.asList(new Goal[]{
-                                    new Goal(null, null, null, new Formula<>(new FormulaRepresentation<>(applicationResult.getGoals().getGoalAt(0), SpeedithFormatDescriptor.getInstance()), Formula.FormulaRole.Goal))
-                                }))
-                            });
-                    goalAcceptingReasoner.commitTransformedGoals(goalTransformationResult);
+                if (applicationResult != null) {
+                    // Show the user the results and aske them whether the results
+                    // should be passed back to the master reasoner.
+                    SpiderDiagramDialog sdd = new SpiderDiagramDialog(null, true, applicationResult.getGoals());
+                    sdd.pack();
+                    sdd.setVisible(true);
+                    if (sdd.isCancelled()) {
+                        return;
+                    }
+                    // Put the result back to the master reasoner:
+                    GoalProvider masterReasoner = targets.getGoals().getOwner();
+                    if (masterReasoner instanceof GoalAcceptingReasoner) {
+                        GoalAcceptingReasoner goalAcceptingReasoner = (GoalAcceptingReasoner) masterReasoner;
+                        targets.getGoals().toArray();
+                        @SuppressWarnings({"rawtypes", "unchecked"})
+                        GoalTransformationResult goalTransformationResult = new GoalTransformationResult(this, targets.getGoals(), new MovableArrayList[]{
+                                    new MovableArrayList<>(Arrays.asList(new Goal[]{
+                                        new Goal(null, null, null, new Formula<>(new FormulaRepresentation<>(applicationResult.getGoals().getGoalAt(0), SpeedithFormatDescriptor.getInstance()), Formula.FormulaRole.Goal))
+                                    }))
+                                });
+                        goalAcceptingReasoner.commitTransformedGoals(goalTransformationResult);
+                    }
+
                 }
             } catch (RuleApplicationException | UnsupportedOperationException ex) {
                 Logger.getLogger(SpeedithDriver.class.getName()).log(Level.INFO, Bundle.SD_application_error_message(infRule.getName(), ex.getLocalizedMessage()), ex);

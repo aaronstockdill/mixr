@@ -86,9 +86,14 @@ public class GoalTransformationResult implements InferenceStepResult {
      */
     private final List<List<Goal>> transformedGoals;
     private AtomicInteger goalChangesCount = new AtomicInteger(-1);
+    private ProofTrace proofTrace;
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructor">
+    public GoalTransformationResult(@NonNull GoalTransformer slaveReasoner, @NonNull Goals originalGoals, MovableArrayList<Goal>[] transformedGoals) {
+        this(slaveReasoner, originalGoals, transformedGoals, null);
+    }
+    
     /**
      * Creates a new goal-transformation result.
      *
@@ -105,7 +110,7 @@ public class GoalTransformationResult implements InferenceStepResult {
         "GTR_original_goals_null=Original goals must not be null.",
         "GTR_transformed_goals_mismatch=The list of transformed goals must have at most as many elements as there are original goals."
     })
-    public GoalTransformationResult(@NonNull GoalTransformer slaveReasoner, @NonNull Goals originalGoals, MovableArrayList<Goal>[] transformedGoals) {
+    public GoalTransformationResult(@NonNull GoalTransformer slaveReasoner, @NonNull Goals originalGoals, MovableArrayList<Goal>[] transformedGoals, ProofTrace proofTrace) {
         if (slaveReasoner == null) {
             throw new IllegalArgumentException(Bundle.GTR_slave_reasoner_null());
         }
@@ -131,6 +136,7 @@ public class GoalTransformationResult implements InferenceStepResult {
             }
         }
         this.transformedGoals = Collections.unmodifiableList(Arrays.asList(tmp));
+        this.proofTrace = proofTrace;
     }
     //</editor-fold>
 
@@ -289,7 +295,7 @@ public class GoalTransformationResult implements InferenceStepResult {
     //<editor-fold defaultstate="collapsed" desc="InferenceStepResult Implementation">
     @Override
     public ProofTrace getProofTrace() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return proofTrace;
     }
     //</editor-fold>
 }
