@@ -57,6 +57,7 @@ public interface CarrierFormulaFormat<T> extends FormulaFormat<T> {
      * 
      * @param formula the formula from which we want to extract an embedded
      * foreign formula.
+     * 
      * @param context the goal from which we want to decode the placeholder. There
      * may be no context, in which case this parameter may be {@code null}.
      * @return the placeholder, as extracted from the given formula.
@@ -65,7 +66,7 @@ public interface CarrierFormulaFormat<T> extends FormulaFormat<T> {
      * message of this exception will be shown to the user in the GUI, it is 
      * therefore desired that the message is human-readable.
      */
-    public abstract Placeholder<T, ?> decodePlaceholder(Formula<T> formula, Goal context) throws PlaceholderEmbeddingException;
+    public abstract Placeholder<T, ?> decodePlaceholder(FormulaRepresentation<T> formula, Goal context) throws PlaceholderEmbeddingException;
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Exception Classes">
