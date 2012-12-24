@@ -33,7 +33,9 @@ import org.openide.util.NbBundle;
 
 /**
  * The formula format descriptor for the <span
- * style="font-style:italic;">natural language</span>.
+ * style="font-style:italic;">natural language</span> formula format.
+ *
+ * <p>This is a dummy formula format with some hard-coded examples.</p>
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
@@ -42,29 +44,26 @@ import org.openide.util.NbBundle;
 })
 public class NaturalLanguage extends FormulaFormatDescriptor<String> implements EmbeddableFormulaFormat<String> {
 
-    //<editor-fold defaultstate="collapsed" desc="Fields">
     /**
      * The name of the natural language format.
      */
     private static final String FormatFormatName = "NatLang";
-    //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Constructor">
     private NaturalLanguage() {
         super(FormatFormatName, Bundle.NatLang_format_pretty_name(), String.class);
     }
-    //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Text Formula Format Implementation">
     @Override
     @NbBundle.Messages({
         "NatLang_encoding_natlang_only=The given formula cannot be converted to the natural language. It is of an unknown type."
     })
     public String encodeAsString(FormulaRepresentation<String> formula) throws FormulaEncodingException {
+        // Check if the given formula is of the "NatLang" format:
         if (formula.getFormat() == getInstance()) {
             return formula.getFormula();
+        } else {
+            throw new FormulaEncodingException(Bundle.NatLang_encoding_natlang_only());
         }
-        throw new FormulaEncodingException(Bundle.NatLang_encoding_natlang_only());
     }
 
     @Override
@@ -76,9 +75,7 @@ public class NaturalLanguage extends FormulaFormatDescriptor<String> implements 
     public Set<String> getFreeVariables(FormulaRepresentation<String> formula) {
         return null;
     }
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Singleton Instance">
     /**
      * Returns the singleton instance of the natural language format descriptor.
      *
@@ -92,5 +89,4 @@ public class NaturalLanguage extends FormulaFormatDescriptor<String> implements 
 
         private static final NaturalLanguage Instance = new NaturalLanguage();
     }
-    // </editor-fold>
 }

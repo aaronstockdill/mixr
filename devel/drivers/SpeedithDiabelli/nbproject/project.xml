@@ -82,20 +82,13 @@
                 </dependency>
             </module-dependencies>
             <public-packages>
-                <package>icircles.abstractDescription</package>
-                <package>icircles.abstractDualGraph</package>
-                <package>icircles.concreteDiagram</package>
-                <package>icircles.decomposition</package>
-                <package>icircles.gui</package>
-                <package>icircles.i18n</package>
-                <package>icircles.recomposition</package>
-                <package>icircles.test</package>
-                <package>icircles.util</package>
                 <package>org.antlr.runtime</package>
                 <package>org.antlr.runtime.debug</package>
                 <package>org.antlr.runtime.misc</package>
                 <package>org.antlr.runtime.tree</package>
                 <package>org.apache.commons.cli</package>
+                <package>speedith</package>
+                <package>speedith.cli</package>
                 <package>speedith.core.i18n</package>
                 <package>speedith.core.lang</package>
                 <package>speedith.core.lang.export</package>
@@ -106,8 +99,18 @@
                 <package>speedith.core.reasoning.rules</package>
                 <package>speedith.core.reasoning.rules.instructions</package>
                 <package>speedith.diabelli</package>
+                <package>speedith.diabelli.isabelle</package>
                 <package>speedith.diabelli.logic</package>
                 <package>speedith.diabelli.ui</package>
+                <package>speedith.i18n</package>
+                <package>speedith.icircles.util</package>
+                <package>speedith.logging</package>
+                <package>speedith.preferences</package>
+                <package>speedith.ui</package>
+                <package>speedith.ui.input</package>
+                <package>speedith.ui.rules</package>
+                <package>speedith.ui.selection</package>
+                <package>speedith.ui.selection.helpers</package>
             </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/commons-cli.jar</runtime-relative-path>

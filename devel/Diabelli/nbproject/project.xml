@@ -4,7 +4,7 @@
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
             <code-name-base>diabelli</code-name-base>
-            <suite-component/>
+            <standalone/>
             <module-dependencies>
                 <dependency>
                     <code-name-base>org.netbeans.api.annotations.common</code-name-base>
@@ -97,6 +97,7 @@
                 <package>diabelli.logic</package>
                 <package>diabelli.ui</package>
                 <package>diabelli.ui.actions</package>
+                <package>diabelli.ui.presenters</package>
                 <package>propity.i18n</package>
                 <package>propity.util</package>
             </public-packages>
