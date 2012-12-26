@@ -24,6 +24,7 @@
  */
 package diabelli.logic;
 
+import java.util.Set;
 import org.netbeans.api.annotations.common.NonNull;
 import org.openide.util.NbBundle;
 
@@ -40,6 +41,7 @@ public final class FormulaRepresentation<T> implements Sentence {
     private final T formula;
     private final FormulaFormat<T> format;
     private Formula<?> parentFormula;
+    private final Set<FreeVariable<?>> freeVariables;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -58,7 +60,7 @@ public final class FormulaRepresentation<T> implements Sentence {
         "FP_formula_null=A valid, non-null formula object must be provided.",
         "FP_format_null=A valid, non-null format description of the formula must be provided."
     })
-    public FormulaRepresentation(@NonNull T formula, @NonNull FormulaFormat<T> format) {
+    public FormulaRepresentation(@NonNull T formula, @NonNull FormulaFormat<T> format, Set<FreeVariable<?>> freeVariables) {
         if (formula == null) {
             throw new IllegalArgumentException(Bundle.FP_formula_null());
         }
@@ -67,6 +69,10 @@ public final class FormulaRepresentation<T> implements Sentence {
         }
         this.formula = formula;
         this.format = format;
+        this.freeVariables = freeVariables;
+    }
+    public FormulaRepresentation(@NonNull T formula, @NonNull FormulaFormat<T> format) {
+        this(formula, format, null);
     }
     //</editor-fold>
 
@@ -92,6 +98,15 @@ public final class FormulaRepresentation<T> implements Sentence {
     @NonNull
     public FormulaFormat<T> getFormat() {
         return format;
+    }
+
+    /**
+     * 
+     * @return The placeholder from which this representation originates.
+     * Otherwise it returns {@code null}.
+     */
+    public Set<FreeVariable<?>> getFreeVariables() {
+        return freeVariables;
     }
     
     /**

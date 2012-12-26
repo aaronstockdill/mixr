@@ -27,6 +27,7 @@ package diabelli.demo.driver.natlang;
 import diabelli.logic.EmbeddableFormulaFormat;
 import diabelli.logic.FormulaFormatDescriptor;
 import diabelli.logic.FormulaRepresentation;
+import diabelli.logic.FreeVariable;
 import diabelli.logic.TextEncodedFormulaFormat.FormulaEncodingException;
 import java.util.Set;
 import org.openide.util.NbBundle;
@@ -40,7 +41,7 @@ import org.openide.util.NbBundle;
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 @NbBundle.Messages({
-    "NatLang_format_pretty_name=Spider diagram"
+    "NatLang_format_pretty_name=Dummy natural language"
 })
 public class NaturalLanguage extends FormulaFormatDescriptor<String> implements EmbeddableFormulaFormat<String> {
 
@@ -54,25 +55,17 @@ public class NaturalLanguage extends FormulaFormatDescriptor<String> implements 
     }
 
     @Override
-    @NbBundle.Messages({
-        "NatLang_encoding_natlang_only=The given formula cannot be converted to the natural language. It is of an unknown type."
-    })
-    public String encodeAsString(FormulaRepresentation<String> formula) throws FormulaEncodingException {
-        // Check if the given formula is of the "NatLang" format:
-        if (formula.getFormat() == getInstance()) {
-            return formula.getFormula();
-        } else {
-            throw new FormulaEncodingException(Bundle.NatLang_encoding_natlang_only());
-        }
+    public String encodeAsString(String formula) throws FormulaEncodingException {
+        return formula;
     }
 
     @Override
-    public FormulaRepresentation<String> decodeFromString(String encodedFormula) throws FormulaEncodingException {
-        return new FormulaRepresentation<>(encodedFormula, getInstance());
+    public String decodeFromString(String encodedFormula) throws FormulaEncodingException {
+        return encodedFormula;
     }
 
     @Override
-    public Set<String> getFreeVariables(FormulaRepresentation<String> formula) {
+    public Set<FreeVariable<?>> getFreeVariables(FormulaRepresentation<String> formula) {
         return null;
     }
 

@@ -45,7 +45,7 @@ public interface TextEncodedFormulaFormat<T> extends FormulaFormat<T> {
      * shown to the user in the GUI, it is therefore desired that the message be
      * localised and human-readable.</p>
      */
-    String encodeAsString(FormulaRepresentation<T> formula) throws FormulaEncodingException;
+    String encodeAsString(T formula) throws FormulaEncodingException;
 
     /**
      * Decodes a formula from the given string.
@@ -57,7 +57,7 @@ public interface TextEncodedFormulaFormat<T> extends FormulaFormat<T> {
      * exception will be shown to the user in the GUI, it is therefore desired
      * that the message be localised and human-readable.</p>
      */
-    FormulaRepresentation<T> decodeFromString(String encodedFormula) throws FormulaEncodingException;
+    T decodeFromString(String encodedFormula) throws FormulaEncodingException;
 
     //<editor-fold defaultstate="collapsed" desc="Exception Class">
     /**

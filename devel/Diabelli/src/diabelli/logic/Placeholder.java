@@ -162,14 +162,16 @@ public class Placeholder<THost, TEmbedded> {
             throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_unknown_format(payloadFormulaFormat));
         }
         if (formulaFormat instanceof EmbeddableFormulaFormat) {
-            EmbeddableFormulaFormat<?> payloadFormat = (EmbeddableFormulaFormat) formulaFormat;
-            FormulaRepresentation<?> decodedFormula;
+            @SuppressWarnings("unchecked")
+            EmbeddableFormulaFormat<Object> payloadFormat = (EmbeddableFormulaFormat<Object>) formulaFormat;
+            Object decodedFormula;
             try {
                 decodedFormula = payloadFormat.decodeFromString(payloadFormula);
             } catch (FormulaEncodingException ex) {
                 throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_formula_invalid(payloadFormulaFormat), ex);
             }
-            return new Placeholder<>(hostingFormula, decodedFormula, Collections.unmodifiableSet(freeVariables));
+            FormulaRepresentation<Object> fp = new FormulaRepresentation<>(decodedFormula, payloadFormat, freeVariables);
+            return new Placeholder<>(hostingFormula, fp, Collections.unmodifiableSet(freeVariables));
         } else {
             throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_nonembeddable_format(payloadFormulaFormat));
         }
