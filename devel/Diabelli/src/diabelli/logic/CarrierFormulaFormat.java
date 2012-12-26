@@ -50,7 +50,7 @@ public interface CarrierFormulaFormat<T> extends FormulaFormat<T> {
      * message of this exception will be shown to the user in the GUI, it is 
      * therefore desired that the message is human-readable.
      */
-    public abstract <TPayload> Formula<T> encodePlaceholder(Placeholder<T, TPayload> placeholder, Goal context) throws PlaceholderEmbeddingException;
+    <TPayload> Formula<T> encodePlaceholder(Placeholder<T, TPayload> placeholder, Goal context) throws PlaceholderEmbeddingException;
     /**
      * Looks at the formula, recognises whether it encodes a placeholder, and
      * extracts it if so.
@@ -68,7 +68,7 @@ public interface CarrierFormulaFormat<T> extends FormulaFormat<T> {
      * message of this exception will be shown to the user in the GUI, it is 
      * therefore desired that the message is human-readable.
      */
-    public abstract Placeholder<T, ?> decodePlaceholder(FormulaRepresentation<T> formula, Goal context) throws PlaceholderEmbeddingException;
+    Placeholder<T, ?> decodePlaceholder(FormulaRepresentation<T> formula, Goal context) throws PlaceholderEmbeddingException;
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Exception Classes">

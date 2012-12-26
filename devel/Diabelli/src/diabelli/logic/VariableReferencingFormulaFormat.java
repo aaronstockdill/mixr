@@ -50,5 +50,5 @@ public interface VariableReferencingFormulaFormat<T> extends FormulaFormat<T> {
      * denotes that there are no externally referenced variables in this
      * formula.
      */
-    Set<FreeVariable> getFreeVariables(FormulaRepresentation<T> formula);
+    Set<FreeVariable<?>> getFreeVariables(FormulaRepresentation<T> formula);
 }

@@ -24,18 +24,20 @@
  */
 package diabelli.isabelle.terms;
 
+import diabelli.isabelle.pure.lib.FreeVar;
 import diabelli.isabelle.pure.lib.PlaceholderWithVars;
 import diabelli.isabelle.pure.lib.PlaceholderWithoutVars;
 import diabelli.isabelle.pure.lib.TermUtils;
 import diabelli.logic.CarrierFormulaFormat;
-import diabelli.logic.EmbeddableFormulaFormat;
 import diabelli.logic.Formula;
 import diabelli.logic.FormulaFormatDescriptor;
 import diabelli.logic.FormulaRepresentation;
+import diabelli.logic.FreeVariable;
 import diabelli.logic.Goal;
 import diabelli.logic.Placeholder;
 import isabelle.Term;
-import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
 import org.openide.util.NbBundle;
 
 /**
@@ -62,16 +64,6 @@ public class TermFormatDescriptor extends FormulaFormatDescriptor<Term.Term> imp
     }
     //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Singleton Instance">
-    /**
-     * Returns the singleton instance of the Isabelle term format descriptor.
-     *
-     * @return the singleton instance of the Isabelle term format descriptor.
-     */
-    public static TermFormatDescriptor getInstance() {
-        return SingletonContainer.Instance;
-    }
-
     // <editor-fold defaultstate="collapsed" desc="Placeholder Implementation">
     @Override
     public <TPayload> Formula<Term.Term> encodePlaceholder(Placeholder<Term.Term, TPayload> placeholder, Goal context) throws PlaceholderEmbeddingException {
@@ -84,8 +76,16 @@ public class TermFormatDescriptor extends FormulaFormatDescriptor<Term.Term> imp
             Term.Term term = formula.getFormula();
             diabelli.isabelle.pure.lib.Placeholder placeholder = TermUtils.extractPlaceholder(term);
             if (placeholder instanceof PlaceholderWithVars) {
-                PlaceholderWithVars plVars = (PlaceholderWithVars)placeholder;
-                return Placeholder.create(formula, plVars.formulaFormat(), plVars.payloadFormula(), null);
+                PlaceholderWithVars plVars = (PlaceholderWithVars) placeholder;
+                List<FreeVar> vars = plVars.variables();
+                HashSet<FreeVariable<?>> dbliVars = null;
+                if (vars != null && !vars.isEmpty()) {
+                    dbliVars = new HashSet<>();
+                    for (FreeVar freeVar : vars) {
+                        dbliVars.add(new FreeVariable<>(freeVar.name(), freeVar.typ()));
+                    }
+                }
+                return Placeholder.create(formula, plVars.formulaFormat(), plVars.payloadFormula(), dbliVars);
             } else if (placeholder instanceof PlaceholderWithoutVars) {
                 PlaceholderWithoutVars pl = (PlaceholderWithoutVars) placeholder;
             }
@@ -93,6 +93,16 @@ public class TermFormatDescriptor extends FormulaFormatDescriptor<Term.Term> imp
         throw new UnsupportedOperationException("Not supported yet.");
     }
     // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Singleton Instance">
+    /**
+     * Returns the singleton instance of the Isabelle term format descriptor.
+     *
+     * @return the singleton instance of the Isabelle term format descriptor.
+     */
+    public static TermFormatDescriptor getInstance() {
+        return SingletonContainer.Instance;
+    }
 
     private static class SingletonContainer {
 

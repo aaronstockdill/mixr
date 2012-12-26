@@ -27,6 +27,7 @@ package diabelli.logic;
 import diabelli.Diabelli;
 import diabelli.FormulaFormatManager;
 import diabelli.components.GoalProvider;
+import diabelli.logic.CarrierFormulaFormat.PlaceholderEmbeddingException;
 import diabelli.logic.FormulaTranslator.TranslationException;
 import java.util.*;
 import java.util.logging.Level;
@@ -37,8 +38,8 @@ import org.openide.util.NbBundle;
 
 /**
  * Represents a general formula. It can be a diagrammatic, sentential, or both
- * at the same time (if the {@link GoalProvider reasoner} provides more
- * than one representation of this formula). This class can thus carry many
+ * at the same time (if the {@link GoalProvider reasoner} provides more than one
+ * representation of this formula). This class can thus carry many
  * representations, or formats, of the same formula. For example, a formula can
  * be represented with many strings (using syntaxes of many theorem provers),
  * with term trees (abstract syntax trees), or similar.
@@ -49,15 +50,17 @@ import org.openide.util.NbBundle;
  * Goals#getOwner() owns} this formula. What it exactly means for a particular
  * goal-providing reasoner to have an <span style="font-style:italic;">original
  * representation</span> is up to the reasoner itself. However, the main
- * representation must logically entail (if it acts as a {@link Goal#getPremises() premise})
- * or be entailed (if it acts as a {@link Goal#getConclusion() conclusion}) by
- * all other representations.</p>
+ * representation must logically entail (if it acts as a
+ * {@link Goal#getPremises() premise}) or be entailed (if it acts as a
+ * {@link Goal#getConclusion() conclusion}) by all other representations.</p>
  *
  * <p><span style="font-weight:bold">Note</span>: a formula may have more than
- * one representation in a particular {@link FormulaFormatDescriptor format}.</p>
+ * one representation in a particular
+ * {@link FormulaFormatDescriptor format}.</p>
  *
- * @param <T> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
- * of {@link Formula#getMainRepresentation() the main representation} of this
+ * @param <T> the
+ * {@link FormulaFormat#getRawFormulaType() type of the raw formula} of
+ * {@link Formula#getMainRepresentation() the main representation} of this
  * formula.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
@@ -83,7 +86,8 @@ public class Formula<T> implements Sentence {
      * translations in this case,</li>
      *
      * <li>if this hash map returns a non-{@code null} value, then this
-     * indicates that a translation attempt through {@link Goal#fetchRepresentations(diabelli.logic.Formula, diabelli.logic.FormulaFormat)}
+     * indicates that a translation attempt through
+     * {@link Goal#fetchRepresentations(diabelli.logic.Formula, diabelli.logic.FormulaFormat)}
      * has been made but no translation has been found. In this case, there is
      * no need to search for a translation again.</li>
      *
@@ -101,8 +105,8 @@ public class Formula<T> implements Sentence {
      * (including the main representation, if there is any).
      *
      * <p><span style="font-weight:bold">Important</span>: when using this
-     * variable, you have to acquire a lock on {@link Formula#representationsMap}.
-     * .</p>
+     * variable, you have to acquire a lock on
+     * {@link Formula#representationsMap}. .</p>
      */
     private final LinkedHashSet<FormulaRepresentation<?>> representationsSet;
     private final FormulaRole role;
@@ -110,6 +114,12 @@ public class Formula<T> implements Sentence {
      * The goal that contains this formula.
      */
     private Goal hostingGoal;
+    /**
+     * If this formula is a placeholder, then this field will contain it. See
+     * {@link Formula#getPlaceholder()} for more information.
+     */
+    private Placeholder<T, ?> placeholder = null;
+    private boolean lookedPlaceholderUp = false;
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -223,15 +233,14 @@ public class Formula<T> implements Sentence {
 
     /**
      * This method returns {@code true} iff this formula has no {@link
-     * Formula#getMainRepresentation() main representation} and no
-     * {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)
+     * Formula#getMainRepresentation() main representation} and no null null null     {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)
      * representations} in any other format.
      *
-     * <p>A call to this method does the same as {@code getRepresentationsCount() == 0}.</p>
+     * <p>A call to this method does the same as
+     * {@code getRepresentationsCount() == 0}.</p>
      *
      * @return {@code true} iff this formula has no {@link
-     * Formula#getMainRepresentation() main representation} and no
-     * {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)
+     * Formula#getMainRepresentation() main representation} and no null null null     {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)
      * representations} in any other format.
      */
     public boolean isEmpty() {
@@ -269,10 +278,11 @@ public class Formula<T> implements Sentence {
     }
 
     /**
-     * This method returns all the names of {@link FormulaFormat formula formats}
-     * for which we have at least tried to get a representation of this formula.
-     * This means that even if a format's name is listed in the returned
-     * collection, there might be no {@link Formula#getRepresentation(diabelli.logic.FormulaFormat) representation}
+     * This method returns all the names of
+     * {@link FormulaFormat formula formats} for which we have at least tried to
+     * get a representation of this formula. This means that even if a format's
+     * name is listed in the returned collection, there might be no
+     * {@link Formula#getRepresentation(diabelli.logic.FormulaFormat) representation}
      * in that formal of this formula.
      *
      * @return all the names of {@link FormulaFormat formula formats} for which
@@ -310,9 +320,11 @@ public class Formula<T> implements Sentence {
     }
 
     /**
-     * Returns all representations of this formula (including the {@link Formula#getMainRepresentation() main representation}).
+     * Returns all representations of this formula (including the
+     * {@link Formula#getMainRepresentation() main representation}).
      *
-     * @return all representations of this formula (including the {@link Formula#getMainRepresentation() main representation}).
+     * @return all representations of this formula (including the
+     * {@link Formula#getMainRepresentation() main representation}).
      */
     public FormulaRepresentation<?>[] getRepresentations() {
         synchronized (representationsMap) {
@@ -322,7 +334,8 @@ public class Formula<T> implements Sentence {
 
     /**
      * Returns the total number of representations of this formula. This number
-     * equals to the length of the list returned by {@link Formula#getRepresentations()}.
+     * equals to the length of the list returned by
+     * {@link Formula#getRepresentations()}.
      *
      * @return the total number of representations of this formula.
      */
@@ -340,12 +353,13 @@ public class Formula<T> implements Sentence {
      * }.
      *
      * <p>This function returns {@code null} if there are no representations of
-     * this formula in the given format. Also, if this method returns a non-{@code null}
-     * collection then all elements of the returned collection will be non-{@code null}
-     * too.</p>
+     * this formula in the given format. Also, if this method returns a
+     * non-{@code null} collection then all elements of the returned collection
+     * will be non-{@code null} too.</p>
      *
-     * @param <TRepresentation> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
-     * carried by the returned representations.
+     * @param <TRepresentation> the
+     * {@link FormulaFormat#getRawFormulaType() type of the raw formula} carried
+     * by the returned representations.
      * @param format the desired format in which to get this formula.
      * @return the translations of the {@link Formula#getMainRepresentation()
      * formula} in the given format.
@@ -374,11 +388,14 @@ public class Formula<T> implements Sentence {
      * Returns {@code true} if an attempt has been made to translate this
      * formula into the given format.
      *
-     * <p>This method will return {@code true} if, for example, the {@link Goal#fetchRepresentations(diabelli.logic.Formula, diabelli.logic.FormulaFormat)}
+     * <p>This method will return {@code true} if, for example, the
+     * {@link Goal#fetchRepresentations(diabelli.logic.Formula, diabelli.logic.FormulaFormat)}
      * method tried to translate this formula into the given format but none of
      * the translations succeeded (they all threw a {@link TranslationException}
-     * or there was no direct translation to this format from the {@link Formula#getMainRepresentation() main representation}.
-     * This method is used if the {@link Goal#fetchRepresentations(diabelli.logic.Formula, diabelli.logic.FormulaFormat) fetch representations method}
+     * or there was no direct translation to this format from the
+     * {@link Formula#getMainRepresentation() main representation}. This method
+     * is used if the
+     * {@link Goal#fetchRepresentations(diabelli.logic.Formula, diabelli.logic.FormulaFormat) fetch representations method}
      * is called multiple times&mdash;to prevent redundant translation
      * attempts.</p>
      *
@@ -399,8 +416,9 @@ public class Formula<T> implements Sentence {
      * <p>There may be more than one representation of this formula in the given
      * format. If so, an arbitrary one is returned.</p>
      *
-     * @param <TRep> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
-     * carried by the returned representation.
+     * @param <TRep> the
+     * {@link FormulaFormat#getRawFormulaType() type of the raw formula} carried
+     * by the returned representation.
      * @param format the desired format in which to get this formula.
      * @return the translation of the {@link Formula#getMainRepresentation()
      * formula} in the given format.
@@ -489,12 +507,15 @@ public class Formula<T> implements Sentence {
      * <p>This method is thread-safe.</p>
      *
      * <p>This method is quite expensive if called for the first time,
-     * successive calls will be as expensive as calls to {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
+     * successive calls will be as expensive as calls to
+     * {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
      *
      * <p><span style="font-weight:bold">Important</span>: this method tries to
      * translate only the main translation source into others. Therefore, if
-     * there is no {@link Formula#hasMainTranslationSource()  main translation source},
-     * this method does the same as {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
+     * there is no
+     * {@link Formula#hasMainTranslationSource()  main translation source}, this
+     * method does the same as
+     * {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)}.</p>
      *
      * <p>Implementations that want to change the main source for automatic
      * translations must override the following methods:
@@ -568,18 +589,20 @@ public class Formula<T> implements Sentence {
 
     /**
      * Tries to translate this formula with the given translator. This method
-     * silently fails (returning {@code null}) if {@link FormulaTranslator#getTranslationType()  the type of translation}
+     * silently fails (returning {@code null}) if
+     * {@link FormulaTranslator#getTranslationType()  the type of translation}
      * is not compatible with {@link Formula#getRole() the role} of this
      * formula.
      *
      * <p><span style="font-weight:bold">Note</span>: this method uses the
      * {@link Formula#hasMainTranslationSource() main translation source}. What
      * the main translation source is depends on the implementation, but
-     * typically it is the {@link Formula#getMainRepresentation() main representation}.
-     * </p>
+     * typically it is the
+     * {@link Formula#getMainRepresentation() main representation}. </p>
      *
-     * @param <TTo> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
-     * carried by the returned representations.
+     * @param <TTo> the
+     * {@link FormulaFormat#getRawFormulaType() type of the raw formula} carried
+     * by the returned representations.
      * @param translator the translator with which to translate the formula.
      * @return the representation of this formula which is the result of the
      * translation with the given {@code translator}. Returns {@code null} if
@@ -587,7 +610,8 @@ public class Formula<T> implements Sentence {
      * @throws diabelli.logic.FormulaTranslator.TranslationException thrown by
      * the translator (see {@link FormulaTranslator#translate(diabelli.logic.Formula)
      * }).
-     * @throws IllegalArgumentException if the given {@code translator} is {@code null}.
+     * @throws IllegalArgumentException if the given {@code translator} is
+     * {@code null}.
      */
     @NbBundle.Messages({
         "F_null_translator=A valid non-null translator must be provided."
@@ -611,10 +635,12 @@ public class Formula<T> implements Sentence {
      * <p>Typically, {@link Formula#getMainRepresentation()} is the main
      * translation source.</p>
      *
-     * <p>The main translation source is used by {@link Formula#fetchRepresentations(diabelli.logic.FormulaFormat)}
-     * to automatically convert this formula into the desired format. If there
-     * is no main translation source (which is {@link Formula#getMainRepresentation()}
-     * by default) then no automatic translation will be attempted.</p>
+     * <p>The main translation source is used by
+     * {@link Formula#fetchRepresentations(diabelli.logic.FormulaFormat)} to
+     * automatically convert this formula into the desired format. If there is
+     * no main translation source (which is
+     * {@link Formula#getMainRepresentation()} by default) then no automatic
+     * translation will be attempted.</p>
      *
      * @return {@code true} if the main translation source exists for this
      * formula.
@@ -630,8 +656,7 @@ public class Formula<T> implements Sentence {
      * {@link Formula#getMainRepresentation() main representation}.</p>
      *
      * <p><span style="font-weight:bold">Note</span>: this method must not
-     * return
-     * {@code null} if {@link Formula#hasAttemptedTranslations(diabelli.logic.FormulaFormat)
+     * return {@code null} if {@link Formula#hasAttemptedTranslations(diabelli.logic.FormulaFormat)
      * }
      * returns {@code true}. </p>
      *
@@ -639,6 +664,37 @@ public class Formula<T> implements Sentence {
      */
     public FormulaFormat<T> getMainTranslationSourceFormat() {
         return getMainRepresentation() == null ? null : getMainRepresentation().getFormat();
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Placeholder Stuff">
+    /**
+     * This method looks up the
+     * {@link Formula#getMainRepresentation()  main representation}, checks
+     * whether the formula is actually a placeholder and extracts it if so.
+     *
+     * <p>If the formula is not a placeholder then this method returns
+     * {@code null}.</p>
+     *
+     *
+     * @return the placeholder (if this formula is one) or {@code null} otherwise.
+     * @throws diabelli.logic.CarrierFormulaFormat.PlaceholderEmbeddingException
+     */
+    public Placeholder<T, ?> getPlaceholder() throws PlaceholderEmbeddingException {
+        if (!lookedPlaceholderUp) {
+            lookedPlaceholderUp = true;
+            FormulaRepresentation<T> main = getMainRepresentation();
+            if (main != null) {
+                FormulaFormat<T> mainFormat = main.getFormat();
+                if (mainFormat instanceof CarrierFormulaFormat) {
+                    CarrierFormulaFormat<T> carrierFormulaFormat = (CarrierFormulaFormat<T>) mainFormat;
+                    Placeholder<T, ?> p = carrierFormulaFormat.decodePlaceholder(main, getHostingGoal());
+                    addRepresentation(p.getEmbeddedFormula());
+                    this.placeholder = p;
+                }
+            }
+        }
+        return placeholder;
     }
     // </editor-fold>
 
@@ -650,7 +706,8 @@ public class Formula<T> implements Sentence {
      * <p>If the given representation is {@code null}</p>
      *
      * @param <T> the new format of the representation to add.
-     * @param format the format of the representation to add (must not be {@code null}).
+     * @param format the format of the representation to add (must not be
+     * {@code null}).
      * @param representation
      */
     @NbBundle.Messages({
@@ -678,19 +735,23 @@ public class Formula<T> implements Sentence {
     }
 
     /**
-     * Adds a new representation of this formula to the {@link Formula#getRepresentations() collection of all representations}.
+     * Adds a new representation of this formula to the
+     * {@link Formula#getRepresentations() collection of all representations}.
      *
-     * <p>This method may be used to add representations of {@link Goal#getPremises() premises}
-     * into the {@link Goal#getPremisesFormula() premises formula} if the latter
-     * does not have a {@link Formula#getMainRepresentation() main representation}.</p>
+     * <p>This method may be used to add representations of
+     * {@link Goal#getPremises() premises} into the
+     * {@link Goal#getPremisesFormula() premises formula} if the latter does not
+     * have a {@link Formula#getMainRepresentation() main representation}.</p>
      *
      * <p><span style="font-weight:bold">Warning</span>: the added
      * representations must logically correspond to the original formula. For
-     * example, a subset of premises converted with an {@link FormulaTranslator.TranslationType#ToEntailed entailed translation}
+     * example, a subset of premises converted with an
+     * {@link FormulaTranslator.TranslationType#ToEntailed entailed translation}
      * can be placed into the formula that represents premises.</p>
      *
-     * @param <T> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}
-     * carried by the added representation.
+     * @param <T> the
+     * {@link FormulaFormat#getRawFormulaType() type of the raw formula} carried
+     * by the added representation.
      * @param representation the representation of this formula.
      */
     @NbBundle.Messages({

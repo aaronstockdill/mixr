@@ -27,6 +27,8 @@ package diabelli.ui;
 import diabelli.Diabelli;
 import diabelli.GoalsManager;
 import diabelli.components.FormulaPresenter;
+import diabelli.logic.CarrierFormulaFormat;
+import diabelli.logic.CarrierFormulaFormat.PlaceholderEmbeddingException;
 import diabelli.logic.Formula;
 import diabelli.logic.FormulaFormat;
 import diabelli.logic.FormulaRepresentation;
@@ -48,6 +50,7 @@ import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.explorer.ExplorerManager;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.TopComponent;
@@ -176,6 +179,12 @@ public final class FormulaPresentationTopComponent extends TopComponent {
     private void addVisualisationsOf(Formula<?> formula, Collection<FormulaFormat<?>> inFormats, GeneralGoalNode goalNode, int goalIndex) {
         if (inFormats == null) {
             inFormats = getAllFormats();
+        }
+        try {
+            // Try to extract a placeholder from the main representation:
+            formula.getPlaceholder();
+        } catch (PlaceholderEmbeddingException ex) {
+            Exceptions.printStackTrace(ex);
         }
         // Go through every format, every representation, and every
         // visualiser and display all these combinations
