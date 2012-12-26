@@ -26,7 +26,10 @@ package diabelli.demo.driver.natlang;
 
 import diabelli.components.DiabelliComponent;
 import diabelli.components.FormulaFormatsProvider;
+import diabelli.components.FormulaPresenter;
 import diabelli.logic.FormulaFormat;
+import diabelli.logic.FormulaRepresentation;
+import java.awt.Component;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -39,7 +42,7 @@ import org.openide.util.lookup.ServiceProvider;
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 @ServiceProvider(service = DiabelliComponent.class)
-public class NatLang implements DiabelliComponent, FormulaFormatsProvider {
+public class NatLang implements DiabelliComponent, FormulaFormatsProvider, FormulaPresenter {
 
     @Override
     public String getName() {
@@ -49,6 +52,25 @@ public class NatLang implements DiabelliComponent, FormulaFormatsProvider {
     @Override
     public Collection<FormulaFormat<?>> getFormulaFormats() {
         return FormulaFormatsContainer.FormulaFormats;
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="Formula Presenter Implementation">
+    @Override
+    public Set<FormulaFormat<?>> getPresentedFormats() {
+        return FormulaFormatsContainer.FormulaFormats;
+    }
+
+    public boolean canPresent(FormulaFormat<?> format) {
+        return NaturalLanguage.getInstance() == format;
+    }
+
+    @Override
+    public NatLangPresenter createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException {
+        if (formula.getFormula() instanceof String) {
+            return new NatLangPresenter((String) formula.getFormula());
+        } else {
+            return null;
+        }
     }
 
     private static class FormulaFormatsContainer {
