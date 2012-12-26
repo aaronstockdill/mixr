@@ -90,7 +90,7 @@ public class TermFormatDescriptor extends FormulaFormatDescriptor<Term.Term> imp
                 PlaceholderWithoutVars pl = (PlaceholderWithoutVars) placeholder;
             }
         }
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
     }
     // </editor-fold>
 

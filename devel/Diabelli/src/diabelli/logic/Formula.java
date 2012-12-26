@@ -233,14 +233,16 @@ public class Formula<T> implements Sentence {
 
     /**
      * This method returns {@code true} iff this formula has no {@link
-     * Formula#getMainRepresentation() main representation} and no null null null     {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)
+     * Formula#getMainRepresentation() main representation} and no null null
+     * null null     {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)
      * representations} in any other format.
      *
      * <p>A call to this method does the same as
      * {@code getRepresentationsCount() == 0}.</p>
      *
      * @return {@code true} iff this formula has no {@link
-     * Formula#getMainRepresentation() main representation} and no null null null     {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)
+     * Formula#getMainRepresentation() main representation} and no null null
+     * null null     {@link Formula#getRepresentations(diabelli.logic.FormulaFormat)
      * representations} in any other format.
      */
     public boolean isEmpty() {
@@ -677,7 +679,8 @@ public class Formula<T> implements Sentence {
      * {@code null}.</p>
      *
      *
-     * @return the placeholder (if this formula is one) or {@code null} otherwise.
+     * @return the placeholder (if this formula is one) or {@code null}
+     * otherwise.
      * @throws diabelli.logic.CarrierFormulaFormat.PlaceholderEmbeddingException
      */
     public Placeholder<T, ?> getPlaceholder() throws PlaceholderEmbeddingException {
@@ -689,8 +692,10 @@ public class Formula<T> implements Sentence {
                 if (mainFormat instanceof CarrierFormulaFormat) {
                     CarrierFormulaFormat<T> carrierFormulaFormat = (CarrierFormulaFormat<T>) mainFormat;
                     Placeholder<T, ?> p = carrierFormulaFormat.decodePlaceholder(main, getHostingGoal());
-                    addRepresentation(p.getEmbeddedFormula());
-                    this.placeholder = p;
+                    if (p != null) {
+                        addRepresentation(p.getEmbeddedFormula());
+                        this.placeholder = p;
+                    }
                 }
             }
         }
