@@ -5,9 +5,11 @@ import scala.collection.mutable.Buffer
 import scala.collection.JavaConversions
 import scala.collection.mutable.ArrayBuffer
 
+sealed case class FreeVar(name: String, typ: Typ);
+
 sealed abstract class Placeholder;
 case class PlaceholderWithoutVars(formulaFormat: String, payloadFormula: String) extends Placeholder;
-case class PlaceholderWithVars(variables: List[Term], formulaFormat: String, payloadFormula: String) extends Placeholder;
+case class PlaceholderWithVars(variables: java.util.List[FreeVar], formulaFormat: String, payloadFormula: String) extends Placeholder;
 
 /**
  * Provides a bunch of methods for
@@ -172,18 +174,21 @@ object TermUtils {
     }
   }
 
-  private val Placeholder_Diabelli = "HeterogeneousStatements.Diabelli";
-  private val Placeholder_DiabelliVars = "HeterogeneousStatements.DiabelliVars";
-  private val Placeholder_Vars = "HeterogeneousStatements.diabelli_var";
+  private val Placeholder_Diabelli = "IsaDia.Diabelli";
+  private val Placeholder_DiabelliVars = "IsaDia.DiabelliVars";
+  private val Placeholder_Vars = "IsaDia.diabelli_var";
   private val Type_PlaceholderVars = Type(Placeholder_Vars, List());
   private val Type_PlaceholderVars_List = List(Type_PlaceholderVars);
-  private val HeterogeneousStatements_About = "HeterogeneousStatements.About";
+  private val IsaDia_About = "IsaDia.About";
 
   /**
    * If the term is a placeholder then this method extracts and returns it. If it is not a placeholder, it returns `null`.
    */
   def extractPlaceholder(t: Term): Placeholder = {
     t match {
+      case App(Const(HOLTrueprop, Type(Fun, _)), term) => {
+        extractPlaceholder(term);
+      }
       case App(Const(Placeholder_Diabelli, Type(Fun, List(CharListType, BoolType))), payload) => {
         val payloadString = extractString(payload);
         val delimiterIndex = payloadString.indexOf(':');
@@ -201,26 +206,27 @@ object TermUtils {
     }
   }
 
-  def extractPlaceholderVars(t: Term): List[Term] = {
+  def extractPlaceholderVars(t: Term): java.util.List[FreeVar] = {
     t match {
       case App(App(Const(List_list_Cons, Type(Fun, List(Type_PlaceholderVars, Type(Fun, List(Type(List_list, Type_PlaceholderVars_List), Type(List_list, Type_PlaceholderVars_List)))))), first), other) => {
-        val outVars = Buffer[Term]();
+        val outVars = Buffer[FreeVar]();
         extractPlaceholderVarGroup(first, outVars);
         traverseListElements(other, t => {
           extractPlaceholderVarGroup(t, outVars);
         });
-        outVars.toList;
+        JavaConversions.bufferAsJavaList(outVars);
       }
       case _ => throw new IllegalArgumentException("Not a valid list of placeholder variables.");
     }
   }
 
-  def extractPlaceholderVarGroup(t: Term, outVars: Buffer[Term]) = {
+  def extractPlaceholderVarGroup(t: Term, outVars: Buffer[FreeVar]) = {
     t match {
-      case App(Const(HeterogeneousStatements_About, Type(Fun, List(Type(List_list, List(TFree_a)), Type_PlaceholderVars))), vars) => {
-        traverseListElements(vars, t => {
-          outVars += t;
-        });
+      case App(Const(IsaDia_About, Type(Fun, List(Type(List_list, List(_)), Type_PlaceholderVars))), vars) => {
+        traverseListElements(vars, t => {t match {
+          case Free(varName, varType) =>  {outVars += FreeVar(varName, varType);}
+          case _ =>  throw new IllegalArgumentException("Not a valid group of placeholder variables.");
+        }});
       }
       case _ => throw new IllegalArgumentException("Not a valid group of placeholder variables.");
     }

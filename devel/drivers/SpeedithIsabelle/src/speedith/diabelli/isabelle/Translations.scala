@@ -29,21 +29,6 @@ object Translations {
    * This main method is used only for testing.
    */
   def main(args: Array[String]): Unit = {
-    println("Malfunctioning example:");
-    testExample(Example10_unescapedYXML_isa2012);
-    
-    /*println("Test something quickly:");
-    
-    testExample(Example6_unescapedYXML);
-    testExample(Example7_unescapedYXML);
-    testExample(Example8_unescapedYXML);
-    testExample(Example9_unescapedYXML);
-    testPremises(Example9_unescapedYXML);
-    testExample(Example4_unescapedYXML);
-    testExample(Example5_unescapedYXML);
-    testExample(Example3_unescapedYXML);
-    testExample(Example2_unescapedYXML);
-    testExample(Example1_unescapedYXML);*/
   }
 
   private def testPremises(s: String): SpiderDiagram = {
