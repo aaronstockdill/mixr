@@ -1,5 +1,5 @@
 /*
- * File name: VariableReferencingFormulaFormat.java
+ * File name: UnknownFormatException.java
  *    Author: Matej Urbas [matej.urbas@gmail.com]
  * 
  *  Copyright © 2012 Matej Urbas
@@ -24,31 +24,25 @@
  */
 package diabelli.logic;
 
-import java.util.Set;
-
 /**
- * Formulae of this format may contain free variables (or variables that are
- * bound outside of the scope of the formula).
- *
- * @param <T> the
- * {@link FormulaFormat#getRawFormulaType() type of the raw formula}.
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface VariableReferencingFormulaFormat<T> extends FormulaFormat<T> {
+public class UnknownFormatException extends Exception {
 
-    /**
-     * Returns the names of variables that are free in the formula (or that are
-     * bound outside of the scope of the formula).
-     *
-     * <p>This function may return {@code null}, which denotes that there are no
-     * externally referenced variables in this formula.</p>
-     *
-     * @param formula the formula from which we want to extract free variables.
-     * @return the names of variables that are free in the formula (or that are
-     * bound outside of the scope of the formula). May be {@code null}, which
-     * denotes that there are no externally referenced variables in this
-     * formula.
-     */
-    Set<FreeVariable> getFreeVariables(FormulaRepresentation<T> formula);
+    public UnknownFormatException() {
+    }
+
+    public UnknownFormatException(String message) {
+        super(message);
+    }
+
+    public UnknownFormatException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public UnknownFormatException(Throwable cause) {
+        super(cause);
+    }
+    
 }

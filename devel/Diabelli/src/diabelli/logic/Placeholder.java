@@ -24,7 +24,12 @@
  */
 package diabelli.logic;
 
+import diabelli.Diabelli;
+import diabelli.logic.TextEncodedFormulaFormat.FormulaEncodingException;
+import java.util.Collections;
 import java.util.Set;
+import org.openide.util.Exceptions;
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
 /**
@@ -60,6 +65,7 @@ public class Placeholder<THost, TEmbedded> {
     private final CarrierFormulaFormat<THost> hostingFormat;
     private final EmbeddableFormulaFormat<TEmbedded> embeddedFormat;
     private final FormulaRepresentation<TEmbedded> embeddedFormula;
+    private final Set<FreeVariable<?>> freeVariables;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -77,7 +83,7 @@ public class Placeholder<THost, TEmbedded> {
         "PH_invalid_format=The formula is not embeddable.",
         "PH_null_formula=No formula to embed."
     })
-    private Placeholder(FormulaRepresentation<THost> hostingFormula, FormulaRepresentation<TEmbedded> embeddedFormula) {
+    private Placeholder(FormulaRepresentation<THost> hostingFormula, FormulaRepresentation<TEmbedded> embeddedFormula, Set<FreeVariable<?>> freeVariables) {
         if (embeddedFormula == null) {
             throw new IllegalArgumentException(Bundle.PH_null_formula());
         }
@@ -96,6 +102,7 @@ public class Placeholder<THost, TEmbedded> {
         }
         this.embeddedFormula = embeddedFormula;
         this.hostingFormula = hostingFormula;
+        this.freeVariables = freeVariables;
     }
     //</editor-fold>
 
@@ -116,21 +123,83 @@ public class Placeholder<THost, TEmbedded> {
         return embeddedFormula;
     }
 
+    public Set<FreeVariable<?>> getFreeVariables() {
+        return freeVariables;
+    }
+
     public FormulaRepresentation<THost> getHostingFormula() {
         return hostingFormula;
     }
     // </editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="Placeholder Creation">
     /**
+     * Creates a new placeholder instance.
      *
-     * @param rawPayloadString
-     * @param freeVariables
+     * @param <THost>
+     * @param hostingFormula
+     * @param payloadFormulaFormat
+     * @param payloadFormula
+     * @param freeVariables this set is not copied but it will be unmodifiable
+     * through the returned placeholder.
      * @return
+     * @throws UnknownFormatException
+     * @throws diabelli.logic.TextEncodedFormulaFormat.FormulaEncodingException
      */
-    public static <THost> Placeholder<THost, ?> create(String payloadFormulaFormat, String payloadFormula, Set<String> freeVariables) {
-        // TODO: Extract the format and the formula from the string "<format>:\s?<formula>"
-        return null;
+    @NbBundle.Messages({
+        "Placeholder_unknown_format=The formula format '{0}' is not known.",
+        "Placeholder_nonembeddable_format=The formula format '{0}' does not support textual encoding of formulae.",
+        "Placeholder_formula_invalid=The formula of the payload is not parsable or understood by the '{0}' formula format.",
+        "Placeholder_diabelli_not_present=Could not find the Diabelli core component."
+    })
+    public static <THost> Placeholder<THost, ?> create(FormulaRepresentation<THost> hostingFormula, String payloadFormulaFormat, String payloadFormula, Set<FreeVariable<?>> freeVariables) throws CarrierFormulaFormat.PlaceholderEmbeddingException {
+        Diabelli dbli = Lookup.getDefault().lookup(Diabelli.class);
+        if (dbli == null) {
+            throw new IllegalStateException(Bundle.Placeholder_diabelli_not_present());
+        }
+        FormulaFormat<?> formulaFormat = dbli.getFormulaFormatManager().getFormulaFormat(payloadFormulaFormat);
+        if (formulaFormat == null) {
+            throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_unknown_format(payloadFormulaFormat));
+        }
+        if (formulaFormat instanceof EmbeddableFormulaFormat) {
+            EmbeddableFormulaFormat<?> payloadFormat = (EmbeddableFormulaFormat) formulaFormat;
+            FormulaRepresentation<?> decodedFormula;
+            try {
+                decodedFormula = payloadFormat.decodeFromString(payloadFormula);
+            } catch (FormulaEncodingException ex) {
+                throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_formula_invalid(payloadFormulaFormat), ex);
+            }
+            return new Placeholder<>(hostingFormula, decodedFormula, Collections.unmodifiableSet(freeVariables));
+        } else {
+            throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_nonembeddable_format(payloadFormulaFormat));
+        }
+    }
+
+    /**
+     * Creates a new placeholder instance.
+     *
+     * @param <THost>
+     * @param hostingFormula
+     * @param rawPayload
+     * @param freeVariables this set is not copied but it will be unmodifiable
+     * through the returned placeholder.
+     * @return
+     * @throws UnknownFormatException
+     * @throws diabelli.logic.TextEncodedFormulaFormat.FormulaEncodingException
+     */
+    @NbBundle.Messages({
+        "Placeholder_empty_payload=The payload formula in the placeholder must not be empty.",
+        "Placeholder_invalid_payload_format=The payload string is not correctly formatted. The format of payloads should be '<FormatName>: <Formula>'."
+    })
+    public static <THost> Placeholder<THost, ?> create(FormulaRepresentation<THost> hostingFormula, String rawPayload, Set<FreeVariable<?>> freeVariables) throws CarrierFormulaFormat.PlaceholderEmbeddingException {
+        if (rawPayload == null || rawPayload.isEmpty()) {
+            throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_empty_payload());
+        }
+        String[] components = rawPayload.split(": ?", 2);
+        if (components == null || components.length != 2) {
+            throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_invalid_payload_format());
+        }
+        return create(hostingFormula, components[0], components[1], freeVariables);
     }
     // </editor-fold>
 }

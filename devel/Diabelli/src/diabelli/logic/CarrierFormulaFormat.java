@@ -60,7 +60,9 @@ public interface CarrierFormulaFormat<T> extends FormulaFormat<T> {
      * 
      * @param context the goal from which we want to decode the placeholder. There
      * may be no context, in which case this parameter may be {@code null}.
+     * 
      * @return the placeholder, as extracted from the given formula.
+     * 
      * @throws diabelli.logic.CarrierFormulaFormat.PlaceholderEmbeddingException
      * thrown if an error happened during the decoding of the placeholder. The
      * message of this exception will be shown to the user in the GUI, it is 

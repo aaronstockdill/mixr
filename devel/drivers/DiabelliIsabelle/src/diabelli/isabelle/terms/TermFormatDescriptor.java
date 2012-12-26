@@ -85,7 +85,7 @@ public class TermFormatDescriptor extends FormulaFormatDescriptor<Term.Term> imp
             diabelli.isabelle.pure.lib.Placeholder placeholder = TermUtils.extractPlaceholder(term);
             if (placeholder instanceof PlaceholderWithVars) {
                 PlaceholderWithVars plVars = (PlaceholderWithVars)placeholder;
-                return Placeholder.create(plVars.formulaFormat(), plVars.payloadFormula(), null);
+                return Placeholder.create(formula, plVars.formulaFormat(), plVars.payloadFormula(), null);
             } else if (placeholder instanceof PlaceholderWithoutVars) {
                 PlaceholderWithoutVars pl = (PlaceholderWithoutVars) placeholder;
             }
