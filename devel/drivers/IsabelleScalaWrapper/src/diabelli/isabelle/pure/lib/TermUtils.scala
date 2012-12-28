@@ -37,7 +37,7 @@ object TermUtils {
   val HOL_bool = HOLTypeBool;
 
   def main(args: Array[String]): Unit = {
-    val t = TermYXML.parseYXML(TermYXML.Examples_unescaped(4));
+    val t = TermYXML.parseYXML(TermYXML.Examples_unescaped(1));
     traverseTermTree(t, t => {
       val ph = extractPlaceholder(t);
       if (ph == null) {
