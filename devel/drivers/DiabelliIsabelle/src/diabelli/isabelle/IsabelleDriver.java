@@ -213,6 +213,7 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
                     }
                     ArrayList<? extends FormulaRepresentation> isabelleStringRepresentation = goalFormula.fetchRepresentations(StringFormat.getInstance());
                     if (isabelleStringRepresentation == null || isabelleStringRepresentation.isEmpty()) {
+                        // TODO: Try to convert the formula into a placeholder and add it as an Isabelle string representation.
                         throw new RuntimeException(Bundle.ID_transformed_goal_unknown());
                     }
                     // We now have the corresponding Isabelle string formula, which

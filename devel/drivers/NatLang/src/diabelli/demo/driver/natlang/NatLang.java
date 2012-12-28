@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -49,14 +50,14 @@ import org.openide.util.lookup.ServiceProvider;
 @ServiceProvider(service = DiabelliComponent.class)
 public class NatLang implements DiabelliComponent, FormulaFormatsProvider, FormulaPresenter, GoalTransformer {
 
-    private final Collection<InferenceRuleDescriptor> inferenceRules;
+    private final List<InferenceRuleDescriptor> inferenceRules;
 
     public NatLang() {
         ArrayList<InferenceRuleDescriptor> tmp = new ArrayList<>();
 
         tmp.add(new DummyPlaceholderInference(NatLang.this));
 
-        inferenceRules = Collections.unmodifiableCollection(tmp);
+        inferenceRules = Collections.unmodifiableList(tmp);
     }
 
     @Override
@@ -104,6 +105,10 @@ public class NatLang implements DiabelliComponent, FormulaFormatsProvider, Formu
 
     @Override
     public void applyInferenceRule(InferenceTarget targets, InferenceRuleDescriptor inferenceRule) {
+        if (inferenceRule instanceof DummyPlaceholderInference) {
+            DummyPlaceholderInference dummyPlaceholderInference = (DummyPlaceholderInference) inferenceRule;
+            dummyPlaceholderInference.applyInferenceRule(targets);
+        }
     }
 
     @Override

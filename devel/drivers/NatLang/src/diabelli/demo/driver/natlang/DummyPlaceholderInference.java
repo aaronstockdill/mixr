@@ -75,7 +75,7 @@ public class DummyPlaceholderInference implements InferenceRuleDescriptor, Infer
 
     @Override
     public GoalTransformer getOwner() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return owner;
     }
 
     @Override
@@ -87,15 +87,17 @@ public class DummyPlaceholderInference implements InferenceRuleDescriptor, Infer
             tid.setOriginalFormula(natLangSentence);
             tid.setVisible(true);
             if (tid.isOkay()) {
-                    // Put the result back to the master reasoner:
-                    targets.getGoals().toArray();
-                    @SuppressWarnings({"rawtypes", "unchecked"})
-                    GoalTransformationResult goalTransformationResult = new GoalTransformationResult(getOwner(), targets.getGoals(), new MovableArrayList[]{
-                                new MovableArrayList<>(Arrays.asList(new Goal[]{
-                                    new Goal(null, null, null, new Formula(new FormulaRepresentation(tid.getNewFormula(), NaturalLanguage.getInstance()), Formula.FormulaRole.Goal))
-                                }))
-                            });
-                    Lookup.getDefault().lookup(Diabelli.class).getGoalManager().commitTransformedGoals(goalTransformationResult);
+                // Put the result back to the master reasoner:
+                targets.getGoals().toArray();
+                GoalTransformationResult goalTransformationResult = new GoalTransformationResult(
+                        getOwner(),
+                        targets.getGoals(),
+                        new MovableArrayList[]{
+                            new MovableArrayList<>(Arrays.asList(new Goal[]{
+                                new Goal(null, null, null, new Formula(new FormulaRepresentation(tid.getNewFormula(), NaturalLanguage.getInstance()), Formula.FormulaRole.Goal))
+                            }))
+                        });
+                Lookup.getDefault().lookup(Diabelli.class).getGoalManager().commitTransformedGoals(goalTransformationResult);
             }
         }
     }
@@ -103,13 +105,11 @@ public class DummyPlaceholderInference implements InferenceRuleDescriptor, Infer
     private String getNatLangSentenceFromTarget(InferenceTarget target) {
         if (target != null && target.getSentences().size() == 1) {
             Sentence sentence = target.getSentences().get(0);
-            if (sentence instanceof Formula) {
-                Formula formula = (Formula) sentence;
-                if (formula.getRole() == Formula.FormulaRole.Goal) {
-                    ArrayList<? extends FormulaRepresentation> natLangRepresentations = formula.fetchRepresentations(NaturalLanguage.getInstance());
-                    if (natLangRepresentations != null && !natLangRepresentations.isEmpty()) {
-                        return natLangRepresentations.get(0).getFormula().toString();
-                    }
+            if (sentence instanceof Goal) {
+                Goal goal = (Goal) sentence;
+                ArrayList<? extends FormulaRepresentation> natLangRepresentations = goal.asFormula().fetchRepresentations(NaturalLanguage.getInstance());
+                if (natLangRepresentations != null && !natLangRepresentations.isEmpty()) {
+                    return natLangRepresentations.get(0).getFormula().toString();
                 }
             }
         }
