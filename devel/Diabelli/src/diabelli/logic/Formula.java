@@ -540,6 +540,13 @@ public class Formula implements Sentence {
         if (format == null) {
             throw new IllegalArgumentException(Bundle.F_toFormat_null());
         }
+        // Try to extract the placeholder if possible:
+        try {
+            // Try to extract a placeholder from the main representation:
+            getPlaceholder();
+        } catch (PlaceholderEmbeddingException ex) {
+            Exceptions.printStackTrace(ex);
+        }
         // If the representations in this format have already been calculated
         // once, return what is already available (it does not matter if no
         // translations are available).
@@ -550,13 +557,6 @@ public class Formula implements Sentence {
         // translation at all:
         if (!hasMainTranslationSource()) {
             return null;
-        }
-        // Try to extract the placeholder if possible:
-        try {
-            // Try to extract a placeholder from the main representation:
-            getPlaceholder();
-        } catch (PlaceholderEmbeddingException ex) {
-            Exceptions.printStackTrace(ex);
         }
         // Try to translate this formula:
         FormulaRepresentation representation = null;

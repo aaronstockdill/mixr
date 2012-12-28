@@ -88,6 +88,7 @@ public class TermFormatDescriptor extends FormulaFormatDescriptor implements Car
                 return Placeholder.create(formula, plVars.formulaFormat(), plVars.payloadFormula(), dbliVars);
             } else if (placeholder instanceof PlaceholderWithoutVars) {
                 PlaceholderWithoutVars pl = (PlaceholderWithoutVars) placeholder;
+                return Placeholder.create(formula, pl.formulaFormat(), pl.payloadFormula(), null);
             }
         }
         return null;

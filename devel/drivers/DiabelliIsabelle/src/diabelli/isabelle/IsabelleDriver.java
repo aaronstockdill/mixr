@@ -29,10 +29,10 @@ import diabelli.components.FormulaFormatsProvider;
 import diabelli.components.FormulaPresenter;
 import diabelli.components.GoalAcceptingReasoner;
 import diabelli.components.util.BareGoalProvidingReasoner;
-import diabelli.isabelle.Bundle;
 import diabelli.isabelle.pure.lib.TermYXML;
 import diabelli.isabelle.terms.*;
 import diabelli.logic.*;
+import diabelli.logic.TextEncodedFormulaFormat.FormulaEncodingException;
 import isabelle.Term.Term;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
@@ -46,6 +46,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Timer;
@@ -212,16 +213,21 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
                         throw new RuntimeException(Bundle.ID_transformed_goal_unknown());
                     }
                     ArrayList<? extends FormulaRepresentation> isabelleStringRepresentation = goalFormula.fetchRepresentations(StringFormat.getInstance());
-                    if (isabelleStringRepresentation == null || isabelleStringRepresentation.isEmpty()) {
-                        // TODO: Try to convert the formula into a placeholder and add it as an Isabelle string representation.
-                        throw new RuntimeException(Bundle.ID_transformed_goal_unknown());
-                    }
-                    // We now have the corresponding Isabelle string formula, which
-                    // can be printed back to the proof script:
                     try {
-                        // Commit the rule application result back to the Isabelle's proof
-                        // script:
-                        proofDocument.insertAfter(proofDocument.getLastLockedElement(), String.format("apply (diabelli \"%s\")\n", isabelleStringRepresentation.get(0).getFormula()));
+                        if (isabelleStringRepresentation == null || isabelleStringRepresentation.isEmpty()) {
+                            String placeholder = createPlaceholder(goalFormula);
+                            if (placeholder == null) {
+                                throw new RuntimeException(Bundle.ID_transformed_goal_unknown());
+                            } else {
+                                proofDocument.insertAfter(proofDocument.getLastLockedElement(), String.format("apply (diabelliOracle \"%s\")\n", placeholder));
+                            }
+                        } else {
+                            // We now have the corresponding Isabelle string formula, which
+                            // can be printed back to the proof script:
+                            // Commit the rule application result back to the Isabelle's proof
+                            // script:
+                            proofDocument.insertAfter(proofDocument.getLastLockedElement(), String.format("apply (diabelli \"%s\")\n", isabelleStringRepresentation.get(0).getFormula()));
+                        }
                         proofDocument.awaitStable();
                     } catch (InterruptedException ex) {
                         Exceptions.printStackTrace(ex);
@@ -229,6 +235,52 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
                 }
             }
         }
+    }
+
+    private String createPlaceholder(Formula goalFormula) {
+        FormulaRepresentation mainRepresentation = goalFormula.getMainRepresentation();
+        if (mainRepresentation != null) {
+            FormulaFormat format = mainRepresentation.getFormat();
+            if (format instanceof TextEncodedFormulaFormat) {
+                TextEncodedFormulaFormat textEncodedFormulaFormat = (TextEncodedFormulaFormat) format;
+                try {
+                    String formulaAsString = textEncodedFormulaFormat.encodeAsString(mainRepresentation.getFormula());
+                    TreeSet<FreeVariable> freeVariables = null;
+                    if (format instanceof VariableReferencingFormulaFormat) {
+                        VariableReferencingFormulaFormat variableReferencingFormulaFormat = (VariableReferencingFormulaFormat) format;
+                        final Set<FreeVariable> tmpFreeVars = variableReferencingFormulaFormat.getFreeVariables(mainRepresentation);
+                        if (tmpFreeVars != null && !tmpFreeVars.isEmpty()) {
+                            freeVariables = new TreeSet<>(tmpFreeVars);
+                        }
+                    }
+                    // Build the Isabelle formula string:
+                    String isabellePlaceholderFormula;
+                    if (freeVariables == null || freeVariables.isEmpty()) {
+                        isabellePlaceholderFormula = "Diabelli ''" + format.getFormatName() + ": " + formulaAsString + "''";
+                    } else {
+                        StringBuilder sb = new StringBuilder("DiabelliVars [");
+                        while (!freeVariables.isEmpty()) {
+                            FreeVariable var1 = freeVariables.first();
+                            freeVariables.remove(var1);
+                            sb.append("About [").append(var1.getName());
+                            for (FreeVariable varN : freeVariables) {
+                                if (varN.getType() != null && varN.getType().equals(var1.getType())) {
+                                    sb.append(", ").append(varN.getName());
+                                }
+                            }
+                            sb.append("], ");
+                        }
+                        sb.delete(sb.length() - 2, sb.length());
+                        sb.append("] ''").append(format.getFormatName()).append(": ").append(formulaAsString).append("''");
+                        isabellePlaceholderFormula = sb.toString();
+                    }
+                    return isabellePlaceholderFormula;
+                } catch (FormulaEncodingException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
+        }
+        return null;
     }
     // </editor-fold>
 

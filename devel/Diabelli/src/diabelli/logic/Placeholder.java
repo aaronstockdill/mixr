@@ -171,7 +171,7 @@ public class Placeholder {
                 throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_formula_invalid(payloadFormulaFormat), ex);
             }
             FormulaRepresentation fp = new FormulaRepresentation(decodedFormula, payloadFormat, freeVariables);
-            return new Placeholder(hostingFormula, fp, Collections.unmodifiableSet(freeVariables));
+            return new Placeholder(hostingFormula, fp, freeVariables == null ? null : Collections.unmodifiableSet(freeVariables));
         } else {
             throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_nonembeddable_format(payloadFormulaFormat));
         }
