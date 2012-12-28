@@ -27,6 +27,7 @@ package diabelli;
 import diabelli.components.GoalProvider;
 import diabelli.logic.Goal;
 import diabelli.logic.Goals;
+import diabelli.logic.InferenceStepResult;
 import java.beans.PropertyChangeListener;
 
 /**
@@ -43,6 +44,17 @@ public interface GoalsManager {
      * @return the currently active goals of Diabelli.
      */
     Goals getCurrentGoals();
+    
+    /**
+     * After a successful interactive application of an inference rule this
+     * method should be called.
+     * 
+     * <p>This method passes the transformed goals back to the originating
+     * driver, which in turn passes the transformed goals back to the reasoner.</p>
+     * 
+     * @param inferenceResult the result of the inference step.
+     */
+    void commitTransformedGoals(InferenceStepResult inferenceResult);
 
     //<editor-fold defaultstate="collapsed" desc="Property Changed Stuff">
     /**

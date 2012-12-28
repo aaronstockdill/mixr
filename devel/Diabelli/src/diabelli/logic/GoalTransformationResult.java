@@ -182,6 +182,7 @@ public class GoalTransformationResult implements InferenceStepResult {
      *
      * @return new goals (transformed original goals).
      */
+    @Override
     public List<List<Goal>> getTransformedGoals() {
         return transformedGoals;
     }
@@ -191,6 +192,7 @@ public class GoalTransformationResult implements InferenceStepResult {
      *
      * @return the reasoner that produced the transformed goals.
      */
+    @Override
     public GoalTransformer getSlaveReasoner() {
         return slaveReasoner;
     }
@@ -200,6 +202,7 @@ public class GoalTransformationResult implements InferenceStepResult {
      *
      * @return the goals that were transformed.
      */
+    @Override
     public Goals getOriginalGoals() {
         return originalGoals;
     }
@@ -212,6 +215,7 @@ public class GoalTransformationResult implements InferenceStepResult {
      * @param goalIndex
      * @return
      */
+    @Override
     public boolean isGoalChanged(int goalIndex) {
         List<Goal> transformedGoal = transformedGoals.get(goalIndex);
 
@@ -249,6 +253,7 @@ public class GoalTransformationResult implements InferenceStepResult {
      * @return a collection of transformed goals that correspond to the original
      * goal at the given index.
      */
+    @Override
     public List<Goal> getTransformedGoalsFor(int originalGoalIndex) {
         if (originalGoalIndex < getTransformedGoalsCount() && originalGoalIndex >= 0) {
             return transformedGoals.get(originalGoalIndex);
@@ -262,6 +267,7 @@ public class GoalTransformationResult implements InferenceStepResult {
      *
      * @return the number of changed goals.
      */
+    @Override
     public int getGoalChangesCount() {
         // NOTE: It's okay if this value is recalculated multiple times. It's
         // read-only.
@@ -278,16 +284,15 @@ public class GoalTransformationResult implements InferenceStepResult {
         }
         return goalChangesCount.get();
     }
-    //</editor-fold>
-
-    // <editor-fold defaultstate="collapsed" desc="Private Helper Methods">
+    
     /**
      * Returns the number of elements in
      * {@link GoalTransformationResult#transformedGoals}.
      *
      * @return
      */
-    private int getTransformedGoalsCount() {
+    @Override
+    public int getTransformedGoalsCount() {
         return transformedGoals == null ? 0 : transformedGoals.size();
     }
     // </editor-fold>

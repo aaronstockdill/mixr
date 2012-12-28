@@ -27,9 +27,13 @@ package diabelli.demo.driver.natlang;
 import diabelli.components.DiabelliComponent;
 import diabelli.components.FormulaFormatsProvider;
 import diabelli.components.FormulaPresenter;
+import diabelli.components.GoalTransformer;
 import diabelli.logic.FormulaFormat;
 import diabelli.logic.FormulaRepresentation;
-import java.awt.Component;
+import diabelli.logic.InferenceRuleDescriptor;
+import diabelli.logic.InferenceStepResult;
+import diabelli.logic.InferenceTarget;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -39,10 +43,21 @@ import org.openide.util.lookup.ServiceProvider;
 /**
  * A demonstration driver which provides support for the <span
  * style="font-style:italic;">natural language</span> reasoning language.
+ *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 @ServiceProvider(service = DiabelliComponent.class)
-public class NatLang implements DiabelliComponent, FormulaFormatsProvider, FormulaPresenter {
+public class NatLang implements DiabelliComponent, FormulaFormatsProvider, FormulaPresenter, GoalTransformer {
+
+    private final Collection<InferenceRuleDescriptor> inferenceRules;
+
+    public NatLang() {
+        ArrayList<InferenceRuleDescriptor> tmp = new ArrayList<>();
+
+        tmp.add(new DummyPlaceholderInference(NatLang.this));
+
+        inferenceRules = Collections.unmodifiableCollection(tmp);
+    }
 
     @Override
     public String getName() {
@@ -54,7 +69,6 @@ public class NatLang implements DiabelliComponent, FormulaFormatsProvider, Formu
         return FormulaFormatsContainer.FormulaFormats;
     }
 
-    // <editor-fold defaultstate="collapsed" desc="Formula Presenter Implementation">
     @Override
     public Set<FormulaFormat<?>> getPresentedFormats() {
         return FormulaFormatsContainer.FormulaFormats;
@@ -73,6 +87,35 @@ public class NatLang implements DiabelliComponent, FormulaFormatsProvider, Formu
         }
     }
 
+    @Override
+    public Collection<InferenceRuleDescriptor> getApplicableInferenceRules(InferenceTarget target) {
+        return getInferenceRules();
+    }
+
+    @Override
+    public Collection<InferenceRuleDescriptor> getInferenceRules() {
+        return inferenceRules;
+    }
+
+    @Override
+    public boolean canTransform(InferenceTarget target) {
+        return true;
+    }
+
+    @Override
+    public void applyInferenceRule(InferenceTarget targets, InferenceRuleDescriptor inferenceRule) {
+    }
+
+    @Override
+    public InferenceStepResult applyAutomatedInferenceRule(InferenceTarget targets, InferenceRuleDescriptor inferenceRule) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public String getInferenceSetName() {
+        return "NatLang";
+    }
+
     private static class FormulaFormatsContainer {
 
         private static final Set<FormulaFormat<?>> FormulaFormats;
@@ -83,5 +126,4 @@ public class NatLang implements DiabelliComponent, FormulaFormatsProvider, Formu
             FormulaFormats = Collections.unmodifiableSet(tmp);
         }
     }
-    
 }

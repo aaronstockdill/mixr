@@ -82,18 +82,22 @@ public interface GoalTransformer extends Reasoner {
      * @return a collection of all inference rules that are applicable on the
      * given target.
      */
-    Collection<InferenceRuleDescriptor> getApplicableInferenceRules(InferenceTarget target);
+    Collection<? extends InferenceRuleDescriptor> getApplicableInferenceRules(InferenceTarget target);
 
     /**
      * Returns the collection of all inference rules provided by this reasoner.
      *
      * @return the collection of all inference rules provided by this reasoner.
      */
-    Collection<InferenceRuleDescriptor> getInferenceRules();
+    Collection<? extends InferenceRuleDescriptor> getInferenceRules();
 
     /**
      * Quickly and superficially checks whether this reasoner can work with the
      * given inference target.
+     *
+     * <p>This method is used to determine whether to display the inference
+     * rules of this driver in the drop-down list of applicable inference rules
+     * in the UI.</p>
      *
      * @param target the goals, formulae, or formulae representations on which
      * we want to use this reasoner.

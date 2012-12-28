@@ -130,7 +130,7 @@ public final class ApplyInferenceRuleAction extends AbstractAction implements Pr
         for (GoalTransformer goalTransformingReasoner : goalTransformingReasoners) {
             if (goalTransformingReasoner.canTransform(target)) {
                 // Now add all applicable inference rules to the submenu:
-                Collection<InferenceRuleDescriptor> applicableInferenceRules = goalTransformingReasoner.getApplicableInferenceRules(target);
+                Collection<? extends InferenceRuleDescriptor> applicableInferenceRules = goalTransformingReasoner.getApplicableInferenceRules(target);
                 if (applicableInferenceRules != null && !applicableInferenceRules.isEmpty()) {
                     // Sort the inference rules by their names:
                     final ArrayList<InferenceRuleDescriptor> sortedInfRules = new ArrayList<>(applicableInferenceRules);

@@ -27,14 +27,22 @@ package diabelli.implementation;
 import diabelli.Diabelli;
 import diabelli.GoalsManager;
 import diabelli.ReasonersManager;
+import diabelli.components.GoalAcceptingReasoner;
 import diabelli.components.GoalProvider;
+import diabelli.logic.Formula;
+import diabelli.logic.FormulaRepresentation;
+import diabelli.logic.Goal;
+import diabelli.logic.GoalTransformationResult;
 import diabelli.logic.Goals;
+import diabelli.logic.InferenceStepResult;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.NbBundle;
+import propity.util.MovableArrayList;
 
 /**
  * The main implementation of the {@link GoalsManager Diabelli goal manager
@@ -67,6 +75,26 @@ class GoalsManagerImpl implements GoalsManager, ManagerInternals {
     @Override
     public Goals getCurrentGoals() {
         return currentGoals;
+    }
+
+    @Override
+    @NbBundle.Messages({
+        "GMI_inference_step_empty_or_invalid=Cannot commit a null inference step or one that is without original goals.",
+        "GMI_no_goal_accepting_reasoner=Could not determine the goal-accepting reasoner to pass the goals to."
+    })
+    public void commitTransformedGoals(InferenceStepResult inferenceResult) {
+        if (inferenceResult != null && inferenceResult.getOriginalGoals() != null) {
+            // Put the result back to the master reasoner:
+            GoalProvider masterReasoner = inferenceResult.getOriginalGoals().getOwner();
+            if (masterReasoner == null) {
+                throw new IllegalArgumentException(Bundle.GMI_no_goal_accepting_reasoner());
+            } else if (masterReasoner instanceof GoalAcceptingReasoner) {
+                GoalAcceptingReasoner goalAcceptingReasoner = (GoalAcceptingReasoner) masterReasoner;
+                goalAcceptingReasoner.commitTransformedGoals(inferenceResult);
+            }
+        } else {
+            throw new IllegalArgumentException(Bundle.GMI_inference_step_empty_or_invalid());
+        }
     }
     //</editor-fold>
 

@@ -24,6 +24,7 @@
  */
 package speedith.diabelli;
 
+import diabelli.Diabelli;
 import diabelli.components.DiabelliComponent;
 import diabelli.components.FormulaFormatsProvider;
 import diabelli.components.FormulaPresenter;
@@ -39,6 +40,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 import propity.util.MovableArrayList;
@@ -218,19 +220,14 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
                         return;
                     }
                     // Put the result back to the master reasoner:
-                    GoalProvider masterReasoner = targets.getGoals().getOwner();
-                    if (masterReasoner instanceof GoalAcceptingReasoner) {
-                        GoalAcceptingReasoner goalAcceptingReasoner = (GoalAcceptingReasoner) masterReasoner;
-                        targets.getGoals().toArray();
-                        @SuppressWarnings({"rawtypes", "unchecked"})
-                        GoalTransformationResult goalTransformationResult = new GoalTransformationResult(this, targets.getGoals(), new MovableArrayList[]{
-                                    new MovableArrayList<>(Arrays.asList(new Goal[]{
-                                        new Goal(null, null, null, new Formula<>(new FormulaRepresentation<>(applicationResult.getGoals().getGoalAt(0), SpeedithFormatDescriptor.getInstance()), Formula.FormulaRole.Goal))
-                                    }))
-                                });
-                        goalAcceptingReasoner.commitTransformedGoals(goalTransformationResult);
-                    }
-
+                    targets.getGoals().toArray();
+                    @SuppressWarnings({"rawtypes", "unchecked"})
+                    GoalTransformationResult goalTransformationResult = new GoalTransformationResult(this, targets.getGoals(), new MovableArrayList[]{
+                                new MovableArrayList<>(Arrays.asList(new Goal[]{
+                                    new Goal(null, null, null, new Formula<>(new FormulaRepresentation<>(applicationResult.getGoals().getGoalAt(0), SpeedithFormatDescriptor.getInstance()), Formula.FormulaRole.Goal))
+                                }))
+                            });
+                    Lookup.getDefault().lookup(Diabelli.class).getGoalManager().commitTransformedGoals(goalTransformationResult);
                 }
             } catch (RuleApplicationException | UnsupportedOperationException ex) {
                 Logger.getLogger(SpeedithDriver.class.getName()).log(Level.INFO, Bundle.SD_application_error_message(infRule.getName(), ex.getLocalizedMessage()), ex);
