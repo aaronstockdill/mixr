@@ -48,10 +48,10 @@ import org.openide.util.NbBundle;
 class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
-    private final HashMap<String, FormulaFormat<?>> formulaFormats;
-    private final HashMap<String, FormulaTranslator<?, ?>> formulaTranslators;
-    private final HashMap<FormulaFormat<?>, HashSet<? extends FormulaTranslator<?, ?>>> fromFormatTranslatorsMap;
-    private final HashMap<FormulaFormat<?>, HashSet<? extends FormulaTranslator<?, ?>>> toFormatTranslatorsMap;
+    private final HashMap<String, FormulaFormat> formulaFormats;
+    private final HashMap<String, FormulaTranslator> formulaTranslators;
+    private final HashMap<FormulaFormat, HashSet<? extends FormulaTranslator>> fromFormatTranslatorsMap;
+    private final HashMap<FormulaFormat, HashSet<? extends FormulaTranslator>> toFormatTranslatorsMap;
     private Diabelli diabelli;
     //</editor-fold>
 
@@ -66,12 +66,12 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
 
     // <editor-fold defaultstate="collapsed" desc="Formula Formats">
     @Override
-    public Collection<FormulaFormat<?>> getFormulaFormats() {
+    public Collection<FormulaFormat> getFormulaFormats() {
         return Collections.unmodifiableCollection(formulaFormats.values());
     }
 
     @Override
-    public FormulaFormat<?> getFormulaFormat(String formatName) {
+    public FormulaFormat getFormulaFormat(String formatName) {
         return formulaFormats.get(formatName);
     }
 
@@ -89,11 +89,11 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
         "FFM_formats_empty=The Diabelli component '{0}' advertises itself as a formula format provider, however, it provides no formats.",
         "FFM_format_null=The Diabelli component '{0}' tried to register a 'null' format."
     })
-    void registerFormulaFormats(Collection<FormulaFormat<?>> formats, FormulaFormatsProvider providingComponent) {
+    void registerFormulaFormats(Collection<FormulaFormat> formats, FormulaFormatsProvider providingComponent) {
         if (formats == null || formats.isEmpty()) {
             throw new IllegalArgumentException(Bundle.FFM_formats_empty(providingComponent.getName()));
         } else {
-            for (FormulaFormat<?> format : formats) {
+            for (FormulaFormat format : formats) {
                 if (format == null) {
                     throw new IllegalArgumentException(Bundle.FFM_format_null(providingComponent.getName()));
                 }
@@ -108,7 +108,7 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
 
     // <editor-fold defaultstate="collapsed" desc="Formula Translators">
     @Override
-    public Collection<FormulaTranslator<?, ?>> getFormulaTranslators() {
+    public Collection<FormulaTranslator> getFormulaTranslators() {
         return Collections.unmodifiableCollection(formulaTranslators.values());
     }
 
@@ -118,47 +118,47 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
     }
 
     @Override
-    public FormulaTranslator<?, ?> getFormulaTranslator(String formatName) {
+    public FormulaTranslator getFormulaTranslator(String formatName) {
         return formulaTranslators.get(formatName);
     }
 
     @Override
-    public <TFrom> Set<FormulaTranslator<TFrom, ?>> getFormulaTranslatorsFrom(FormulaFormat<TFrom> fromFormat) {
+    public Set<FormulaTranslator> getFormulaTranslatorsFrom(FormulaFormat fromFormat) {
         @SuppressWarnings("unchecked")
-        HashSet<FormulaTranslator<TFrom, ?>> translators = (HashSet<FormulaTranslator<TFrom, ?>>) fromFormatTranslatorsMap.get(fromFormat);
+        HashSet<FormulaTranslator> translators = (HashSet<FormulaTranslator>) fromFormatTranslatorsMap.get(fromFormat);
         return translators == null ? null : Collections.unmodifiableSet(translators);
     }
 
     @Override
-    public <TFrom> int getFormulaTranslatorsFromCount(FormulaFormat<TFrom> fromFormat) {
+    public int getFormulaTranslatorsFromCount(FormulaFormat fromFormat) {
         HashSet<?> translators = fromFormatTranslatorsMap.get(fromFormat);
         return translators == null ? 0 : translators.size();
     }
 
     @Override
-    public <TTo> Set<FormulaTranslator<?, TTo>> getFormulaTranslatorsTo(FormulaFormat<TTo> toFormat) {
+    public Set<FormulaTranslator> getFormulaTranslatorsTo(FormulaFormat toFormat) {
         @SuppressWarnings("unchecked")
-        HashSet<? extends FormulaTranslator<?, TTo>> translators = (HashSet<? extends FormulaTranslator<?, TTo>>) toFormatTranslatorsMap.get(toFormat);
+        HashSet<? extends FormulaTranslator> translators = (HashSet<? extends FormulaTranslator>) toFormatTranslatorsMap.get(toFormat);
         return translators == null ? null : Collections.unmodifiableSet(translators);
     }
 
     @Override
-    public <TTo> int getFormulaTranslatorsToCount(FormulaFormat<TTo> toFormat) {
+    public int getFormulaTranslatorsToCount(FormulaFormat toFormat) {
         HashSet<?> translators = toFormatTranslatorsMap.get(toFormat);
         return translators == null ? 0 : translators.size();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <TFrom, TTo> Set<FormulaTranslator<TFrom, TTo>> getFormulaTranslators(FormulaFormat<TFrom> fromFormat, FormulaFormat<TTo> toFormat) {
-        HashSet<? extends FormulaTranslator<TFrom, ?>> from = (HashSet<? extends FormulaTranslator<TFrom, ?>>) fromFormatTranslatorsMap.get(fromFormat);
-        HashSet<? extends FormulaTranslator<?, TTo>> to = (HashSet<? extends FormulaTranslator<? extends Object, TTo>>) toFormatTranslatorsMap.get(toFormat);
+    public Set<FormulaTranslator> getFormulaTranslators(FormulaFormat fromFormat, FormulaFormat toFormat) {
+        HashSet<? extends FormulaTranslator> from = (HashSet<? extends FormulaTranslator>) fromFormatTranslatorsMap.get(fromFormat);
+        HashSet<? extends FormulaTranslator> to = (HashSet<? extends FormulaTranslator>) toFormatTranslatorsMap.get(toFormat);
         if (from == null || to == null) {
             return null;
         } else {
-            HashSet<? extends FormulaTranslator<TFrom, ?>> fromTo = (HashSet<? extends FormulaTranslator<TFrom, ?>>) from.clone();
+            @SuppressWarnings("unchecked")
+            HashSet<FormulaTranslator> fromTo = (HashSet<FormulaTranslator>) from.clone();
             fromTo.retainAll(to);
-            return (Set<FormulaTranslator<TFrom, TTo>>) fromTo;
+            return (Set<FormulaTranslator>) fromTo;
         }
     }
 
@@ -171,11 +171,11 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
         "FFM_translators_empty=The Diabelli component '{0}' advertises itself as a formula translator provider, however, it provides no formula translators.",
         "FFM_translator_null=The Diabelli component '{0}' tried to register a 'null' formula translator."
     })
-    void registerFormulaTranslators(Collection<FormulaTranslator<?, ?>> translators, FormulaTranslationsProvider providingComponent) {
+    void registerFormulaTranslators(Collection<FormulaTranslator> translators, FormulaTranslationsProvider providingComponent) {
         if (translators == null || translators.isEmpty()) {
             throw new IllegalArgumentException(Bundle.FFM_translators_empty(providingComponent.getName()));
         } else {
-            for (FormulaTranslator<?, ?> translator : translators) {
+            for (FormulaTranslator translator : translators) {
                 if (translator == null) {
                     throw new IllegalArgumentException(Bundle.FFM_translator_null(providingComponent.getName()));
                 }
@@ -191,20 +191,20 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
         }
     }
 
-    private <TFrom> void addFromFormat(FormulaTranslator<TFrom, ?> translator) {
-        FormulaFormat<TFrom> fromFormat = translator.getFromFormat();
+    private <TFrom> void addFromFormat(FormulaTranslator translator) {
+        FormulaFormat fromFormat = translator.getFromFormat();
         @SuppressWarnings("unchecked")
-        HashSet<FormulaTranslator<TFrom, ?>> fromTranslators = (HashSet<FormulaTranslator<TFrom, ?>>) fromFormatTranslatorsMap.get(fromFormat);
+        HashSet<FormulaTranslator> fromTranslators = (HashSet<FormulaTranslator>) fromFormatTranslatorsMap.get(fromFormat);
         if (fromTranslators == null) {
             fromFormatTranslatorsMap.put(fromFormat, fromTranslators = new HashSet<>());
         }
         fromTranslators.add(translator);
     }
 
-    private <TTo> void addToFormat(FormulaTranslator<?, TTo> translator) {
-        FormulaFormat<TTo> toFormat = translator.getToFormat();
+    private <TTo> void addToFormat(FormulaTranslator translator) {
+        FormulaFormat toFormat = translator.getToFormat();
         @SuppressWarnings("unchecked")
-        HashSet<FormulaTranslator<?, TTo>> toTranslators = (HashSet<FormulaTranslator<?, TTo>>) toFormatTranslatorsMap.get(toFormat);
+        HashSet<FormulaTranslator> toTranslators = (HashSet<FormulaTranslator>) toFormatTranslatorsMap.get(toFormat);
         if (toTranslators == null) {
             toFormatTranslatorsMap.put(toFormat, toTranslators = new HashSet<>());
         }

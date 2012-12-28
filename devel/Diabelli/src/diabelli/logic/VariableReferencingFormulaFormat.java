@@ -30,12 +30,9 @@ import java.util.Set;
  * Formulae of this format may contain free variables (or variables that are
  * bound outside of the scope of the formula).
  *
- * @param <T> the
- * {@link FormulaFormat#getRawFormulaType() type of the raw formula}.
- *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface VariableReferencingFormulaFormat<T> extends FormulaFormat<T> {
+public interface VariableReferencingFormulaFormat extends FormulaFormat {
 
     /**
      * Returns the names of variables that are free in the formula (or that are
@@ -50,5 +47,5 @@ public interface VariableReferencingFormulaFormat<T> extends FormulaFormat<T> {
      * denotes that there are no externally referenced variables in this
      * formula.
      */
-    Set<FreeVariable<?>> getFreeVariables(FormulaRepresentation<T> formula);
+    Set<FreeVariable> getFreeVariables(FormulaRepresentation formula);
 }

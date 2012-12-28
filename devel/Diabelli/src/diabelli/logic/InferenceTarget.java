@@ -61,6 +61,7 @@ public class InferenceTarget {
      *
      * @param goals this {@link Goals goals} object contains all the selected
      * formulae that should be the target of the rule application.
+     * 
      * @param sentences a collection of sentences (formulae) the user has
      * selected for rule application. Can be {@code null}, which indicates
      * that the inference rule should be applied on all goals.

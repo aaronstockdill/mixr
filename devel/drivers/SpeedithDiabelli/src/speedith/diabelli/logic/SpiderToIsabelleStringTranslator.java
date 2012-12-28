@@ -45,7 +45,7 @@ import propity.util.Maps;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public class SpiderToIsabelleStringTranslator extends FormulaTranslator<SpiderDiagram, StringFormula> {
+public class SpiderToIsabelleStringTranslator extends FormulaTranslator {
     
     //<editor-fold defaultstate="collapsed" desc="Fields">
     private final SDExporter SDPrettyExporter;
@@ -95,24 +95,29 @@ public class SpiderToIsabelleStringTranslator extends FormulaTranslator<SpiderDi
     @Override
     @NbBundle.Messages({
         "STIST_no_sd_format_representation=Cannot translate the given formula with this translator. The formula has no spider diagram representation.",
+        "STIST_no_sd=The formula contains an invalid spider diagram.",
         "STIST_translation_failed=The translation of the spider diagram to an Isabelle formula failed."
     })
-    public FormulaRepresentation<StringFormula> translate(Formula<SpiderDiagram> formula) throws TranslationException {
-        ArrayList<? extends FormulaRepresentation<SpiderDiagram>> sdFormulae = formula.fetchRepresentations(SpeedithFormatDescriptor.getInstance());
+    public FormulaRepresentation translate(Formula formula) throws TranslationException {
+        ArrayList<? extends FormulaRepresentation> sdFormulae = formula.fetchRepresentations(SpeedithFormatDescriptor.getInstance());
         if (sdFormulae == null || sdFormulae.isEmpty()) {
             throw new TranslationException(Bundle.STIST_no_sd_format_representation());
         }
-        FormulaRepresentation<SpiderDiagram> sdFormula = sdFormulae.get(0);
+        FormulaRepresentation sdFormula = sdFormulae.get(0);
         try {
-            String export = SDNormalExporter.export(sdFormula.getFormula());
-            return new FormulaRepresentation<>(new StringFormula(export), StringFormat.getInstance());
+            if (sdFormula.getFormula() instanceof SpiderDiagram) {
+            String export = SDNormalExporter.export((SpiderDiagram)sdFormula.getFormula());
+            return new FormulaRepresentation(new StringFormula(export), StringFormat.getInstance());
+            } else {
+                throw new TranslationException(Bundle.STIST_no_sd());
+            }
         } catch (ExportException ex) {
             throw new TranslationException(Bundle.STIST_translation_failed(), ex);
         }
     }
 
     @Override
-    public FormulaRepresentation<StringFormula> translate(List<? extends Formula<SpiderDiagram>> premises) throws TranslationException {
+    public FormulaRepresentation translate(List<? extends Formula> premises) throws TranslationException {
         throw new TranslationException("Not supported yet.");
     }
 }

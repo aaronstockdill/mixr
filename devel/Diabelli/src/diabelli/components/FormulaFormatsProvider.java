@@ -44,5 +44,5 @@ public interface FormulaFormatsProvider extends DiabelliComponent {
      *
      * @return a list of formula formats provided by this Diabelli component.
      */
-    Collection<FormulaFormat<?>> getFormulaFormats();
+    Collection<FormulaFormat> getFormulaFormats();
 }

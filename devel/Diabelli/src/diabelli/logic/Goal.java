@@ -51,10 +51,10 @@ import org.openide.util.NbBundle;
 public class Goal implements Sentence {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
-    private final ArrayList<? extends Formula<?>> premises;
-    private final Formula<?> premisesFormula;
-    private final Formula<?> conclusion;
-    private final Formula<?> goalFormula;
+    private final ArrayList<? extends Formula> premises;
+    private final Formula premisesFormula;
+    private final Formula conclusion;
+    private final Formula goalFormula;
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Constructor">
@@ -74,18 +74,18 @@ public class Goal implements Sentence {
     })
     @SuppressWarnings({"LeakingThisInConstructor", "rawtypes", "unchecked"})
     public Goal(
-            ArrayList<? extends Formula<?>> premises,
-            Formula<?> premisesFormula,
-            Formula<?> conclusion,
-            Formula<?> goalFormula) {
+            ArrayList<? extends Formula> premises,
+            Formula premisesFormula,
+            Formula conclusion,
+            Formula goalFormula) {
         this.premises = premises;
-        this.conclusion = conclusion == null ? new Formula<>(null, Formula.FormulaRole.Conclusion) : conclusion;
-        this.goalFormula = goalFormula == null ? new Formula<>(null, Formula.FormulaRole.Goal) : goalFormula;
+        this.conclusion = conclusion == null ? new Formula(null, Formula.FormulaRole.Conclusion) : conclusion;
+        this.goalFormula = goalFormula == null ? new Formula(null, Formula.FormulaRole.Goal) : goalFormula;
         this.premisesFormula = premisesFormula == null ? new PremisesFormula(premises) : premisesFormula;
 
         // Set self as the hosting goal for all the above formulae:
         if (premises != null && !premises.isEmpty()) {
-            for (Formula<?> formula : premises) {
+            for (Formula formula : premises) {
                 if (formula == null) {
                     throw new IllegalArgumentException(Bundle.G_premises_contains_null());
                 }
@@ -105,7 +105,7 @@ public class Goal implements Sentence {
      *
      * @return the list of premises in this goal.
      */
-    public List<? extends Formula<?>> getPremises() {
+    public List<? extends Formula> getPremises() {
         return premises == null || premises.isEmpty() ? null : Collections.unmodifiableList(premises);
     }
 
@@ -116,7 +116,7 @@ public class Goal implements Sentence {
      *
      * @return the premises represented as a single formula.
      */
-    public Formula<?> getPremisesFormula() {
+    public Formula getPremisesFormula() {
         return premisesFormula;
     }
 
@@ -138,7 +138,7 @@ public class Goal implements Sentence {
     @NbBundle.Messages({
         "G_premise_index_out_of_bounds=Could not fetch the premise at index '{0}'. There are '{1}' premises in this goal."
     })
-    public Formula<?> getPremiseAt(int index) {
+    public Formula getPremiseAt(int index) {
         int count = getPremisesCount();
         if (index >= count || index < 0) {
             throw new IndexOutOfBoundsException(Bundle.G_premise_index_out_of_bounds(index, count));
@@ -153,7 +153,7 @@ public class Goal implements Sentence {
      *
      * @return the conclusion of this goal.
      */
-    public Formula<?> getConclusion() {
+    public Formula getConclusion() {
         return conclusion;
     }
 
@@ -167,7 +167,7 @@ public class Goal implements Sentence {
      * @return a formula that represents the whole goal.
      */
     @NonNull
-    public Formula<?> asFormula() {
+    public Formula asFormula() {
         return goalFormula;
     }
 
@@ -176,24 +176,22 @@ public class Goal implements Sentence {
      * This method puts the translations into the {@link Goal#getPremisesFormula()
      * premises formula}.
      *
-     * @param <TTo> the the type of raw formulae to which to translate the
-     * premises.
      * @param premises a subset of premises of this goal.
      * @param toFormat the format to which to translate the subset of premises.
      */
-    public <TTo> void addPremisesTranslations(List<? extends Formula<? extends Object>> premises, FormulaFormat<TTo> toFormat) {
+    public <TTo> void addPremisesTranslations(List<? extends Formula> premises, FormulaFormat toFormat) {
         @SuppressWarnings("unchecked")
-        List<? extends Formula<Object>> premisesO = (List<? extends Formula<Object>>) premises;
+        List<? extends Formula> premisesO = (List<? extends Formula>) premises;
         // Check that the premises are actually contained in this goal's
         // premises collection
         if (hostingGoalOf(premisesO) == this) {
             // Check that all premises have the same format of the main representation:
-            FormulaFormat<Object> fromFormat = getCommonMainFormat(premisesO);
+            FormulaFormat fromFormat = getCommonMainFormat(premisesO);
             // If there is a common main format, use it to get all
             // translators:
-            Set<FormulaTranslator<Object, TTo>> translators = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager().getFormulaTranslators(fromFormat, toFormat);
+            Set<FormulaTranslator> translators = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager().getFormulaTranslators(fromFormat, toFormat);
             if (translators != null && !translators.isEmpty()) {
-                for (FormulaTranslator<Object, TTo> translator : translators) {
+                for (FormulaTranslator translator : translators) {
                     addPremisesTranslationImpl(premisesO, translator);
                 }
             }
@@ -226,12 +224,12 @@ public class Goal implements Sentence {
         "G_translator_format_mismatch=The format of the premises does not match the translator's input format.",
         "G_foreign_premises=The premises are not hosted by this goal."
     })
-    public <TFrom, TTo> void addPremisesTranslation(List<? extends Formula<TFrom>> premises, FormulaTranslator<TFrom, TTo> translator) {
+    public void addPremisesTranslation(List<? extends Formula> premises, FormulaTranslator translator) {
         // Check that the premises are actually contained in this goal's
         // premises collection
         if (hostingGoalOf(premises) == this) {
             // Check that all premises have the same format of the main representation:
-            FormulaFormat<TFrom> fromFormat = getCommonMainFormat(premises);
+            FormulaFormat fromFormat = getCommonMainFormat(premises);
             if (fromFormat == null) {
                 Logger.getLogger(Goal.class.getName()).log(Level.INFO, Bundle.G_premises_not_with_same_formats());
             } else if (fromFormat != translator.getFromFormat()) {
@@ -257,9 +255,9 @@ public class Goal implements Sentence {
      * @param translator the translator with which to translate the given
      * premises into the target format.
      */
-    private <TFrom, TTo> void addPremisesTranslationImpl(List<? extends Formula<TFrom>> premises, FormulaTranslator<TFrom, TTo> translator) {
+    private void addPremisesTranslationImpl(List<? extends Formula> premises, FormulaTranslator translator) {
         try {
-            FormulaRepresentation<TTo> translate = translator.translate(premises);
+            FormulaRepresentation translate = translator.translate(premises);
             getPremisesFormula().addRepresentation(translate);
         } catch (TranslationException ex) {
             Logger.getLogger(Formula.class.getName()).log(Level.FINEST, String.format("Translation with '%s' failed. Translation error message: %s", translator.getPrettyName(), ex.getMessage()), ex);
@@ -276,12 +274,12 @@ public class Goal implements Sentence {
      * @return a non-{@code null} formula format if all the premises have a main
      * representation and all their main representations are of the same format.
      */
-    private static <T> FormulaFormat<T> getCommonMainFormat(List<? extends Formula<T>> formulae) {
+    private static FormulaFormat getCommonMainFormat(List<? extends Formula> formulae) {
         if (formulae != null && formulae.size() > 0) {
-            Formula<T> curFormula = formulae.get(0);
+            Formula curFormula = formulae.get(0);
             if (curFormula != null && curFormula.getMainRepresentation() != null) {
                 @SuppressWarnings("unchecked")
-                FormulaFormat<T> format = curFormula.getMainRepresentation().getFormat();
+                FormulaFormat format = curFormula.getMainRepresentation().getFormat();
                 for (int i = 1; i < formulae.size(); i++) {
                     curFormula = formulae.get(i);
                     if (curFormula == null || curFormula.getMainRepresentation() == null || curFormula.getMainRepresentation().getFormat() != format) {
@@ -304,11 +302,11 @@ public class Goal implements Sentence {
      * @param premises
      * @return
      */
-    private static <T> Goal hostingGoalOf(List<? extends Formula<T>> premises) {
+    private static Goal hostingGoalOf(List<? extends Formula> premises) {
         if (premises != null && premises.size() > 0) {
             Goal curGoal = premises.get(0).getHostingGoal();
             for (int i = 1; i < premises.size(); i++) {
-                Formula<T> formula = premises.get(i);
+                Formula formula = premises.get(i);
                 if (formula.getHostingGoal() != curGoal) {
                     return null;
                 }

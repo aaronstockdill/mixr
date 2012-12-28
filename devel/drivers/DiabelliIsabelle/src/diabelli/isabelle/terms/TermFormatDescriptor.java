@@ -48,7 +48,7 @@ import org.openide.util.NbBundle;
 @NbBundle.Messages({
     "TFD_term_format_pretty_name=Isabelle term"
 })
-public class TermFormatDescriptor extends FormulaFormatDescriptor<Term.Term> implements CarrierFormulaFormat<Term.Term> {
+public class TermFormatDescriptor extends FormulaFormatDescriptor implements CarrierFormulaFormat {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
     /**
@@ -66,23 +66,23 @@ public class TermFormatDescriptor extends FormulaFormatDescriptor<Term.Term> imp
 
     // <editor-fold defaultstate="collapsed" desc="Placeholder Implementation">
     @Override
-    public <TPayload> Formula<Term.Term> encodePlaceholder(Placeholder<Term.Term, TPayload> placeholder, Goal context) throws PlaceholderEmbeddingException {
+    public Formula encodePlaceholder(Placeholder placeholder, Goal context) throws PlaceholderEmbeddingException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public Placeholder<Term.Term, ?> decodePlaceholder(FormulaRepresentation<Term.Term> formula, Goal context) throws PlaceholderEmbeddingException {
-        if (formula != null) {
-            Term.Term term = formula.getFormula();
+    public Placeholder decodePlaceholder(FormulaRepresentation formula, Goal context) throws PlaceholderEmbeddingException {
+        if (formula != null && formula.getFormula() instanceof Term.Term) {
+            Term.Term term = (Term.Term)formula.getFormula();
             diabelli.isabelle.pure.lib.Placeholder placeholder = TermUtils.extractPlaceholder(term);
             if (placeholder instanceof PlaceholderWithVars) {
                 PlaceholderWithVars plVars = (PlaceholderWithVars) placeholder;
                 List<FreeVar> vars = plVars.variables();
-                HashSet<FreeVariable<?>> dbliVars = null;
+                HashSet<FreeVariable> dbliVars = null;
                 if (vars != null && !vars.isEmpty()) {
                     dbliVars = new HashSet<>();
                     for (FreeVar freeVar : vars) {
-                        dbliVars.add(new FreeVariable<>(freeVar.name(), freeVar.typ()));
+                        dbliVars.add(new FreeVariable(freeVar.name(), freeVar.typ()));
                     }
                 }
                 return Placeholder.create(formula, plVars.formulaFormat(), plVars.payloadFormula(), dbliVars);

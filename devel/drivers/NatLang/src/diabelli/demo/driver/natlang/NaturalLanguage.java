@@ -43,7 +43,7 @@ import org.openide.util.NbBundle;
 @NbBundle.Messages({
     "NatLang_format_pretty_name=Dummy natural language"
 })
-public class NaturalLanguage extends FormulaFormatDescriptor<String> implements EmbeddableFormulaFormat<String> {
+public class NaturalLanguage extends FormulaFormatDescriptor implements EmbeddableFormulaFormat {
 
     /**
      * The name of the natural language format.
@@ -55,17 +55,17 @@ public class NaturalLanguage extends FormulaFormatDescriptor<String> implements 
     }
 
     @Override
-    public String encodeAsString(String formula) throws FormulaEncodingException {
-        return formula;
+    public String encodeAsString(Object formula) throws FormulaEncodingException {
+        return formula == null ? null : formula.toString();
     }
 
     @Override
-    public String decodeFromString(String encodedFormula) throws FormulaEncodingException {
+    public Object decodeFromString(String encodedFormula) throws FormulaEncodingException {
         return encodedFormula;
     }
 
     @Override
-    public Set<FreeVariable<?>> getFreeVariables(FormulaRepresentation<String> formula) {
+    public Set<FreeVariable> getFreeVariables(FormulaRepresentation formula) {
         return null;
     }
 

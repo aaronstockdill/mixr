@@ -32,7 +32,7 @@ package diabelli.logic;
  * {@link FormulaFormat#getRawFormulaType() type of the raw formula}.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface CarrierFormulaFormat<T> extends FormulaFormat<T> {
+public interface CarrierFormulaFormat extends FormulaFormat {
 
     // <editor-fold defaultstate="collapsed" desc="Public Abstract Methods">
     /**
@@ -53,7 +53,7 @@ public interface CarrierFormulaFormat<T> extends FormulaFormat<T> {
      * message of this exception will be shown to the user in the GUI, it is
      * therefore desired that the message is human-readable.
      */
-    <TPayload> Formula<T> encodePlaceholder(Placeholder<T, TPayload> placeholder, Goal context) throws PlaceholderEmbeddingException;
+    Formula encodePlaceholder(Placeholder placeholder, Goal context) throws PlaceholderEmbeddingException;
 
     /**
      * Looks at the formula, recognises whether it encodes a placeholder, and
@@ -74,7 +74,7 @@ public interface CarrierFormulaFormat<T> extends FormulaFormat<T> {
      * message of this exception will be shown to the user in the GUI, it is
      * therefore desired that the message is human-readable.
      */
-    Placeholder<T, ?> decodePlaceholder(FormulaRepresentation<T> formula, Goal context) throws PlaceholderEmbeddingException;
+    Placeholder decodePlaceholder(FormulaRepresentation formula, Goal context) throws PlaceholderEmbeddingException;
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Exception Classes">

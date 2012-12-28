@@ -37,15 +37,16 @@ import speedith.core.lang.SpiderDiagram;
 import speedith.core.lang.reader.ReadingException;
 
 /**
- * This translator is able to translate {@link isabelle.Term.Term Isabelle terms}
- * to {@link SpiderDiagram spider diagrams}.
+ * This translator is able to translate
+ * {@link isabelle.Term.Term Isabelle terms} to
+ * {@link SpiderDiagram spider diagrams}.
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 @NbBundle.Messages({
     "ISAtoSDTrans_internal_name=IsabelleTerms_to_SpiderDiagrams"
 })
-public class IsabelleToSpidersTranslator extends FormulaTranslator<Term.Term, SpiderDiagram> {
+public class IsabelleToSpidersTranslator extends FormulaTranslator {
 
     // <editor-fold defaultstate="collapsed" desc="Singleton stuff">
     private IsabelleToSpidersTranslator() {
@@ -85,19 +86,19 @@ public class IsabelleToSpidersTranslator extends FormulaTranslator<Term.Term, Sp
         "ISAtoSDTrans_translation_error_isa_formula_not_a_term=The Isabelle driver might be faulty. It returned an Isabelle term formula that is not a Term.Term.",
         "ISAtoSDTrans_translation_error_null_sd_returned=The translation failed to produce a valid spider diagram."
     })
-    public FormulaRepresentation<SpiderDiagram> translate(Formula<Term.Term> formula) throws TranslationException {
-        ArrayList<? extends FormulaRepresentation<Term.Term>> isaReps = formula.fetchRepresentations(TermFormatDescriptor.getInstance());
+    public FormulaRepresentation translate(Formula formula) throws TranslationException {
+        ArrayList<? extends FormulaRepresentation> isaReps = formula.fetchRepresentations(TermFormatDescriptor.getInstance());
         if (isaReps == null || isaReps.isEmpty()) {
             throw new TranslationException(Bundle.ISAtoSDTrans_translation_error_no_isa_term());
         }
         if (isaReps.get(0).getFormula() instanceof Term.Term) {
-            Term.Term term = isaReps.get(0).getFormula();
+            Term.Term term = (Term.Term) isaReps.get(0).getFormula();
             try {
                 SpiderDiagram sd = speedith.diabelli.isabelle.Translations.termToSpiderDiagram(term);
                 if (sd == null || !sd.isValid()) {
                     throw new TranslationException(Bundle.ISAtoSDTrans_translation_error_null_sd_returned());
                 }
-                return new FormulaRepresentation<>(sd, SpeedithFormatDescriptor.getInstance());
+                return new FormulaRepresentation(sd, SpeedithFormatDescriptor.getInstance());
             } catch (ReadingException ex) {
                 throw new TranslationException(Bundle.ISAtoSDTrans_translation_error_reading_failed(), ex);
             }
@@ -109,10 +110,11 @@ public class IsabelleToSpidersTranslator extends FormulaTranslator<Term.Term, Sp
     @NbBundle.Messages({
         "ITST_not_all_premises=The list of formulae does not contain only premises.",
         "ITST_context_unknown=The type of the given context goal is not supported.",
+        "ITST_some_premises_not_terms=Some of the premises are not Isabelle terms.",
         "ITST_premises_translation_failed=Could not extract a spider diagram from the given premises."
     })
     @Override
-    public FormulaRepresentation<SpiderDiagram> translate(List<? extends Formula<Term.Term>> premises) throws TranslationException {
+    public FormulaRepresentation translate(List<? extends Formula> premises) throws TranslationException {
         if (!arePremises(premises)) {
             throw new TranslationException(Bundle.ITST_not_all_premises());
         } else if (!(premises.get(0).getHostingGoal() instanceof TermGoal)) {
@@ -120,11 +122,15 @@ public class IsabelleToSpidersTranslator extends FormulaTranslator<Term.Term, Sp
         } else {
             TermGoal termGoal = (TermGoal) premises.get(0).getHostingGoal();
             ArrayList<Term.Term> terms = new ArrayList<>();
-            for (Formula<Term.Term> premise : premises) {
-                terms.add(premise.getMainRepresentation().getFormula());
+            for (Formula premise : premises) {
+                if (premise.getMainRepresentation().getFormula() instanceof Term.Term) {
+                    terms.add((Term.Term) premise.getMainRepresentation().getFormula());
+                } else {
+                    throw new TranslationException(Bundle.ITST_some_premises_not_terms());
+                }
             }
             try {
-                return new FormulaRepresentation<>(speedith.diabelli.isabelle.Translations.termToSpiderDiagram(terms, termGoal.getVariables()), SpeedithFormatDescriptor.getInstance());
+                return new FormulaRepresentation(speedith.diabelli.isabelle.Translations.termToSpiderDiagram(terms, termGoal.getVariables()), SpeedithFormatDescriptor.getInstance());
             } catch (ReadingException ex) {
                 throw new TranslationException(Bundle.ITST_premises_translation_failed(), ex);
             }

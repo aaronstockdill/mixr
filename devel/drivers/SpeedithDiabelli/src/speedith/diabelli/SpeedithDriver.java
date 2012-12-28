@@ -90,23 +90,23 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
 
     // <editor-fold defaultstate="collapsed" desc="Formula Format Provider Implementation">
     @Override
-    public Collection<FormulaFormat<?>> getFormulaFormats() {
+    public Collection<FormulaFormat> getFormulaFormats() {
         return FormulaFormatsContainer.SpeedithFormats;
     }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Formula Presenter Implementation">
     @Override
-    public Set<FormulaFormat<?>> getPresentedFormats() {
+    public Set<FormulaFormat> getPresentedFormats() {
         return PresentedFormatsContainer.PresentedFormats;
     }
 
-    public boolean canPresent(FormulaFormat<?> format) {
+    public boolean canPresent(FormulaFormat format) {
         return SpeedithFormatDescriptor.getInstance() == format;
     }
 
     @Override
-    public SpiderDiagramPanel createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException {
+    public SpiderDiagramPanel createVisualiserFor(FormulaRepresentation formula) throws VisualisationException {
         if (formula.getFormula() instanceof SpiderDiagram) {
             SpiderDiagram spiderDiagram = (SpiderDiagram) formula.getFormula();
             if (spiderDiagram.isValid()) {
@@ -121,10 +121,10 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
 
     private static class PresentedFormatsContainer {
 
-        private static final Set<FormulaFormat<?>> PresentedFormats;
+        private static final Set<FormulaFormat> PresentedFormats;
 
         static {
-            Set<FormulaFormat<?>> tmp = new HashSet<>();
+            Set<FormulaFormat> tmp = new HashSet<>();
             tmp.add(SpeedithFormatDescriptor.getInstance());
             PresentedFormats = Collections.unmodifiableSet(tmp);
         }
@@ -133,7 +133,7 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
 
     //<editor-fold defaultstate="collapsed" desc="Formula Translations Provider Implementation">
     @Override
-    public Collection<FormulaTranslator<?, ?>> getFormulaTranslators() {
+    public Collection<FormulaTranslator> getFormulaTranslators() {
         return FormulaTranslatorsContainer.SpeedithTranslators;
     }
     //</editor-fold>
@@ -156,11 +156,11 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
             Sentence sentence = target.getSentences().get(0);
             if (sentence instanceof Goal) {
                 Goal goal = (Goal) sentence;
-                ArrayList<? extends FormulaRepresentation<SpiderDiagram>> spiderDiagrams = goal.asFormula().fetchRepresentations(SpeedithFormatDescriptor.getInstance());
-                if (spiderDiagrams == null || spiderDiagrams.isEmpty()) {
+                ArrayList<? extends FormulaRepresentation> spiderDiagrams = goal.asFormula().fetchRepresentations(SpeedithFormatDescriptor.getInstance());
+                if (spiderDiagrams == null || spiderDiagrams.isEmpty() || !(spiderDiagrams.get(0).getFormula() instanceof SpiderDiagram)) {
                     return null;
                 }
-                return spiderDiagrams.get(0).getFormula();
+                return (SpiderDiagram) spiderDiagrams.get(0).getFormula();
             } else {
                 return null;
             }
@@ -220,11 +220,10 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
                         return;
                     }
                     // Put the result back to the master reasoner:
-                    targets.getGoals().toArray();
                     @SuppressWarnings({"rawtypes", "unchecked"})
                     GoalTransformationResult goalTransformationResult = new GoalTransformationResult(this, targets.getGoals(), new MovableArrayList[]{
                                 new MovableArrayList<>(Arrays.asList(new Goal[]{
-                                    new Goal(null, null, null, new Formula<>(new FormulaRepresentation<>(applicationResult.getGoals().getGoalAt(0), SpeedithFormatDescriptor.getInstance()), Formula.FormulaRole.Goal))
+                                    new Goal(null, null, null, new Formula(new FormulaRepresentation(applicationResult.getGoals().getGoalAt(0), SpeedithFormatDescriptor.getInstance()), Formula.FormulaRole.Goal))
                                 }))
                             });
                     Lookup.getDefault().lookup(Diabelli.class).getGoalManager().commitTransformedGoals(goalTransformationResult);
@@ -282,10 +281,10 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
     // <editor-fold defaultstate="collapsed" desc="Lazy Initialisation Helpers">
     private static class FormulaFormatsContainer {
 
-        private static final Set<FormulaFormat<?>> SpeedithFormats;
+        private static final Set<FormulaFormat> SpeedithFormats;
 
         static {
-            HashSet<FormulaFormat<?>> tmp = new HashSet<>();
+            HashSet<FormulaFormat> tmp = new HashSet<>();
             tmp.add(SpeedithFormatDescriptor.getInstance());
             SpeedithFormats = Collections.unmodifiableSet(tmp);
         }
@@ -293,10 +292,10 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
 
     private static class FormulaTranslatorsContainer {
 
-        private static final List<FormulaTranslator<?, ?>> SpeedithTranslators;
+        private static final List<FormulaTranslator> SpeedithTranslators;
 
         static {
-            ArrayList<FormulaTranslator<?, ?>> tmp = new ArrayList<>();
+            ArrayList<FormulaTranslator> tmp = new ArrayList<>();
             tmp.add(IsabelleToSpidersTranslator.getInstance());
             tmp.add(SpiderToIsabelleStringTranslator.getInstance());
             SpeedithTranslators = Collections.unmodifiableList(tmp);

@@ -58,14 +58,14 @@ import org.openide.util.NbBundle;
  * @param <TEmbedded>
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public class Placeholder<THost, TEmbedded> {
+public class Placeholder {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
-    private final FormulaRepresentation<THost> hostingFormula;
-    private final CarrierFormulaFormat<THost> hostingFormat;
-    private final EmbeddableFormulaFormat<TEmbedded> embeddedFormat;
-    private final FormulaRepresentation<TEmbedded> embeddedFormula;
-    private final Set<FreeVariable<?>> freeVariables;
+    private final FormulaRepresentation hostingFormula;
+    private final CarrierFormulaFormat hostingFormat;
+    private final EmbeddableFormulaFormat embeddedFormat;
+    private final FormulaRepresentation embeddedFormula;
+    private final Set<FreeVariable> freeVariables;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -83,7 +83,7 @@ public class Placeholder<THost, TEmbedded> {
         "PH_invalid_format=The formula is not embeddable.",
         "PH_null_formula=No formula to embed."
     })
-    private Placeholder(FormulaRepresentation<THost> hostingFormula, FormulaRepresentation<TEmbedded> embeddedFormula, Set<FreeVariable<?>> freeVariables) {
+    private Placeholder(FormulaRepresentation hostingFormula, FormulaRepresentation embeddedFormula, Set<FreeVariable> freeVariables) {
         if (embeddedFormula == null) {
             throw new IllegalArgumentException(Bundle.PH_null_formula());
         }
@@ -91,12 +91,12 @@ public class Placeholder<THost, TEmbedded> {
             throw new IllegalArgumentException(Bundle.PH_null_hosting_formula());
         }
         if (embeddedFormula.getFormat() instanceof EmbeddableFormulaFormat) {
-            this.embeddedFormat = (EmbeddableFormulaFormat<TEmbedded>) embeddedFormula.getFormat();
+            this.embeddedFormat = (EmbeddableFormulaFormat) embeddedFormula.getFormat();
         } else {
             throw new IllegalArgumentException(Bundle.PH_invalid_format());
         }
         if (hostingFormula.getFormat() instanceof CarrierFormulaFormat) {
-            this.hostingFormat = (CarrierFormulaFormat<THost>) hostingFormula.getFormat();
+            this.hostingFormat = (CarrierFormulaFormat) hostingFormula.getFormat();
         } else {
             throw new IllegalArgumentException(Bundle.PH_invalid_hosting_format());
         }
@@ -107,27 +107,27 @@ public class Placeholder<THost, TEmbedded> {
     //</editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Public Properties">
-    public EmbeddableFormulaFormat<TEmbedded> getEmbeddedFormat() {
+    public EmbeddableFormulaFormat getEmbeddedFormat() {
         return embeddedFormat;
     }
 
-    public CarrierFormulaFormat<THost> getHostingFormat() {
+    public CarrierFormulaFormat getHostingFormat() {
         return hostingFormat;
     }
 
-    public FormulaRepresentation<THost> asFormula() {
+    public FormulaRepresentation asFormula() {
         throw new UnsupportedOperationException();
     }
 
-    public FormulaRepresentation<TEmbedded> getEmbeddedFormula() {
+    public FormulaRepresentation getEmbeddedFormula() {
         return embeddedFormula;
     }
 
-    public Set<FreeVariable<?>> getFreeVariables() {
+    public Set<FreeVariable> getFreeVariables() {
         return freeVariables;
     }
 
-    public FormulaRepresentation<THost> getHostingFormula() {
+    public FormulaRepresentation getHostingFormula() {
         return hostingFormula;
     }
     // </editor-fold>
@@ -152,26 +152,26 @@ public class Placeholder<THost, TEmbedded> {
         "Placeholder_formula_invalid=The formula of the payload is not parsable or understood by the '{0}' formula format.",
         "Placeholder_diabelli_not_present=Could not find the Diabelli core component."
     })
-    public static <THost> Placeholder<THost, ?> create(FormulaRepresentation<THost> hostingFormula, String payloadFormulaFormat, String payloadFormula, Set<FreeVariable<?>> freeVariables) throws CarrierFormulaFormat.PlaceholderEmbeddingException {
+    public static Placeholder create(FormulaRepresentation hostingFormula, String payloadFormulaFormat, String payloadFormula, Set<FreeVariable> freeVariables) throws CarrierFormulaFormat.PlaceholderEmbeddingException {
         Diabelli dbli = Lookup.getDefault().lookup(Diabelli.class);
         if (dbli == null) {
             throw new IllegalStateException(Bundle.Placeholder_diabelli_not_present());
         }
-        FormulaFormat<?> formulaFormat = dbli.getFormulaFormatManager().getFormulaFormat(payloadFormulaFormat);
+        FormulaFormat formulaFormat = dbli.getFormulaFormatManager().getFormulaFormat(payloadFormulaFormat);
         if (formulaFormat == null) {
             throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_unknown_format(payloadFormulaFormat));
         }
         if (formulaFormat instanceof EmbeddableFormulaFormat) {
             @SuppressWarnings("unchecked")
-            EmbeddableFormulaFormat<Object> payloadFormat = (EmbeddableFormulaFormat<Object>) formulaFormat;
+            EmbeddableFormulaFormat payloadFormat = (EmbeddableFormulaFormat) formulaFormat;
             Object decodedFormula;
             try {
                 decodedFormula = payloadFormat.decodeFromString(payloadFormula);
             } catch (FormulaEncodingException ex) {
                 throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_formula_invalid(payloadFormulaFormat), ex);
             }
-            FormulaRepresentation<Object> fp = new FormulaRepresentation<>(decodedFormula, payloadFormat, freeVariables);
-            return new Placeholder<>(hostingFormula, fp, Collections.unmodifiableSet(freeVariables));
+            FormulaRepresentation fp = new FormulaRepresentation(decodedFormula, payloadFormat, freeVariables);
+            return new Placeholder(hostingFormula, fp, Collections.unmodifiableSet(freeVariables));
         } else {
             throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_nonembeddable_format(payloadFormulaFormat));
         }
@@ -193,7 +193,7 @@ public class Placeholder<THost, TEmbedded> {
         "Placeholder_empty_payload=The payload formula in the placeholder must not be empty.",
         "Placeholder_invalid_payload_format=The payload string is not correctly formatted. The format of payloads should be '<FormatName>: <Formula>'."
     })
-    public static <THost> Placeholder<THost, ?> create(FormulaRepresentation<THost> hostingFormula, String rawPayload, Set<FreeVariable<?>> freeVariables) throws CarrierFormulaFormat.PlaceholderEmbeddingException {
+    public static Placeholder create(FormulaRepresentation hostingFormula, String rawPayload, Set<FreeVariable> freeVariables) throws CarrierFormulaFormat.PlaceholderEmbeddingException {
         if (rawPayload == null || rawPayload.isEmpty()) {
             throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_empty_payload());
         }

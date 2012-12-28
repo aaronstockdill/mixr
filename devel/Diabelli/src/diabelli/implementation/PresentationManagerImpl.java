@@ -45,7 +45,7 @@ class PresentationManagerImpl implements ManagerInternals, PresentationManager {
     // <editor-fold defaultstate="collapsed" desc="Fields">
     private DiabelliImpl host;
     private Set<FormulaPresenter> presenters;
-    private Map<FormulaFormat<?>, Set<FormulaPresenter>> format2presenters;
+    private Map<FormulaFormat, Set<FormulaPresenter>> format2presenters;
     // </editor-fold>
 
     @Override
@@ -59,16 +59,16 @@ class PresentationManagerImpl implements ManagerInternals, PresentationManager {
     @Override
     public void onAfterComponentsLoaded() {
         HashSet<FormulaPresenter> ps = new HashSet<>();
-        HashMap<FormulaFormat<?>, Set<FormulaPresenter>> f2ps = new HashMap<>();
+        HashMap<FormulaFormat, Set<FormulaPresenter>> f2ps = new HashMap<>();
         for (DiabelliComponent diabelliComponent : host.getRegisteredComponents()) {
             if (diabelliComponent instanceof FormulaPresenter) {
                 final FormulaPresenter fp = (FormulaPresenter) diabelliComponent;
-                Set<FormulaFormat<?>> presentedFormats = fp.getPresentedFormats();
+                Set<FormulaFormat> presentedFormats = fp.getPresentedFormats();
                 if (presentedFormats == null) {
                     Logger.getLogger(PresentationManagerImpl.class.getName()).log(Level.SEVERE, Bundle.PMI_presenters_format_null(fp.getName()));
                 } else {
                     // Here we fill the associative map `FormulaFormat -> Set<FormulaPresenter>`
-                    for (FormulaFormat<?> presentedFormat : presentedFormats) {
+                    for (FormulaFormat presentedFormat : presentedFormats) {
                         Set<FormulaPresenter> psForFormat = f2ps.get(presentedFormat);
                         if (psForFormat == null) {
                             f2ps.put(presentedFormat, psForFormat = new HashSet<>());
@@ -80,7 +80,7 @@ class PresentationManagerImpl implements ManagerInternals, PresentationManager {
             }
         }
         presenters = Collections.unmodifiableSet(ps);
-        for (Entry<FormulaFormat<?>, Set<FormulaPresenter>> entry : f2ps.entrySet()) {
+        for (Entry<FormulaFormat, Set<FormulaPresenter>> entry : f2ps.entrySet()) {
             entry.setValue(Collections.unmodifiableSet(entry.getValue()));
         }
         format2presenters = Collections.unmodifiableMap(f2ps);
@@ -97,7 +97,7 @@ class PresentationManagerImpl implements ManagerInternals, PresentationManager {
     }
 
     @Override
-    public Set<FormulaPresenter> getPresenters(FormulaFormat<?> format) {
+    public Set<FormulaPresenter> getPresenters(FormulaFormat format) {
         return format2presenters.get(format);
     }
 }

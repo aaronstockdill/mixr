@@ -33,6 +33,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.annotations.common.NonNull;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
@@ -58,19 +59,15 @@ import org.openide.util.NbBundle;
  * one representation in a particular
  * {@link FormulaFormatDescriptor format}.</p>
  *
- * @param <T> the
- * {@link FormulaFormat#getRawFormulaType() type of the raw formula} of
- * {@link Formula#getMainRepresentation() the main representation} of this
- * formula.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 @NbBundle.Messages({
     "F_toFormat_null=A target format has to be specified."
 })
-public class Formula<T> implements Sentence {
+public class Formula implements Sentence {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
-    private final FormulaRepresentation<T> mainRepresentation;
+    private final FormulaRepresentation mainRepresentation;
     /**
      * I have decided to use a multimap of representations instead of a simple
      * map. The thing is that one there can be many representations for a single
@@ -99,7 +96,7 @@ public class Formula<T> implements Sentence {
      *
      * </p>
      */
-    private final HashMap<String, HashSet<FormulaRepresentation<?>>> representationsMap;
+    private final HashMap<String, HashSet<FormulaRepresentation>> representationsMap;
     /**
      * This set contains all non-{@code null} representations of this formula
      * (including the main representation, if there is any).
@@ -108,7 +105,7 @@ public class Formula<T> implements Sentence {
      * variable, you have to acquire a lock on
      * {@link Formula#representationsMap}. .</p>
      */
-    private final LinkedHashSet<FormulaRepresentation<?>> representationsSet;
+    private final LinkedHashSet<FormulaRepresentation> representationsSet;
     private final FormulaRole role;
     /**
      * The goal that contains this formula.
@@ -118,7 +115,7 @@ public class Formula<T> implements Sentence {
      * If this formula is a placeholder, then this field will contain it. See
      * {@link Formula#getPlaceholder()} for more information.
      */
-    private Placeholder<T, ?> placeholder = null;
+    private Placeholder placeholder = null;
     private boolean lookedPlaceholderUp = false;
     // </editor-fold>
 
@@ -138,7 +135,7 @@ public class Formula<T> implements Sentence {
     @NbBundle.Messages({
         "F_role_null=A role must be provided for this formula."
     })
-    public Formula(FormulaRepresentation<T> mainRepresentation, @NonNull FormulaRole role, Collection<FormulaRepresentation<?>> otherRepresentations) {
+    public Formula(FormulaRepresentation mainRepresentation, @NonNull FormulaRole role, Collection<FormulaRepresentation> otherRepresentations) {
         if (role == null) {
             throw new IllegalArgumentException(Bundle.F_role_null());
         }
@@ -152,7 +149,7 @@ public class Formula<T> implements Sentence {
         }
         // Now add the other representations:
         if (otherRepresentations != null && !otherRepresentations.isEmpty()) {
-            for (FormulaRepresentation<?> otherRepresentation : otherRepresentations) {
+            for (FormulaRepresentation otherRepresentation : otherRepresentations) {
                 addRepresentation(otherRepresentation);
             }
         }
@@ -171,7 +168,7 @@ public class Formula<T> implements Sentence {
      * Formula#getMainRepresentation() main representation}.
      * @param role the role of this formula in a {@link Goal}.
      */
-    public Formula(FormulaRepresentation<T> mainRepresentation, @NonNull FormulaRole role, FormulaRepresentation<?>... otherRepresentations) {
+    public Formula(FormulaRepresentation mainRepresentation, @NonNull FormulaRole role, FormulaRepresentation... otherRepresentations) {
         this(mainRepresentation, role, otherRepresentations == null || otherRepresentations.length < 1 ? null : Arrays.asList(otherRepresentations));
     }
 
@@ -187,8 +184,8 @@ public class Formula<T> implements Sentence {
      * Formula#getMainRepresentation() main representation}.
      * @param role the role of this formula in a {@link Goal}.
      */
-    public Formula(FormulaRepresentation<T> mainRepresentation, @NonNull FormulaRole role, ArrayList<FormulaRepresentation<?>> otherRepresentations) {
-        this(mainRepresentation, role, (Collection<FormulaRepresentation<?>>) otherRepresentations);
+    public Formula(FormulaRepresentation mainRepresentation, @NonNull FormulaRole role, ArrayList<FormulaRepresentation> otherRepresentations) {
+        this(mainRepresentation, role, (Collection<FormulaRepresentation>) otherRepresentations);
     }
     //</editor-fold>
 
@@ -213,7 +210,7 @@ public class Formula<T> implements Sentence {
      *
      * @return the main representation of this formula.
      */
-    public FormulaRepresentation<T> getMainRepresentation() {
+    public FormulaRepresentation getMainRepresentation() {
         return mainRepresentation;
     }
 
@@ -266,11 +263,11 @@ public class Formula<T> implements Sentence {
      * @return all formats into which we translated the formula.
      */
     @NonNull
-    public ArrayList<FormulaFormat<?>> getFormats() {
+    public ArrayList<FormulaFormat> getFormats() {
         synchronized (representationsMap) {
-            ArrayList<FormulaFormat<?>> formats = new ArrayList<>();
+            ArrayList<FormulaFormat> formats = new ArrayList<>();
             FormulaFormatManager formatManager = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager();
-            for (Map.Entry<String, HashSet<FormulaRepresentation<?>>> formatEntry : representationsMap.entrySet()) {
+            for (Map.Entry<String, HashSet<FormulaRepresentation>> formatEntry : representationsMap.entrySet()) {
                 if (formatEntry.getValue() != null && formatEntry.getValue().size() > 0) {
                     formats.add(formatManager.getFormulaFormat(formatEntry.getKey()));
                 }
@@ -328,9 +325,9 @@ public class Formula<T> implements Sentence {
      * @return all representations of this formula (including the
      * {@link Formula#getMainRepresentation() main representation}).
      */
-    public FormulaRepresentation<?>[] getRepresentations() {
+    public FormulaRepresentation[] getRepresentations() {
         synchronized (representationsMap) {
-            return representationsSet.isEmpty() ? null : representationsSet.toArray(new FormulaRepresentation<?>[representationsSet.size()]);
+            return representationsSet.isEmpty() ? null : representationsSet.toArray(new FormulaRepresentation[representationsSet.size()]);
         }
     }
 
@@ -366,20 +363,19 @@ public class Formula<T> implements Sentence {
      * @return the translations of the {@link Formula#getMainRepresentation()
      * formula} in the given format.
      */
-    @SuppressWarnings("unchecked")
-    public <TRepresentation> ArrayList<? extends FormulaRepresentation<TRepresentation>> getRepresentations(FormulaFormat<TRepresentation> format) {
+    public ArrayList<? extends FormulaRepresentation> getRepresentations(FormulaFormat format) {
         if (format == null) {
             throw new IllegalArgumentException(Bundle.F_toFormat_null());
         }
         synchronized (representationsMap) {
-            HashSet<FormulaRepresentation<?>> formatReps = representationsMap.get(format.getFormatName());
+            HashSet<FormulaRepresentation> formatReps = representationsMap.get(format.getFormatName());
             if (formatReps == null || formatReps.isEmpty()) {
                 return null;
             }
-            ArrayList<FormulaRepresentation<TRepresentation>> reps = new ArrayList<>();
-            for (FormulaRepresentation<?> formulaRep : formatReps) {
+            ArrayList<FormulaRepresentation> reps = new ArrayList<>();
+            for (FormulaRepresentation formulaRep : formatReps) {
                 if (formulaRep != null) {
-                    reps.add((FormulaRepresentation<TRepresentation>) formulaRep);
+                    reps.add(formulaRep);
                 }
             }
             return reps;
@@ -406,7 +402,7 @@ public class Formula<T> implements Sentence {
      * @return {@code true} if an attempt has been made to translate this
      * formula into the given format.
      */
-    public boolean hasAttemptedTranslations(FormulaFormat<?> format) {
+    public boolean hasAttemptedTranslations(FormulaFormat format) {
         synchronized (representationsMap) {
             return representationsMap.get(format.getFormatName()) != null;
         }
@@ -425,14 +421,13 @@ public class Formula<T> implements Sentence {
      * @return the translation of the {@link Formula#getMainRepresentation()
      * formula} in the given format.
      */
-    @SuppressWarnings("unchecked")
-    public <TRep> FormulaRepresentation<TRep> getRepresentation(FormulaFormat<TRep> format) {
+    public <TRep> FormulaRepresentation getRepresentation(FormulaFormat format) {
         if (format == null) {
             throw new IllegalArgumentException(Bundle.F_toFormat_null());
         }
         synchronized (representationsMap) {
-            HashSet<FormulaRepresentation<?>> formatReps = representationsMap.get(format.getFormatName());
-            return (FormulaRepresentation<TRep>) (formatReps == null || formatReps.isEmpty() ? null : formatReps.iterator().next());
+            HashSet<FormulaRepresentation> formatReps = representationsMap.get(format.getFormatName());
+            return formatReps == null || formatReps.isEmpty() ? null : formatReps.iterator().next();
         }
     }
 
@@ -445,12 +440,12 @@ public class Formula<T> implements Sentence {
      * @return the number of representations of this formula in the given
      * format.
      */
-    public int getRepresentationsCount(FormulaFormat<?> format) {
+    public int getRepresentationsCount(FormulaFormat format) {
         if (format == null) {
             throw new IllegalArgumentException(Bundle.F_toFormat_null());
         }
         synchronized (representationsMap) {
-            HashSet<FormulaRepresentation<?>> formatReps = representationsMap.get(format.getFormatName());
+            HashSet<FormulaRepresentation> formatReps = representationsMap.get(format.getFormatName());
             return formatReps == null || formatReps.isEmpty() ? 0 : formatReps.size();
         }
     }
@@ -541,7 +536,7 @@ public class Formula<T> implements Sentence {
      * @return the translation of the {@link Formula#getMainRepresentation()
      * formula}.
      */
-    public <TTo> ArrayList<? extends FormulaRepresentation<TTo>> fetchRepresentations(FormulaFormat<TTo> format) {
+    public ArrayList<? extends FormulaRepresentation> fetchRepresentations(FormulaFormat format) {
         if (format == null) {
             throw new IllegalArgumentException(Bundle.F_toFormat_null());
         }
@@ -556,12 +551,19 @@ public class Formula<T> implements Sentence {
         if (!hasMainTranslationSource()) {
             return null;
         }
+        // Try to extract the placeholder if possible:
+        try {
+            // Try to extract a placeholder from the main representation:
+            getPlaceholder();
+        } catch (PlaceholderEmbeddingException ex) {
+            Exceptions.printStackTrace(ex);
+        }
         // Try to translate this formula:
-        FormulaRepresentation<TTo> representation = null;
+        FormulaRepresentation representation = null;
         // There is no representation yet for this format. Try to find one.
-        final Set<FormulaTranslator<T, TTo>> formulaTranslatorsFrom = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager().getFormulaTranslators(getMainTranslationSourceFormat(), format);
+        final Set<FormulaTranslator> formulaTranslatorsFrom = Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager().getFormulaTranslators(getMainTranslationSourceFormat(), format);
         if (formulaTranslatorsFrom != null && !formulaTranslatorsFrom.isEmpty()) {
-            for (FormulaTranslator<T, TTo> translator : formulaTranslatorsFrom) {
+            for (FormulaTranslator translator : formulaTranslatorsFrom) {
                 // Make sure that the translation is valid and then translate it:
                 try {
                     // We can try and translate it:
@@ -583,7 +585,7 @@ public class Formula<T> implements Sentence {
         if (representation == null) {
             return null;
         } else {
-            ArrayList<FormulaRepresentation<TTo>> rep = new ArrayList<>();
+            ArrayList<FormulaRepresentation> rep = new ArrayList<>();
             rep.add(representation);
             return rep;
         }
@@ -618,7 +620,7 @@ public class Formula<T> implements Sentence {
     @NbBundle.Messages({
         "F_null_translator=A valid non-null translator must be provided."
     })
-    public <TTo> FormulaRepresentation<TTo> translateWith(FormulaTranslator<T, TTo> translator) throws TranslationException {
+    public FormulaRepresentation translateWith(FormulaTranslator translator) throws TranslationException {
         if (translator == null) {
             throw new IllegalArgumentException(Bundle.F_null_translator());
         }
@@ -664,7 +666,7 @@ public class Formula<T> implements Sentence {
      *
      * @return the format of the main translation source.
      */
-    public FormulaFormat<T> getMainTranslationSourceFormat() {
+    public FormulaFormat getMainTranslationSourceFormat() {
         return getMainRepresentation() == null ? null : getMainRepresentation().getFormat();
     }
     // </editor-fold>
@@ -683,15 +685,15 @@ public class Formula<T> implements Sentence {
      * otherwise.
      * @throws diabelli.logic.CarrierFormulaFormat.PlaceholderEmbeddingException
      */
-    public Placeholder<T, ?> getPlaceholder() throws PlaceholderEmbeddingException {
+    public Placeholder getPlaceholder() throws PlaceholderEmbeddingException {
         if (!lookedPlaceholderUp) {
             lookedPlaceholderUp = true;
-            FormulaRepresentation<T> main = getMainRepresentation();
+            FormulaRepresentation main = getMainRepresentation();
             if (main != null) {
-                FormulaFormat<T> mainFormat = main.getFormat();
+                FormulaFormat mainFormat = main.getFormat();
                 if (mainFormat instanceof CarrierFormulaFormat) {
-                    CarrierFormulaFormat<T> carrierFormulaFormat = (CarrierFormulaFormat<T>) mainFormat;
-                    Placeholder<T, ?> p = carrierFormulaFormat.decodePlaceholder(main, getHostingGoal());
+                    CarrierFormulaFormat carrierFormulaFormat = (CarrierFormulaFormat) mainFormat;
+                    Placeholder p = carrierFormulaFormat.decodePlaceholder(main, getHostingGoal());
                     if (p != null) {
                         addRepresentation(p.getEmbeddedFormula());
                         this.placeholder = p;
@@ -710,21 +712,21 @@ public class Formula<T> implements Sentence {
      *
      * <p>If the given representation is {@code null}</p>
      *
-     * @param <T> the new format of the representation to add.
      * @param format the format of the representation to add (must not be
      * {@code null}).
+     * 
      * @param representation
      */
     @NbBundle.Messages({
         "F_format_null=The representation to be added does not identify its format. A valid format must be provided.",
         "F_format_mismatch=The format of the representation to be added and the specified format are not the same."
     })
-    private <T> void addRepresentation(FormulaFormat<T> format, FormulaRepresentation<T> representation) {
+    private void addRepresentation(FormulaFormat format, FormulaRepresentation representation) {
         if (format == null) {
             throw new IllegalArgumentException(Bundle.F_format_null());
         }
         synchronized (representationsMap) {
-            HashSet<FormulaRepresentation<?>> formatReps = representationsMap.get(format.getFormatName());
+            HashSet<FormulaRepresentation> formatReps = representationsMap.get(format.getFormatName());
             if (formatReps == null) {
                 representationsMap.put(format.getFormatName(), formatReps = new HashSet<>());
             }
@@ -754,15 +756,12 @@ public class Formula<T> implements Sentence {
      * {@link FormulaTranslator.TranslationType#ToEntailed entailed translation}
      * can be placed into the formula that represents premises.</p>
      *
-     * @param <T> the
-     * {@link FormulaFormat#getRawFormulaType() type of the raw formula} carried
-     * by the added representation.
      * @param representation the representation of this formula.
      */
     @NbBundle.Messages({
         "F_representation_null=Only valid non-null representations can be added to a formula."
     })
-    public final <T> void addRepresentation(FormulaRepresentation<T> representation) {
+    public final void addRepresentation(FormulaRepresentation representation) {
         if (representation == null) {
             throw new IllegalArgumentException(Bundle.F_representation_null());
         }

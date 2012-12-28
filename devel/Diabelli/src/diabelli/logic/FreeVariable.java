@@ -31,15 +31,15 @@ import org.openide.util.NbBundle;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public class FreeVariable<TType> implements Comparable<FreeVariable<TType>> {
+public class FreeVariable implements Comparable<FreeVariable> {
 
     private final String name;
-    private final TType type;
+    private final Object type;
 
     @NbBundle.Messages({
         "FreeVariable_name_empty=The name of a free variable must not be empty."
     })
-    public FreeVariable(String name, TType type) {
+    public FreeVariable(String name, Object type) {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException(Bundle.FreeVariable_name_empty());
         }
@@ -51,14 +51,14 @@ public class FreeVariable<TType> implements Comparable<FreeVariable<TType>> {
         return name;
     }
 
-    public TType getType() {
+    public Object getType() {
         return type;
     }
 
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof FreeVariable) {
-            FreeVariable<?> freeVariable = (FreeVariable) obj;
+            FreeVariable freeVariable = (FreeVariable) obj;
             return this.getName().equals(freeVariable.getName());
         } else {
             return false;
@@ -66,7 +66,7 @@ public class FreeVariable<TType> implements Comparable<FreeVariable<TType>> {
     }
 
     @Override
-    public int compareTo(FreeVariable<TType> o) {
+    public int compareTo(FreeVariable o) {
         if (o == null) {
             throw new NullPointerException();
         } else {

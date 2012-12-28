@@ -304,7 +304,7 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
          *
          * @return the formula that corresponds to this node.
          */
-        public abstract Formula<?> getFormula();
+        public abstract Formula getFormula();
 
         @Override
         public Action[] getActions(boolean context) {
@@ -325,7 +325,7 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         }
 
         @Override
-        public Formula<?> getFormula() {
+        public Formula getFormula() {
             return this.getGoal().asFormula();
         }
     }
@@ -347,7 +347,7 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         }
 
         @Override
-        public Formula<?> getFormula() {
+        public Formula getFormula() {
             return this.getGoal().getConclusion();
         }
     }
@@ -369,7 +369,7 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         }
 
         @Override
-        public Formula<?> getFormula() {
+        public Formula getFormula() {
             return this.getGoal().getPremisesFormula();
         }
     }
@@ -405,7 +405,7 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         }
 
         @Override
-        public Formula<?> getFormula() {
+        public Formula getFormula() {
             return this.getGoal().getPremiseAt(this.getPremiseIndex());
         }
     }

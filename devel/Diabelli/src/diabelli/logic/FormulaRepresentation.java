@@ -35,13 +35,13 @@ import org.openide.util.NbBundle;
  * @param <T> the type of the {@link FormulaRepresentation#getFormula() raw formula}.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public final class FormulaRepresentation<T> implements Sentence {
+public final class FormulaRepresentation implements Sentence {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
-    private final T formula;
-    private final FormulaFormat<T> format;
-    private Formula<?> parentFormula;
-    private final Set<FreeVariable<?>> freeVariables;
+    private final Object formula;
+    private final FormulaFormat format;
+    private Formula parentFormula;
+    private final Set<FreeVariable> freeVariables;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
@@ -60,7 +60,7 @@ public final class FormulaRepresentation<T> implements Sentence {
         "FP_formula_null=A valid, non-null formula object must be provided.",
         "FP_format_null=A valid, non-null format description of the formula must be provided."
     })
-    public FormulaRepresentation(@NonNull T formula, @NonNull FormulaFormat<T> format, Set<FreeVariable<?>> freeVariables) {
+    public FormulaRepresentation(@NonNull Object formula, @NonNull FormulaFormat format, Set<FreeVariable> freeVariables) {
         if (formula == null) {
             throw new IllegalArgumentException(Bundle.FP_formula_null());
         }
@@ -71,7 +71,7 @@ public final class FormulaRepresentation<T> implements Sentence {
         this.format = format;
         this.freeVariables = freeVariables;
     }
-    public FormulaRepresentation(@NonNull T formula, @NonNull FormulaFormat<T> format) {
+    public FormulaRepresentation(@NonNull Object formula, @NonNull FormulaFormat format) {
         this(formula, format, null);
     }
     //</editor-fold>
@@ -84,7 +84,7 @@ public final class FormulaRepresentation<T> implements Sentence {
      * @return the actual raw formula.
      */
     @NonNull
-    public T getFormula() {
+    public Object getFormula() {
         return formula;
     }
 
@@ -96,7 +96,7 @@ public final class FormulaRepresentation<T> implements Sentence {
      * formula} is encoded.
      */
     @NonNull
-    public FormulaFormat<T> getFormat() {
+    public FormulaFormat getFormat() {
         return format;
     }
 
@@ -105,7 +105,7 @@ public final class FormulaRepresentation<T> implements Sentence {
      * @return The placeholder from which this representation originates.
      * Otherwise it returns {@code null}.
      */
-    public Set<FreeVariable<?>> getFreeVariables() {
+    public Set<FreeVariable> getFreeVariables() {
         return freeVariables;
     }
     
@@ -117,7 +117,7 @@ public final class FormulaRepresentation<T> implements Sentence {
      * 
      * @return the formula of which this is a representation.
      */
-    public Formula<?> getParentFormula() {
+    public Formula getParentFormula() {
         return parentFormula;
     }
     //</editor-fold>
@@ -128,7 +128,7 @@ public final class FormulaRepresentation<T> implements Sentence {
      * is added to the formula's collection of representations.
      * @param parentFormula the formula of which this is a representation.
      */
-    void setParentFormula(Formula<?> parentFormula) {
+    void setParentFormula(Formula parentFormula) {
         this.parentFormula = parentFormula;
     }
     // </editor-fold>

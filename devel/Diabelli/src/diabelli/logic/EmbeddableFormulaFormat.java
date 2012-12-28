@@ -31,6 +31,6 @@ package diabelli.logic;
  * @param <T> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface EmbeddableFormulaFormat<T> extends TextEncodedFormulaFormat<T>, VariableReferencingFormulaFormat<T> {
+public interface EmbeddableFormulaFormat extends TextEncodedFormulaFormat, VariableReferencingFormulaFormat {
     
 }

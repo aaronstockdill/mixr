@@ -31,10 +31,9 @@ import org.netbeans.api.annotations.common.NonNull;
  * Provides meta-information about the format in which {@link
  * FormulaRepresentation#getFormula() formulae} may be encoded.
  *
- * @param <T> the {@link FormulaFormat#getRawFormulaType() type of the raw formula}.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface FormulaFormat<T> {
+public interface FormulaFormat {
 
     /**
      * Returns the name of the format. This name should be unique across all
@@ -78,6 +77,6 @@ public interface FormulaFormat<T> {
      * @return the type of {@link FormulaRepresentation#getFormula() the raw
      * formula} for this format.
      */
-    Class<T> getRawFormulaType();
+    Class<?> getRawFormulaType();
     
 }

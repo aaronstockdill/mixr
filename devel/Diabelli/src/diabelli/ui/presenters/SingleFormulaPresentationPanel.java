@@ -45,7 +45,7 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
     private static final String BoldItalicStartTag = "<b><i>";
     private static final long serialVersionUID = 0x1906271867d69be1L;
     private final GeneralGoalNode presentedNode;
-    private final FormulaRepresentation<?> formula;
+    private final FormulaRepresentation formula;
     private final int goalIndex;
     private final int representationIndex;
     private final Component presenterPanel;
@@ -56,7 +56,7 @@ public class SingleFormulaPresentationPanel extends javax.swing.JPanel {
     /**
      * Creates new form SingleFormulaPresentationPanel
      */
-    public SingleFormulaPresentationPanel(GeneralGoalNode presentedNode, FormulaRepresentation<?> formula, int goalIndex, int representationIndex, Component presenterPanel, FormulaPresenter presenter) {
+    public SingleFormulaPresentationPanel(GeneralGoalNode presentedNode, FormulaRepresentation formula, int goalIndex, int representationIndex, Component presenterPanel, FormulaPresenter presenter) {
         this.presentedNode = presentedNode;
         this.formula = formula;
         this.goalIndex = goalIndex;

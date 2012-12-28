@@ -100,16 +100,16 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
 
     // <editor-fold defaultstate="collapsed" desc="Formula Format Provider Implementation">
     @Override
-    public Collection<FormulaFormat<?>> getFormulaFormats() {
+    public Collection<FormulaFormat> getFormulaFormats() {
         return FormulaFormatsContainer.IsabelleFormats;
     }
 
     private static class FormulaFormatsContainer {
 
-        private static final List<FormulaFormat<?>> IsabelleFormats;
+        private static final List<FormulaFormat> IsabelleFormats;
 
         static {
-            ArrayList<FormulaFormat<?>> tmp = new ArrayList<>();
+            ArrayList<FormulaFormat> tmp = new ArrayList<>();
             tmp.add(TermFormatDescriptor.getInstance());
             tmp.add(StringFormat.getInstance());
             IsabelleFormats = Collections.unmodifiableList(tmp);
@@ -119,16 +119,16 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
 
     // <editor-fold defaultstate="collapsed" desc="Formula Presenter Implementation">
     @Override
-    public Set<FormulaFormat<?>> getPresentedFormats() {
+    public Set<FormulaFormat> getPresentedFormats() {
         return PresentedFormatsContainer.PresentedFormats;
     }
 
-    public boolean canPresent(FormulaFormat<?> format) {
+    public boolean canPresent(FormulaFormat format) {
         return StringFormat.getInstance() == format;
     }
 
     @Override
-    public Component createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException {
+    public Component createVisualiserFor(FormulaRepresentation formula) throws VisualisationException {
         if (canPresent(formula.getFormat()) && formula.getFormula() instanceof StringFormula) {
             StringFormula f = (StringFormula) formula.getFormula();
             if (f.getMarkedUpFormula() == null) {
@@ -144,10 +144,10 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
 
     private static class PresentedFormatsContainer {
 
-        private static final Set<FormulaFormat<?>> PresentedFormats;
+        private static final Set<FormulaFormat> PresentedFormats;
 
         static {
-            Set<FormulaFormat<?>> tmp = new HashSet<>();
+            Set<FormulaFormat> tmp = new HashSet<>();
             tmp.add(StringFormat.getInstance());
             PresentedFormats = Collections.unmodifiableSet(tmp);
         }
@@ -207,11 +207,11 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
                     }
                     // Okay, now get the Isabelle string formula and submit it to
                     // the proof script:
-                    Formula<?> goalFormula = transformedGoals.get(0).asFormula();
+                    Formula goalFormula = transformedGoals.get(0).asFormula();
                     if (goalFormula == null) {
                         throw new RuntimeException(Bundle.ID_transformed_goal_unknown());
                     }
-                    ArrayList<? extends FormulaRepresentation<StringFormula>> isabelleStringRepresentation = goalFormula.fetchRepresentations(StringFormat.getInstance());
+                    ArrayList<? extends FormulaRepresentation> isabelleStringRepresentation = goalFormula.fetchRepresentations(StringFormat.getInstance());
                     if (isabelleStringRepresentation == null || isabelleStringRepresentation.isEmpty()) {
                         throw new RuntimeException(Bundle.ID_transformed_goal_unknown());
                     }
@@ -395,7 +395,7 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
                             Term term = TermYXML.parseYXML(unescapedYXML);
                             final TermGoal toGoal = TermsToDiabelli.toGoal(term, injectionContext.getProofDocument());
                             // Get the string version of this goal:
-                            toGoal.asFormula().addRepresentation(new FormulaRepresentation<>(new StringFormula(results[i + 1]), StringFormat.getInstance()));
+                            toGoal.asFormula().addRepresentation(new FormulaRepresentation(new StringFormula(results[i + 1]), StringFormat.getInstance()));
                             goals.add(toGoal);
                         }
                     }

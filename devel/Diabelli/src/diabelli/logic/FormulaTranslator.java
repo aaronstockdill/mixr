@@ -47,11 +47,11 @@ import org.openide.util.NbBundle;
  * to which this translator can translate a formula.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public abstract class FormulaTranslator<TFrom, TTo> {
+public abstract class FormulaTranslator {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
-    private final FormulaFormat<TFrom> fromFormat;
-    private final FormulaFormat<TTo> toFormat;
+    private final FormulaFormat fromFormat;
+    private final FormulaFormat toFormat;
     private final TranslationType type;
     private final String name;
     //</editor-fold>
@@ -79,7 +79,7 @@ public abstract class FormulaTranslator<TFrom, TTo> {
         "FT_type_null=The type of the translation is not specified.",
         "FT_name_null=The name of this translator is not specified."
     })
-    protected FormulaTranslator(@NonNull FormulaFormat<TFrom> fromFormat, @NonNull FormulaFormat<TTo> toFormat, @NonNull TranslationType type, @NonNull String name) {
+    protected FormulaTranslator(@NonNull FormulaFormat fromFormat, @NonNull FormulaFormat toFormat, @NonNull TranslationType type, @NonNull String name) {
         if (fromFormat == null) {
             throw new IllegalArgumentException(Bundle.FT_fromFormat_null());
         }
@@ -108,7 +108,7 @@ public abstract class FormulaTranslator<TFrom, TTo> {
      * formulae.
      */
     @NonNull
-    public FormulaFormat<TFrom> getFromFormat() {
+    public FormulaFormat getFromFormat() {
         return fromFormat;
     }
 
@@ -120,7 +120,7 @@ public abstract class FormulaTranslator<TFrom, TTo> {
      * formulae.
      */
     @NonNull
-    public FormulaFormat<TTo> getToFormat() {
+    public FormulaFormat getToFormat() {
         return toFormat;
     }
 
@@ -184,7 +184,7 @@ public abstract class FormulaTranslator<TFrom, TTo> {
      * exception is thrown whenever the translation didn't succeed for any
      * reason. A detailed explanation might be given for the user.
      */
-    public abstract FormulaRepresentation<TTo> translate(Formula<TFrom> formula) throws TranslationException;
+    public abstract FormulaRepresentation translate(Formula formula) throws TranslationException;
 
     /**
      * Translates the given premises (in the {@link
@@ -207,7 +207,7 @@ public abstract class FormulaTranslator<TFrom, TTo> {
      * exception is thrown whenever the translation didn't succeed for any
      * reason. A detailed explanation might be given for the user.
      */
-    public abstract FormulaRepresentation<TTo> translate(List<? extends Formula<TFrom>> premises) throws TranslationException;
+    public abstract FormulaRepresentation translate(List<? extends Formula> premises) throws TranslationException;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Helper Classes">
@@ -269,11 +269,11 @@ public abstract class FormulaTranslator<TFrom, TTo> {
      * @return {@code true} iff the given list contains at least one formula and
      * all of them are premises.
      */
-    public static boolean arePremises(List<? extends Formula<?>> formulae) {
+    public static boolean arePremises(List<? extends Formula> formulae) {
         if (formulae == null || formulae.isEmpty()) {
             return false;
         } else {
-            for (Formula<?> formula : formulae) {
+            for (Formula formula : formulae) {
                 if (formula.getRole() != Formula.FormulaRole.Premise) {
                     return false;
                 }

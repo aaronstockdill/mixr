@@ -43,8 +43,6 @@ import org.netbeans.api.annotations.common.NonNull;
  * Specifically, {@link CurrentFormulaTopComponent} is responsible for selecting
  * the formula that should be displayed with the help of presenters.</p>
  *
- * @param <T> the format type of formulae that this presenter is capable of
- * visualising.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public interface FormulaPresenter extends DiabelliComponent {
@@ -60,7 +58,7 @@ public interface FormulaPresenter extends DiabelliComponent {
      * visualising.
      */
     @NonNull
-    Set<FormulaFormat<?>> getPresentedFormats();
+    Set<FormulaFormat> getPresentedFormats();
 
     /**
      * Returns a panel which displays the given goal. The returned panel will be
@@ -74,7 +72,7 @@ public interface FormulaPresenter extends DiabelliComponent {
      * @throws diabelli.components.FormulaPresenter.VisualisationException see {@link VisualisationException}
      * for info on when this exception is thrown.
      */
-    Component createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException;
+    Component createVisualiserFor(FormulaRepresentation formula) throws VisualisationException;
 
     /**
      * This exception is thrown if the visualisation failed unexpectedly. If the

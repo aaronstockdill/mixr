@@ -65,21 +65,21 @@ public class NatLang implements DiabelliComponent, FormulaFormatsProvider, Formu
     }
 
     @Override
-    public Collection<FormulaFormat<?>> getFormulaFormats() {
+    public Collection<FormulaFormat> getFormulaFormats() {
         return FormulaFormatsContainer.FormulaFormats;
     }
 
     @Override
-    public Set<FormulaFormat<?>> getPresentedFormats() {
+    public Set<FormulaFormat> getPresentedFormats() {
         return FormulaFormatsContainer.FormulaFormats;
     }
 
-    public boolean canPresent(FormulaFormat<?> format) {
+    public boolean canPresent(FormulaFormat format) {
         return NaturalLanguage.getInstance() == format;
     }
 
     @Override
-    public NatLangPresenter createVisualiserFor(FormulaRepresentation<?> formula) throws VisualisationException {
+    public NatLangPresenter createVisualiserFor(FormulaRepresentation formula) throws VisualisationException {
         if (formula.getFormula() instanceof String) {
             return new NatLangPresenter((String) formula.getFormula());
         } else {
@@ -118,10 +118,10 @@ public class NatLang implements DiabelliComponent, FormulaFormatsProvider, Formu
 
     private static class FormulaFormatsContainer {
 
-        private static final Set<FormulaFormat<?>> FormulaFormats;
+        private static final Set<FormulaFormat> FormulaFormats;
 
         static {
-            HashSet<FormulaFormat<?>> tmp = new HashSet<>();
+            HashSet<FormulaFormat> tmp = new HashSet<>();
             tmp.add(NaturalLanguage.getInstance());
             FormulaFormats = Collections.unmodifiableSet(tmp);
         }

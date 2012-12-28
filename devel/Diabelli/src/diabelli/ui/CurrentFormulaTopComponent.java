@@ -288,7 +288,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
          *
          * @return the selected formula that this node represents.
          */
-        public Formula<?> getSelectedFormula() {
+        public Formula getSelectedFormula() {
             return getSelectedGoal().asFormula();
         }
 
@@ -300,7 +300,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
          *
          * @return the selected representation of the selected formula.
          */
-        public FormulaRepresentation<?> getSelectedFormulaRepresentation() {
+        public FormulaRepresentation getSelectedFormulaRepresentation() {
             return getSelectedFormula().getMainRepresentation();
         }
 
@@ -346,7 +346,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         }
 
         @Override
-        public Formula<?> getSelectedFormula() {
+        public Formula getSelectedFormula() {
             return goal.getGoal().getPremiseAt(goal.getPremiseIndex());
         }
 
@@ -367,7 +367,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         }
 
         @Override
-        public Formula<?> getSelectedFormula() {
+        public Formula getSelectedFormula() {
             return goal.getGoal().getPremisesFormula();
         }
     }
@@ -384,7 +384,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         }
 
         @Override
-        public Formula<?> getSelectedFormula() {
+        public Formula getSelectedFormula() {
             return goal.getGoal().getConclusion();
         }
     }
@@ -411,12 +411,12 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         }
 
         @Override
-        public Formula<?> getSelectedFormula() {
+        public Formula getSelectedFormula() {
             return delegate.getSelectedFormula();
         }
 
         @Override
-        public FormulaRepresentation<?> getSelectedFormulaRepresentation() {
+        public FormulaRepresentation getSelectedFormulaRepresentation() {
             return delegate.getSelectedFormulaRepresentation();
         }
 
@@ -460,14 +460,14 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
 
     public static class RepresentationFormulaNode<T extends GeneralGoalNode> extends FormulaDelegateNode<T> {
 
-        final List<? extends FormulaRepresentation<?>> representations;
+        final List<? extends FormulaRepresentation> representations;
         final int representationIndex;
 
         @Messages({
             "FormatRepresentationNode_displayName=Representation {0}: {1}",
             "FormatRepresentationNode_displayName_main_representation=Main representation: {0}"
         })
-        RepresentationFormulaNode(GeneralFormulaNode<T> selection, List<? extends FormulaRepresentation<?>> representations, int representationIndex) {
+        RepresentationFormulaNode(GeneralFormulaNode<T> selection, List<? extends FormulaRepresentation> representations, int representationIndex) {
             super(selection, Children.LEAF);
             this.representations = representations;
             this.representationIndex = representationIndex;
@@ -479,7 +479,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         }
 
         @Override
-        public FormulaRepresentation<?> getSelectedFormulaRepresentation() {
+        public FormulaRepresentation getSelectedFormulaRepresentation() {
             return representations.get(representationIndex);
         }
     }
@@ -502,10 +502,10 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         protected boolean createKeys(List<RepresentationFormulaNode<T>> toPopulate) {
             // Enumerate all the representations of the currently selected
             // formula:
-            Formula<?> selectedFormula = source.getSelectedFormula();
+            Formula selectedFormula = source.getSelectedFormula();
             if (selectedFormula == null || selectedFormula.getRepresentationsCount() < 1)
                 return true;
-            List<FormulaRepresentation<?>> representations = Arrays.asList(selectedFormula.getRepresentations());
+            List<FormulaRepresentation> representations = Arrays.asList(selectedFormula.getRepresentations());
             for (int i = 0; i < representations.size(); i++) {
                 toPopulate.add(new RepresentationFormulaNode<>(source, representations, i));
             }

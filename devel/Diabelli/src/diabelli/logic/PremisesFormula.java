@@ -39,18 +39,18 @@ import java.util.ArrayList;
  * formula.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-class PremisesFormula<T> extends Formula<T> {
+class PremisesFormula extends Formula {
 
     //<editor-fold defaultstate="collapsed" desc="Fields">
     /**
      * The array that carries all the premises handled by this formula.
      */
-    private final ArrayList<? extends Formula<T>> originalPremises;
+    private final ArrayList<? extends Formula> originalPremises;
     private final boolean supportsTranslation;
     //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructor">
-    PremisesFormula(ArrayList<? extends Formula<T>> originalPremises) {
+    PremisesFormula(ArrayList<? extends Formula> originalPremises) {
         super(null, FormulaRole.Premise);
         this.originalPremises = originalPremises;
         supportsTranslation = originalPremises != null
@@ -66,12 +66,12 @@ class PremisesFormula<T> extends Formula<T> {
     }
 
     @Override
-    public FormulaFormat<T> getMainTranslationSourceFormat() {
+    public FormulaFormat getMainTranslationSourceFormat() {
         return supportsTranslation ? originalPremises.get(0).getMainRepresentation().getFormat() : null;
     }
 
     @Override
-    public <TTo> FormulaRepresentation<TTo> translateWith(FormulaTranslator<T, TTo> translator) throws TranslationException {
+    public FormulaRepresentation translateWith(FormulaTranslator translator) throws TranslationException {
         if (translator == null) {
             throw new IllegalArgumentException(Bundle.F_null_translator());
         }

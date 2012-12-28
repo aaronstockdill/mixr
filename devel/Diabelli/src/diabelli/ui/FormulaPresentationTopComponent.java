@@ -166,34 +166,28 @@ public final class FormulaPresentationTopComponent extends TopComponent {
     @Messages({
         "FPTC_visualiser_failed=The formula presenter '{0}' unexpectedly failed while visualising a formula of the format '{1}'."
     })
-    private void addVisualisationsOf(GeneralGoalNode goalNode, Collection<FormulaFormat<?>> inFormats) {
+    private void addVisualisationsOf(GeneralGoalNode goalNode, Collection<FormulaFormat> inFormats) {
         if (goalNode != null && goalNode.getFormula() != null) {
             if (inFormats == null) {
                 inFormats = getAllFormats();
             }
-            Formula<?> formula = goalNode.getFormula();
+            Formula formula = goalNode.getFormula();
             addVisualisationsOf(formula, inFormats, goalNode, goalNode.getGoalIndex());
         }
     }
 
-    private void addVisualisationsOf(Formula<?> formula, Collection<FormulaFormat<?>> inFormats, GeneralGoalNode goalNode, int goalIndex) {
+    private void addVisualisationsOf(Formula formula, Collection<FormulaFormat> inFormats, GeneralGoalNode goalNode, int goalIndex) {
         if (inFormats == null) {
             inFormats = getAllFormats();
         }
-        try {
-            // Try to extract a placeholder from the main representation:
-            formula.getPlaceholder();
-        } catch (PlaceholderEmbeddingException ex) {
-            Exceptions.printStackTrace(ex);
-        }
         // Go through every format, every representation, and every
         // visualiser and display all these combinations
-        for (FormulaFormat<?> formulaFormat : inFormats) {
-            ArrayList<? extends FormulaRepresentation<?>> reps = formula.fetchRepresentations(formulaFormat);
+        for (FormulaFormat formulaFormat : inFormats) {
+            ArrayList<? extends FormulaRepresentation> reps = formula.fetchRepresentations(formulaFormat);
             if (reps != null && reps.size() > 0) {
                 Set<FormulaPresenter> presenters = getPresentersFor(formulaFormat);
                 if (presenters != null && presenters.size() > 0) {
-                    for (FormulaRepresentation<?> rep : reps) {
+                    for (FormulaRepresentation rep : reps) {
                         for (FormulaPresenter presenter : presenters) {
                             try {
                                 Component visualiser = presenter.createVisualiserFor(rep);
@@ -208,7 +202,7 @@ public final class FormulaPresentationTopComponent extends TopComponent {
         }
     }
 
-    private void addVisualisation(GeneralGoalNode goalNode, int goalIndex, FormulaFormat<?> formulaFormat, FormulaRepresentation<?> rep, FormulaPresenter presenter, Component visualiser) {
+    private void addVisualisation(GeneralGoalNode goalNode, int goalIndex, FormulaFormat formulaFormat, FormulaRepresentation rep, FormulaPresenter presenter, Component visualiser) {
         // Now put the panel onto this panel:
         SingleFormulaPresentationPanel pnl = new SingleFormulaPresentationPanel(goalNode, rep, goalIndex, -1, visualiser, presenter);
         visualisationsPanel.add(pnl);
@@ -259,7 +253,7 @@ public final class FormulaPresentationTopComponent extends TopComponent {
     private void updatePresented(ArrayList<GeneralGoalNode> formulae) {
         clearVisualisations();
         if (formulae != null && formulae.size() > 0) {
-            Collection<FormulaFormat<?>> allFormats = getAllFormats();
+            Collection<FormulaFormat> allFormats = getAllFormats();
             for (GeneralGoalNode formula : formulae) {
                 addVisualisationsOf(formula, allFormats);
             }
@@ -273,7 +267,7 @@ public final class FormulaPresentationTopComponent extends TopComponent {
     private void presentGoals(List<Goal> goals) {
         clearVisualisations();
         if (goals != null && goals.size() > 0) {
-            Collection<FormulaFormat<?>> allFormats = getAllFormats();
+            Collection<FormulaFormat> allFormats = getAllFormats();
             for (int i = 0; i < goals.size(); i++) {
                 Goal goal = goals.get(i);
                 addVisualisationsOf(goal.asFormula(), allFormats, null, i);
@@ -327,11 +321,11 @@ public final class FormulaPresentationTopComponent extends TopComponent {
         return Lookup.getDefault().lookup(Diabelli.class).getPresentationManager().getPresenters();
     }
 
-    private Collection<FormulaFormat<?>> getAllFormats() {
+    private Collection<FormulaFormat> getAllFormats() {
         return Lookup.getDefault().lookup(Diabelli.class).getFormulaFormatManager().getFormulaFormats();
     }
 
-    private Set<FormulaPresenter> getPresentersFor(FormulaFormat<?> format) {
+    private Set<FormulaPresenter> getPresentersFor(FormulaFormat format) {
         return Lookup.getDefault().lookup(Diabelli.class).getPresentationManager().getPresenters(format);
     }
     // </editor-fold>
