@@ -25,33 +25,51 @@
 package diabelli.isabelle.terms;
 
 import diabelli.logic.FormulaFormatDescriptor;
+import diabelli.logic.FormulaRepresentation;
 import org.openide.util.NbBundle;
 
 /**
  * The formula format descriptor for Isabelle formulae in the string form.
+ *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 @NbBundle.Messages({
     "SF_string_format_pretty_name=Isabelle string formula"
 })
 public class StringFormat extends FormulaFormatDescriptor {
-    
+
     //<editor-fold defaultstate="collapsed" desc="Fields">
     /**
-     * The name of Isabelle's string format. This name is used in {@link FormulaFormatDescriptor#getFormatName()}.
+     * The name of Isabelle's string format. This name is used in
+     * {@link FormulaFormatDescriptor#getFormatName()}.
      */
     public static final String TermFormatName = "Isabelle_string";
     //</editor-fold>
-    
+
     //<editor-fold defaultstate="collapsed" desc="Constructor">
     private StringFormat() {
         super(TermFormatName, Bundle.SF_string_format_pretty_name(), StringFormula.class);
     }
     //</editor-fold>
-    
+
+    // <editor-fold defaultstate="collapsed" desc="Formula Creation Methods">
+    /**
+     * A helper method for creating an Isabelle string formula.
+     *
+     * @param rawFormula a string, representing an Isabelle formula.
+     *
+     * @return the formula representation instance carrying the raw formula
+     * string.
+     */
+    public static FormulaRepresentation createFormula(String rawFormula) {
+        return new FormulaRepresentation(new StringFormula(rawFormula), getInstance());
+    }
+    // </editor-fold>
+
     // <editor-fold defaultstate="collapsed" desc="Singleton Instance">
     /**
      * Returns the singleton instance of the Isabelle string format descriptor.
+     *
      * @return the singleton instance of the Isabelle string format descriptor.
      */
     public static StringFormat getInstance() {
@@ -59,9 +77,8 @@ public class StringFormat extends FormulaFormatDescriptor {
     }
 
     private static class SingletonContainer {
-        
+
         private static final StringFormat Instance = new StringFormat();
-        
     }
     // </editor-fold>
 }

@@ -30,6 +30,7 @@ import diabelli.logic.FormulaRepresentation;
 import diabelli.logic.FreeVariable;
 import diabelli.logic.TextEncodedFormulaFormat.FormulaEncodingException;
 import java.util.Set;
+import java.util.TreeSet;
 import org.openide.util.NbBundle;
 
 /**
@@ -65,8 +66,16 @@ public class NaturalLanguage extends FormulaFormatDescriptor implements Embeddab
     }
 
     @Override
-    public Set<FreeVariable> getFreeVariables(FormulaRepresentation formula) {
-        return null;
+    public Set<FreeVariable> getFreeVariables(FormulaRepresentation representation) {
+        if (representation != null &&
+                representation.getFormat() == getInstance() &&
+                representation.getFormula() instanceof String) {
+            String formula = (String) representation.getFormula();
+            final TreeSet<FreeVariable> variables = new TreeSet<>();
+            return variables;
+        } else {
+            return null;
+        }
     }
 
     /**

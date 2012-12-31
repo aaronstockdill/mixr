@@ -175,63 +175,64 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
     })
     public void commitTransformedGoals(InferenceStepResult step) throws UnsupportedOperationException {
         // Insert the changed goals if the committed inference step transformed them:
-        if (step instanceof GoalTransformationResult) {
-            GoalTransformationResult goalTransformationResult = (GoalTransformationResult) step;
-            Goals originalGoals = goalTransformationResult.getOriginalGoals();
-            if (originalGoals == null || originalGoals.isEmpty() || !(originalGoals.get(0) instanceof TermGoal)) {
-                return;
+        Goals originalGoals = step.getOriginalGoals();
+        if (originalGoals == null || originalGoals.isEmpty() || !(originalGoals.get(0) instanceof TermGoal)) {
+            return;
+        }
+        // Get the proof script document into which we will insert the
+        // Isabelle command:
+        ProofDocument proofDocument = ((TermGoal) originalGoals.get(0)).getProofContext();
+        if (proofDocument != null) {
+            // Get the transformed goals:
+            // TODO: Handle multiple goals:
+            if (step.getGoalChangesCount() > 1) {
+                throw new UnsupportedOperationException(Bundle.ID_multiple_goals_unsupported());
             }
-            // Get the proof script document into which we will insert the
-            // Isabelle command:
-            ProofDocument proofDocument = ((TermGoal) originalGoals.get(0)).getProofContext();
-            if (proofDocument != null) {
-                // Get the transformed goals:
-                // TODO: Handle multiple goals:
-                if (goalTransformationResult.getGoalChangesCount() > 1) {
-                    throw new UnsupportedOperationException(Bundle.ID_multiple_goals_unsupported());
+            // Find the only goal that was changed:
+            List<Goal> transformedGoals = null;
+            for (int i = 0; i < originalGoals.size(); i++) {
+                if (step.isGoalChanged(i)) {
+                    transformedGoals = step.getTransformedGoalsFor(i);
+                    break;
                 }
-                // Find the only goal that was changed:
-                List<Goal> transformedGoals = null;
-                for (int i = 0; i < originalGoals.size(); i++) {
-                    if (goalTransformationResult.isGoalChanged(i)) {
-                        transformedGoals = goalTransformationResult.getTransformedGoalsFor(i);
-                        break;
-                    }
+            }
+            // Has the goal been discharged?
+            if (transformedGoals == null || transformedGoals.isEmpty()) {
+                throw new UnsupportedOperationException("Discharging of goals not yet supported by the Isabelle driver.");
+            } else {
+                // No, the goal been changed.
+                if (transformedGoals.size() > 1) {
+                    throw new UnsupportedOperationException("The Isabelle driver does not yet support creation of multiple sub-goals from a single one.");
                 }
-                // Has the goal been discharged?
-                if (transformedGoals == null || transformedGoals.isEmpty()) {
-                    throw new UnsupportedOperationException("Discharging of goals not yet supported by the Isabelle driver.");
-                } else {
-                    // No, the goal been changed.
-                    if (transformedGoals.size() > 1) {
-                        throw new UnsupportedOperationException("The Isabelle driver does not yet support creation of multiple sub-goals from a single one.");
+                // Okay, now get the Isabelle string formula and submit it to
+                // the proof script:
+                Formula goalFormula = transformedGoals.get(0).asFormula();
+                if (goalFormula == null) {
+                    throw new RuntimeException(Bundle.ID_transformed_goal_unknown());
+                }
+                ArrayList<? extends FormulaRepresentation> isabelleStringRepresentation = goalFormula.fetchRepresentations(StringFormat.getInstance());
+                try {
+                    Object theStringFormula;
+                    if (isabelleStringRepresentation == null || isabelleStringRepresentation.isEmpty()) {
+                        theStringFormula = createPlaceholder(goalFormula);
+                    } else {
+                        theStringFormula = isabelleStringRepresentation.get(0).getFormula();
                     }
-                    // Okay, now get the Isabelle string formula and submit it to
-                    // the proof script:
-                    Formula goalFormula = transformedGoals.get(0).asFormula();
-                    if (goalFormula == null) {
+                    if (theStringFormula == null) {
                         throw new RuntimeException(Bundle.ID_transformed_goal_unknown());
                     }
-                    ArrayList<? extends FormulaRepresentation> isabelleStringRepresentation = goalFormula.fetchRepresentations(StringFormat.getInstance());
-                    try {
-                        if (isabelleStringRepresentation == null || isabelleStringRepresentation.isEmpty()) {
-                            String placeholder = createPlaceholder(goalFormula);
-                            if (placeholder == null) {
-                                throw new RuntimeException(Bundle.ID_transformed_goal_unknown());
-                            } else {
-                                proofDocument.insertAfter(proofDocument.getLastLockedElement(), String.format("apply (diabelliOracle \"%s\")\n", placeholder));
-                            }
-                        } else {
-                            // We now have the corresponding Isabelle string formula, which
-                            // can be printed back to the proof script:
-                            // Commit the rule application result back to the Isabelle's proof
-                            // script:
-                            proofDocument.insertAfter(proofDocument.getLastLockedElement(), String.format("apply (diabelli \"%s\")\n", isabelleStringRepresentation.get(0).getFormula()));
-                        }
-                        proofDocument.awaitStable();
-                    } catch (InterruptedException ex) {
-                        Exceptions.printStackTrace(ex);
+                    // We now have the corresponding Isabelle string formula, which
+                    // can be printed back to the proof script:
+                    // Commit the rule application result back to the Isabelle's proof
+                    // script:
+                    if (step.getProofTrace() instanceof OracleProofTrace) {
+                        proofDocument.insertAfter(proofDocument.getLastLockedElement(), String.format("apply (diabelliOracle \"%s\")\n", theStringFormula));
+                    } else {
+                        proofDocument.insertAfter(proofDocument.getLastLockedElement(), String.format("apply (diabelli \"%s\")\n", theStringFormula));
                     }
+                    proofDocument.awaitStable();
+                } catch (InterruptedException ex) {
+                    Exceptions.printStackTrace(ex);
                 }
             }
         }

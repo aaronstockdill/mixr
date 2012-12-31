@@ -26,6 +26,7 @@ package diabelli.demo.driver.natlang;
 
 import diabelli.Diabelli;
 import diabelli.components.GoalTransformer;
+import diabelli.isabelle.terms.StringFormat;
 import diabelli.logic.Formula;
 import diabelli.logic.FormulaRepresentation;
 import diabelli.logic.Goal;
@@ -44,28 +45,28 @@ import propity.util.MovableArrayList;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public class DummyPlaceholderInference implements InferenceRuleDescriptor, InferenceRule {
+public class DummyIsabelleInference implements InferenceRuleDescriptor, InferenceRule {
 
     private final GoalTransformer owner;
 
-    DummyPlaceholderInference(GoalTransformer owner) {
+    DummyIsabelleInference(GoalTransformer owner) {
         this.owner = owner;
     }
 
     @Override
     @NbBundle.Messages({
-        "DPI_name=Infer new natural language sentence"
+        "DII_name=Infer new Isabelle sentence"
     })
     public String getName() {
-        return Bundle.DPI_name();
+        return Bundle.DII_name();
     }
 
     @Override
     @NbBundle.Messages({
-        "DPI_description=The user types in a new natural language sentence, which must be entailed by the original sentence."
+        "DII_description=The user types in a new Isabelle sentence. This sentence must be entailed by the original sentence."
     })
     public String getDescription() {
-        return Bundle.DPI_description();
+        return Bundle.DII_description();
     }
 
     @Override
@@ -91,7 +92,7 @@ public class DummyPlaceholderInference implements InferenceRuleDescriptor, Infer
                 GoalTransformationResult goalTransformationResult = new GoalTransformationResult(
                         getOwner(),
                         targets.getGoals(),
-                        new MovableArrayList[]{MovableArrayList.create(new Goal(null, null, null, new Formula(new FormulaRepresentation(tid.getNewFormula(), NaturalLanguage.getInstance()), Formula.FormulaRole.Goal)))},
+                        new MovableArrayList[]{MovableArrayList.create(new Goal(null, null, null, new Formula(StringFormat.createFormula(tid.getNewFormula()), Formula.FormulaRole.Goal)))},
                         OracleProofTrace.getInstance());
                 Lookup.getDefault().lookup(Diabelli.class).getGoalManager().commitTransformedGoals(goalTransformationResult);
             }

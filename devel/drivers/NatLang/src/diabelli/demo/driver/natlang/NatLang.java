@@ -30,6 +30,7 @@ import diabelli.components.FormulaPresenter;
 import diabelli.components.GoalTransformer;
 import diabelli.logic.FormulaFormat;
 import diabelli.logic.FormulaRepresentation;
+import diabelli.logic.InferenceRule;
 import diabelli.logic.InferenceRuleDescriptor;
 import diabelli.logic.InferenceStepResult;
 import diabelli.logic.InferenceTarget;
@@ -56,6 +57,7 @@ public class NatLang implements DiabelliComponent, FormulaFormatsProvider, Formu
         ArrayList<InferenceRuleDescriptor> tmp = new ArrayList<>();
 
         tmp.add(new DummyPlaceholderInference(NatLang.this));
+        tmp.add(new DummyIsabelleInference(NatLang.this));
 
         inferenceRules = Collections.unmodifiableList(tmp);
     }
@@ -105,8 +107,8 @@ public class NatLang implements DiabelliComponent, FormulaFormatsProvider, Formu
 
     @Override
     public void applyInferenceRule(InferenceTarget targets, InferenceRuleDescriptor inferenceRule) {
-        if (inferenceRule instanceof DummyPlaceholderInference) {
-            DummyPlaceholderInference dummyPlaceholderInference = (DummyPlaceholderInference) inferenceRule;
+        if (inferenceRule instanceof InferenceRule) {
+            InferenceRule dummyPlaceholderInference = (InferenceRule) inferenceRule;
             dummyPlaceholderInference.applyInferenceRule(targets);
         }
     }

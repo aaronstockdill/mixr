@@ -76,7 +76,7 @@ public final class MovableArrayList<E> implements List<E>, RandomAccess {
      * Creates a new empty movable array list.
      */
     public MovableArrayList() {
-        store = new ArrayList<E>();
+        store = new ArrayList<>();
     }
 
     /**
@@ -86,7 +86,7 @@ public final class MovableArrayList<E> implements List<E>, RandomAccess {
      * @param c the collection from which to copy the contents.
      */
     public MovableArrayList(Collection<? extends E> c) {
-        store = new ArrayList<E>(c);
+        store = new ArrayList<>(c);
     }
 
     /**
@@ -97,7 +97,7 @@ public final class MovableArrayList<E> implements List<E>, RandomAccess {
      * {@link ArrayList}.
      */
     public MovableArrayList(int initialCapacity) {
-        store = new ArrayList<E>(initialCapacity);
+        store = new ArrayList<>(initialCapacity);
     }
 
     /**
@@ -124,8 +124,19 @@ public final class MovableArrayList<E> implements List<E>, RandomAccess {
             // okay.
             move(c, this);
         } else {
-            store = new ArrayList<E>(c.store);
+            store = new ArrayList<>(c.store);
         }
+    }
+
+    /**
+     * Creates an instance of the movable array list that uses the given array
+     * as the backing store.
+     *
+     * @param list this array will be used as the backing store (no copy of it
+     * will be created).
+     */
+    private MovableArrayList(ArrayList<E> list) {
+        store = list;
     }
     //</editor-fold>
 
@@ -200,7 +211,7 @@ public final class MovableArrayList<E> implements List<E>, RandomAccess {
     }
     //</editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Other Public Interface">
+    // <editor-fold defaultstate="collapsed" desc="Read-only Backing-Store Access">
     /**
      * Returns an unmodifiable view of the backing store (which is an
      * {@link ArrayList}).
@@ -215,6 +226,38 @@ public final class MovableArrayList<E> implements List<E>, RandomAccess {
      */
     public List<E> getReadOnlyStore() {
         return Collections.unmodifiableList(store);
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Static Creation Methods">
+    public static <E> MovableArrayList<E> create(E el1) {
+        ArrayList<E> newList = new ArrayList<>();
+        newList.add(el1);
+        return new MovableArrayList<>(newList);
+    }
+
+    public static <E> MovableArrayList<E> create(E el1, E el2) {
+        ArrayList<E> newList = new ArrayList<>();
+        newList.add(el1);
+        newList.add(el2);
+        return new MovableArrayList<>(newList);
+    }
+
+    public static <E> MovableArrayList<E> create(E el1, E el2, E el3) {
+        ArrayList<E> newList = new ArrayList<>();
+        newList.add(el1);
+        newList.add(el2);
+        newList.add(el3);
+        return new MovableArrayList<>(newList);
+    }
+
+    public static <E> MovableArrayList<E> create(E el1, E el2, E el3, E el4) {
+        ArrayList<E> newList = new ArrayList<>();
+        newList.add(el1);
+        newList.add(el2);
+        newList.add(el3);
+        newList.add(el4);
+        return new MovableArrayList<>(newList);
     }
     // </editor-fold>
 

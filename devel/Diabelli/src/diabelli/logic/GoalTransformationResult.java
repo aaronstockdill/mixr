@@ -90,7 +90,7 @@ public class GoalTransformationResult implements InferenceStepResult {
     // </editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructor">
-    public GoalTransformationResult(@NonNull GoalTransformer slaveReasoner, @NonNull Goals originalGoals, MovableArrayList<Goal>[] transformedGoals) {
+    public GoalTransformationResult(@NonNull GoalTransformer slaveReasoner, @NonNull Goals originalGoals, MovableArrayList<Goal>... transformedGoals) {
         this(slaveReasoner, originalGoals, transformedGoals, null);
     }
     
