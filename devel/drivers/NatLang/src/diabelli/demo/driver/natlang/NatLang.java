@@ -78,7 +78,7 @@ public class NatLang implements DiabelliComponent, FormulaFormatsProvider, Formu
     }
 
     public boolean canPresent(FormulaFormat format) {
-        return NaturalLanguage.getInstance() == format;
+        return NatLangFormat.getInstance() == format;
     }
 
     @Override
@@ -129,7 +129,7 @@ public class NatLang implements DiabelliComponent, FormulaFormatsProvider, Formu
 
         static {
             HashSet<FormulaFormat> tmp = new HashSet<>();
-            tmp.add(NaturalLanguage.getInstance());
+            tmp.add(NatLangFormat.getInstance());
             FormulaFormats = Collections.unmodifiableSet(tmp);
         }
     }

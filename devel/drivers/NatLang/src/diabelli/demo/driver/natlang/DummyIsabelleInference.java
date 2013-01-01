@@ -104,7 +104,7 @@ public class DummyIsabelleInference implements InferenceRuleDescriptor, Inferenc
             Sentence sentence = target.getSentences().get(0);
             if (sentence instanceof Goal) {
                 Goal goal = (Goal) sentence;
-                ArrayList<? extends FormulaRepresentation> natLangRepresentations = goal.asFormula().fetchRepresentations(NaturalLanguage.getInstance());
+                ArrayList<? extends FormulaRepresentation> natLangRepresentations = goal.asFormula().fetchRepresentations(NatLangFormat.getInstance());
                 if (natLangRepresentations != null && !natLangRepresentations.isEmpty()) {
                     return natLangRepresentations.get(0).getFormula().toString();
                 }

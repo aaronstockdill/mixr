@@ -91,7 +91,7 @@ public class DummyPlaceholderInference implements InferenceRuleDescriptor, Infer
                 GoalTransformationResult goalTransformationResult = new GoalTransformationResult(
                         getOwner(),
                         targets.getGoals(),
-                        new MovableArrayList[]{MovableArrayList.create(new Goal(null, null, null, new Formula(new FormulaRepresentation(tid.getNewFormula(), NaturalLanguage.getInstance()), Formula.FormulaRole.Goal)))},
+                        new MovableArrayList[]{MovableArrayList.create(new Goal(null, null, null, new Formula(new FormulaRepresentation(tid.getNewFormula(), NatLangFormat.getInstance()), Formula.FormulaRole.Goal)))},
                         OracleProofTrace.getInstance());
                 Lookup.getDefault().lookup(Diabelli.class).getGoalManager().commitTransformedGoals(goalTransformationResult);
             }
@@ -103,7 +103,7 @@ public class DummyPlaceholderInference implements InferenceRuleDescriptor, Infer
             Sentence sentence = target.getSentences().get(0);
             if (sentence instanceof Goal) {
                 Goal goal = (Goal) sentence;
-                ArrayList<? extends FormulaRepresentation> natLangRepresentations = goal.asFormula().fetchRepresentations(NaturalLanguage.getInstance());
+                ArrayList<? extends FormulaRepresentation> natLangRepresentations = goal.asFormula().fetchRepresentations(NatLangFormat.getInstance());
                 if (natLangRepresentations != null && !natLangRepresentations.isEmpty()) {
                     return natLangRepresentations.get(0).getFormula().toString();
                 }

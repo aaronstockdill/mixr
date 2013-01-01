@@ -1,5 +1,5 @@
 /*
- * File name: NaturalLanguage.java
+ * File name: NatLangFormat.java
  *    Author: Matej Urbas [matej.urbas@gmail.com]
  * 
  *  Copyright © 2012 Matej Urbas
@@ -44,14 +44,14 @@ import org.openide.util.NbBundle;
 @NbBundle.Messages({
     "NatLang_format_pretty_name=Dummy natural language"
 })
-public class NaturalLanguage extends FormulaFormatDescriptor implements EmbeddableFormulaFormat {
+public class NatLangFormat extends FormulaFormatDescriptor implements EmbeddableFormulaFormat {
 
     /**
      * The name of the natural language format.
      */
     private static final String FormatFormatName = "NatLang";
 
-    private NaturalLanguage() {
+    private NatLangFormat() {
         super(FormatFormatName, Bundle.NatLang_format_pretty_name(), String.class);
     }
 
@@ -83,12 +83,12 @@ public class NaturalLanguage extends FormulaFormatDescriptor implements Embeddab
      *
      * @return the singleton instance of the natural language format descriptor.
      */
-    public static NaturalLanguage getInstance() {
+    public static NatLangFormat getInstance() {
         return SingletonContainer.Instance;
     }
 
     private static class SingletonContainer {
 
-        private static final NaturalLanguage Instance = new NaturalLanguage();
+        private static final NatLangFormat Instance = new NatLangFormat();
     }
 }
