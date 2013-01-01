@@ -44,7 +44,7 @@ import org.openide.util.lookup.ServiceProvider;
 
 /**
  * A demonstration driver which provides support for the <span
- * style="font-style:italic;">natural language</span> reasoning language.
+ * style="font-style:italic;">NatLang</span> language.
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
