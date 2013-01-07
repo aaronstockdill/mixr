@@ -24,10 +24,10 @@
  */
 package diabelli.demo.driver.natlang;
 
-import diabelli.logic.EmbeddableFormulaFormat;
 import diabelli.logic.FormulaFormatDescriptor;
 import diabelli.logic.FormulaRepresentation;
 import diabelli.logic.FreeVariable;
+import diabelli.logic.TextEncodedFormulaFormat;
 import diabelli.logic.TextEncodedFormulaFormat.FormulaEncodingException;
 import java.util.Set;
 import java.util.TreeSet;
@@ -44,7 +44,7 @@ import org.openide.util.NbBundle;
 @NbBundle.Messages({
     "NatLang_format_pretty_name=Dummy natural language"
 })
-public class NatLangFormat extends FormulaFormatDescriptor implements EmbeddableFormulaFormat {
+public class NatLangFormat extends FormulaFormatDescriptor implements TextEncodedFormulaFormat {
 
     /**
      * The name of the natural language format.
@@ -65,18 +65,18 @@ public class NatLangFormat extends FormulaFormatDescriptor implements Embeddable
         return encodedFormula;
     }
 
-    @Override
-    public Set<FreeVariable> getFreeVariables(FormulaRepresentation representation) {
-        if (representation != null &&
-                representation.getFormat() == getInstance() &&
-                representation.getFormula() instanceof String) {
-            String formula = (String) representation.getFormula();
-            final TreeSet<FreeVariable> variables = new TreeSet<>();
-            return variables;
-        } else {
-            return null;
-        }
-    }
+//    @Override
+//    public Set<FreeVariable> getFreeVariables(FormulaRepresentation representation) {
+//        if (representation != null &&
+//                representation.getFormat() == getInstance() &&
+//                representation.getFormula() instanceof String) {
+//            String formula = (String) representation.getFormula();
+//            final TreeSet<FreeVariable> variables = new TreeSet<>();
+//            return variables;
+//        } else {
+//            return null;
+//        }
+//    }
 
     /**
      * Returns the singleton instance of the natural language format descriptor.

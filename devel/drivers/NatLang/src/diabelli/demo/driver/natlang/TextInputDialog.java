@@ -71,13 +71,15 @@ public class TextInputDialog extends javax.swing.JDialog {
         taOriginalFormula.setEditable(false);
         taOriginalFormula.setBackground(new java.awt.Color(237, 237, 237));
         taOriginalFormula.setColumns(20);
-        taOriginalFormula.setRows(5);
+        taOriginalFormula.setRows(2);
+        taOriginalFormula.setTabSize(4);
         jScrollPane1.setViewportView(taOriginalFormula);
 
         org.openide.awt.Mnemonics.setLocalizedText(jLabel2, org.openide.util.NbBundle.getMessage(TextInputDialog.class, "TextInputDialog.jLabel2.text")); // NOI18N
 
         taNewFormula.setColumns(20);
-        taNewFormula.setRows(5);
+        taNewFormula.setRows(2);
+        taNewFormula.setTabSize(4);
         jScrollPane2.setViewportView(taNewFormula);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -108,12 +110,12 @@ public class TextInputDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
                     .addComponent(jButton2))
-                .addContainerGap())
+                .addGap(8, 8, 8))
         );
 
         pack();

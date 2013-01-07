@@ -41,6 +41,8 @@ import org.openide.util.NbBundle;
 import propity.util.MovableArrayList;
 
 /**
+ * A simple inference rule that asks the user to enter a NatLang formula (that
+ * should be the result of the inference).
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */

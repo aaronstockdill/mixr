@@ -50,13 +50,13 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jScrollPane2" pref="199" max="32767" attributes="0"/>
+              <Component id="jScrollPane2" pref="34" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="jButton1" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jButton2" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="8" pref="8" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -102,7 +102,8 @@
               <Color blue="ed" green="ed" red="ed" type="rgb"/>
             </Property>
             <Property name="columns" type="int" value="20"/>
-            <Property name="rows" type="int" value="5"/>
+            <Property name="rows" type="int" value="2"/>
+            <Property name="tabSize" type="int" value="4"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -124,7 +125,8 @@
         <Component class="javax.swing.JTextArea" name="taNewFormula">
           <Properties>
             <Property name="columns" type="int" value="20"/>
-            <Property name="rows" type="int" value="5"/>
+            <Property name="rows" type="int" value="2"/>
+            <Property name="tabSize" type="int" value="4"/>
           </Properties>
         </Component>
       </SubComponents>

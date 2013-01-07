@@ -56,11 +56,6 @@ import diabelli.logic.InferenceStepResult;
  */
 public interface GoalAcceptingReasoner extends GoalProvider {
 
-    // TODO: This method obviously needs to accept something else rather
-    // than just goals. The method has to be called with an object that contains
-    // the reference to the original goals (as a certification that the
-    // transformed goals are actually connected to the original goals and that
-    // the original goals didn't yet change and so on).
     /**
      * Puts the transformed goals back to this reasoner. The driver
      * may commit the goals to the actually reasoner asynchronously. There

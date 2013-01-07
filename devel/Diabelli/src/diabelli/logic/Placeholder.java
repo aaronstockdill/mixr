@@ -28,7 +28,6 @@ import diabelli.Diabelli;
 import diabelli.logic.TextEncodedFormulaFormat.FormulaEncodingException;
 import java.util.Collections;
 import java.util.Set;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
@@ -63,7 +62,7 @@ public class Placeholder {
     //<editor-fold defaultstate="collapsed" desc="Fields">
     private final FormulaRepresentation hostingFormula;
     private final CarrierFormulaFormat hostingFormat;
-    private final EmbeddableFormulaFormat embeddedFormat;
+    private final TextEncodedFormulaFormat embeddedFormat;
     private final FormulaRepresentation embeddedFormula;
     private final Set<FreeVariable> freeVariables;
     //</editor-fold>
@@ -90,8 +89,8 @@ public class Placeholder {
         if (hostingFormula == null) {
             throw new IllegalArgumentException(Bundle.PH_null_hosting_formula());
         }
-        if (embeddedFormula.getFormat() instanceof EmbeddableFormulaFormat) {
-            this.embeddedFormat = (EmbeddableFormulaFormat) embeddedFormula.getFormat();
+        if (embeddedFormula.getFormat() instanceof TextEncodedFormulaFormat) {
+            this.embeddedFormat = (TextEncodedFormulaFormat) embeddedFormula.getFormat();
         } else {
             throw new IllegalArgumentException(Bundle.PH_invalid_format());
         }
@@ -107,7 +106,7 @@ public class Placeholder {
     //</editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Public Properties">
-    public EmbeddableFormulaFormat getEmbeddedFormat() {
+    public TextEncodedFormulaFormat getEmbeddedFormat() {
         return embeddedFormat;
     }
 
@@ -161,9 +160,8 @@ public class Placeholder {
         if (formulaFormat == null) {
             throw new CarrierFormulaFormat.PlaceholderEmbeddingException(Bundle.Placeholder_unknown_format(payloadFormulaFormat));
         }
-        if (formulaFormat instanceof EmbeddableFormulaFormat) {
-            @SuppressWarnings("unchecked")
-            EmbeddableFormulaFormat payloadFormat = (EmbeddableFormulaFormat) formulaFormat;
+        if (formulaFormat instanceof TextEncodedFormulaFormat) {
+            TextEncodedFormulaFormat payloadFormat = (TextEncodedFormulaFormat) formulaFormat;
             Object decodedFormula;
             try {
                 decodedFormula = payloadFormat.decodeFromString(payloadFormula);
