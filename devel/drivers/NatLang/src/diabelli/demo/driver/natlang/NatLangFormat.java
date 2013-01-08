@@ -25,12 +25,8 @@
 package diabelli.demo.driver.natlang;
 
 import diabelli.logic.FormulaFormatDescriptor;
-import diabelli.logic.FormulaRepresentation;
-import diabelli.logic.FreeVariable;
 import diabelli.logic.TextEncodedFormulaFormat;
 import diabelli.logic.TextEncodedFormulaFormat.FormulaEncodingException;
-import java.util.Set;
-import java.util.TreeSet;
 import org.openide.util.NbBundle;
 
 /**
