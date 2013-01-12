@@ -41,6 +41,8 @@ import tptp_parser.SimpleTptpParserOutput;
 import tptp_parser.SimpleTptpParserOutput.TopLevelItem;
 
 /**
+ * The main class of the TPTP driver. It integrates the TPTP formula format and
+ * provides visualisation of TPTP formulae.
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */

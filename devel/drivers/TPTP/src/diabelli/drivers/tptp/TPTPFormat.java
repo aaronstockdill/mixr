@@ -29,7 +29,6 @@ import antlr.TokenStreamException;
 import diabelli.logic.FormulaFormatDescriptor;
 import diabelli.logic.TextEncodedFormulaFormat;
 import java.io.StringReader;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import tptp_parser.SimpleTptpParserOutput;
 import tptp_parser.SimpleTptpParserOutput.TopLevelItem;
@@ -37,6 +36,9 @@ import tptp_parser.TptpLexer;
 import tptp_parser.TptpParser;
 
 /**
+ * Supplies Diabelli with information about the TPTP format, parses TPTP string
+ * formulae and produces an abstract syntax tree, and pretty-prints TPTP
+ * abstract syntax trees back into string.
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
@@ -75,7 +77,7 @@ public class TPTPFormat extends FormulaFormatDescriptor implements TextEncodedFo
         TptpParser tptpParser = new tptp_parser.TptpParser(new TptpLexer(new StringReader(encodedFormula)));
         try {
             final SimpleTptpParserOutput outputManager = new SimpleTptpParserOutput();
-            final TopLevelItem formula = (SimpleTptpParserOutput.TopLevelItem)tptpParser.topLevelItem(outputManager);
+            final TopLevelItem formula = (SimpleTptpParserOutput.TopLevelItem) tptpParser.topLevelItem(outputManager);
             return formula;
         } catch (RecognitionException | TokenStreamException ex) {
             throw new FormulaEncodingException(Bundle.TPTPFormat_invalid_formula(), ex);
@@ -95,5 +97,4 @@ public class TPTPFormat extends FormulaFormatDescriptor implements TextEncodedFo
 
         private static final TPTPFormat Instance = new TPTPFormat();
     }
-    
 }
