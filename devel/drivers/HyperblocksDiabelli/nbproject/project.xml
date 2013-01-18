@@ -4,7 +4,7 @@
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/nb-module-project/3">
             <code-name-base>diabelli.hyperblocks</code-name-base>
-            <standalone/>
+            <suite-component/>
             <module-dependencies>
                 <dependency>
                     <code-name-base>diabelli</code-name-base>
@@ -57,7 +57,51 @@
                 </dependency>
             </module-dependencies>
             <public-packages>
+                <package>com.infosys.closeandmaxtabbedpane</package>
+                <package>contrib.rucker</package>
+                <package>diabelli.hyperblocks</package>
                 <package>diabelli.hyperblocks.ui</package>
+                <package>edu.stanford.ejalbert</package>
+                <package>net.java.games.cg</package>
+                <package>net.java.games.gluegen.runtime</package>
+                <package>net.java.games.jogl</package>
+                <package>net.java.games.jogl.impl</package>
+                <package>net.java.games.jogl.impl.error</package>
+                <package>net.java.games.jogl.impl.glue</package>
+                <package>net.java.games.jogl.impl.macosx</package>
+                <package>net.java.games.jogl.impl.mipmap</package>
+                <package>net.java.games.jogl.impl.registry</package>
+                <package>net.java.games.jogl.impl.tesselator</package>
+                <package>net.java.games.jogl.impl.windows</package>
+                <package>net.java.games.jogl.impl.x11</package>
+                <package>net.java.games.jogl.util</package>
+                <package>net.roydesign.app</package>
+                <package>net.roydesign.event</package>
+                <package>net.roydesign.io</package>
+                <package>net.roydesign.mac</package>
+                <package>net.roydesign.ui</package>
+                <package>openproof.AREditor</package>
+                <package>openproof.FOLTextEditor</package>
+                <package>openproof.awt</package>
+                <package>openproof.boole</package>
+                <package>openproof.boole.editor</package>
+                <package>openproof.boole.entities</package>
+                <package>openproof.boole.status</package>
+                <package>openproof.boole.table</package>
+                <package>openproof.boole.test</package>
+                <package>openproof.coincidence.editor</package>
+                <package>openproof.coincidence.engine</package>
+                <package>openproof.coincidence.representation</package>
+                <package>openproof.draw.demo</package>
+                <package>openproof.draw.editor</package>
+                <package>openproof.draw.engine</package>
+                <package>openproof.draw.representation</package>
+                <package>openproof.eval</package>
+                <package>openproof.fitch</package>
+                <package>openproof.fitch.test</package>
+                <package>openproof.fol</package>
+                <package>openproof.fol.eval</package>
+                <package>openproof.fol.eval.game</package>
             </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/jogl.jar</runtime-relative-path>

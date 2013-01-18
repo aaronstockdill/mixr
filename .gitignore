@@ -24,3 +24,7 @@
 /devel/drivers/TPTP/build/
 /devel/drivers/TPTP/nbproject/private/
 /devel/drivers/HyperblocksDiabelli/nbproject/private/
+/devel/drivers/HyperblocksDiabelli/release/modules/ext/jogl.jar
+/devel/drivers/HyperblocksDiabelli/release/modules/ext/Openproof.jar
+/devel/drivers/HyperblocksDiabelli/release/modules/ext/MRJAdapter.jar
+/devel/drivers/HyperblocksDiabelli/build/

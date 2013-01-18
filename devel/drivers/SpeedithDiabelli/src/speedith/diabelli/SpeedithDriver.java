@@ -31,7 +31,6 @@ import diabelli.components.FormulaPresenter;
 import diabelli.components.FormulaPresenter.VisualisationException;
 import diabelli.components.FormulaTranslationsProvider;
 import diabelli.components.GoalAcceptingReasoner;
-import diabelli.components.GoalProvider;
 import diabelli.components.GoalTransformer;
 import diabelli.components.util.BareGoalProvidingReasoner;
 import diabelli.logic.*;

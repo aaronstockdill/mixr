@@ -64,10 +64,17 @@ public final class HyperblocksTopComponent extends TopComponent {
         setName(Bundle.CTL_HyperblocksTopComponent());
         setToolTipText(Bundle.HINT_HyperblocksTopComponent());
 //        // Print out the 'java.libs.path'
-//        String property = System.getProperty("java.libs.path");
+        String property;
+//        property = System.getProperty("java.libs.path");
 //        System.out.println(property);
-//        property = System.getProperty("java.library.path");
-//        System.out.println(property);
+        property = System.getProperty("java.library.path");
+        System.out.println(property);
+        System.setProperty("java.library.path", property + ":/usr/share/OP-jre/lib:/usr/share/OP-jre/lib/i386");
+//        System.setProperty("java.library.path", property + ":/usr/lib64/jogl");
+        
+        System.out.println("==============================");
+        property = System.getProperty("java.library.path");
+        System.out.println(property);
 
 
         BlocksSitExternalEditor bsee = new BlocksSitExternalEditor();
