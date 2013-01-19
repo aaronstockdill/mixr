@@ -1,2 +1,2 @@
 Manifest-Version: 1.0
-Main-Class: diabelli.isabelle.pure.lib.TermUtils
+Main-Class: mixr.isabelle.pure.lib.TermUtils

@@ -1,4 +1,4 @@
-PROJECTS=IsabelleScalaWrapper SpeedithIsabelle
+PROJECTS=IsabelleScalaWrapper SpeedithIsabelleScalaWrapper
 
 .PHONY : all clean test-all
 all:

@@ -16,8 +16,8 @@ libPure=~/bin/Isabelle2012/lib/classes/ext/Pure.jar
 ################################################################################
 ## Isabelle Wrapper
 ##
-isaWrapper_sources=(./IsabelleScalaWrapper/src/diabelli/isabelle/pure/lib/TermUtils.scala \
-    ./IsabelleScalaWrapper/src/diabelli/isabelle/pure/lib/TermYXML.scala)
+isaWrapper_sources=(./IsabelleScalaWrapper/src/mixr/isabelle/pure/lib/TermUtils.scala \
+    ./IsabelleScalaWrapper/src/mixr/isabelle/pure/lib/TermYXML.scala)
 isaWrapper_classDir=./IsabelleScalaWrapper/classes
 isaWrapper_distDir=./IsabelleScalaWrapper/dist
 isaWrapper_jar=libIsaWrapper.jar
@@ -45,8 +45,8 @@ EOF
 ## Speedith-to-Isabelle Wrapper
 ##
 
-sdIsaWrapper_sources=(./SpeedithIsabelle/src/speedith/diabelli/isabelle/Translations.scala \
-    ./SpeedithIsabelle/src/speedith/diabelli/isabelle/NormalForms.scala)
+sdIsaWrapper_sources=(./SpeedithIsabelle/src/speedith/mixr/isabelle/Translations.scala \
+    ./SpeedithIsabelle/src/speedith/mixr/isabelle/NormalForms.scala)
 sdIsaWrapper_classDir=./SpeedithIsabelle/classes
 sdIsaWrapper_distDir=./SpeedithIsabelle/dist
 sdIsaWrapper_jar=libSdIsaWrapper.jar

@@ -1,5 +1,5 @@
 # Some common things:
-SCALA_HOME  =~/bin/scala-2.9.2
+SCALA_HOME ?= /usr
 SCALAC = $(SCALA_HOME)/bin/scalac
 SCALA = $(SCALA_HOME)/bin/scala
 SCALAC_FLAGS=
@@ -11,7 +11,7 @@ DIST_DIR=dist
 CLASSES=
 MANIFEST_FILE=META-INF/MANIFEST.MF
 
-libPure =$$HOME/bin/Isabelle2012/lib/classes/ext/Pure.jar
+libPure ?= $$HOME/bin/Isabelle2012/lib/classes/ext/Pure.jar
 
 $(CLASSES_DEST_DIR)/%.class: $(SRC_DIR)/%.scala
 	$(SCALAC) -d $(CLASSES_DEST_DIR) $(SCALAC_FLAGS) $(SCALAC_OPTS) -classpath $(CLASSES_DEST_DIR):$(SCALA_CLASSPATH) $<
