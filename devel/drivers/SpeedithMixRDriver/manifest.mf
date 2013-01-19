@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+OpenIDE-Module: speedith.mixr/1
+OpenIDE-Module-Implementation-Version: 1
+OpenIDE-Module-Layer: speedith/mixr/layer.xml
+OpenIDE-Module-Localizing-Bundle: speedith/mixr/Bundle.properties
+OpenIDE-Module-Requires: org.openide.windows.WindowManager
+

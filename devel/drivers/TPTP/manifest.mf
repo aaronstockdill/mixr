@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-OpenIDE-Module: diabelli.drivers.tptp
-OpenIDE-Module-Localizing-Bundle: diabelli/drivers/tptp/Bundle.properties
+OpenIDE-Module: mixr.drivers.tptp
+OpenIDE-Module-Localizing-Bundle: mixr/drivers/tptp/Bundle.properties
 OpenIDE-Module-Specification-Version: 1.0
 
