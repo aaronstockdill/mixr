@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module: mixr.demo.driver.picproc
+OpenIDE-Module-Localizing-Bundle: mixr/demo/driver/picproc/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+
