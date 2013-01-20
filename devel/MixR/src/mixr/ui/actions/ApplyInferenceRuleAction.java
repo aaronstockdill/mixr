@@ -29,7 +29,7 @@ import mixr.components.GoalAcceptingReasoner;
 import mixr.components.GoalTransformer;
 import mixr.logic.Goals;
 import mixr.logic.InferenceRuleDescriptor;
-import mixr.logic.InferenceTarget;
+import mixr.logic.InferenceTargets;
 import mixr.logic.Sentence;
 import mixr.ui.GoalsTopComponent;
 import mixr.ui.GoalsTopComponent.GeneralGoalNode;
@@ -48,6 +48,7 @@ import javax.swing.Action;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import mixr.logic.InferenceTarget;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionRegistration;
 import org.openide.util.ContextAwareAction;
@@ -124,7 +125,7 @@ public final class ApplyInferenceRuleAction extends AbstractAction implements Pr
         myMenu.setMnemonic(Bundle.AIRA_apply_inference_step_menu_mnemonic().charAt(0));
 
         // Extract the inference target from the selection in the goals window:
-        InferenceTarget target = getTarget();
+        InferenceTargets target = getTarget();
 
         // Check with all goal-transforming reasoners
         Set<GoalTransformer> goalTransformingReasoners = Lookup.getDefault().lookup(MixR.class).getReasonersManager().getGoalTransformingReasoners();
@@ -203,7 +204,7 @@ public final class ApplyInferenceRuleAction extends AbstractAction implements Pr
      * @return the rule application target (the formulae as selected in the goal
      * window).
      */
-    private InferenceTarget getTarget() {
+    private InferenceTargets getTarget() {
         Collection<? extends GeneralGoalNode> allInstances = lookupInfo.allInstances();
         if (allInstances == null || allInstances.isEmpty()) {
             return null;
@@ -222,8 +223,8 @@ public final class ApplyInferenceRuleAction extends AbstractAction implements Pr
             // Collect the formulae and check that they all belong to the same
             // `Goals` object:
             Goals targetGoals = ggn.getGoals();
-            ArrayList<Sentence> targetFormulae = new ArrayList<>();
-            targetFormulae.add(getSentenceFromNode(ggn));
+            ArrayList<InferenceTarget> infTargets = new ArrayList<>();
+            infTargets.add(ggn.getInferenceTarget());
             for (; it.hasNext();) {
                 ggn = it.next();
                 // NOTE: maybe we could throw an exception instead of returning a 
@@ -231,19 +232,10 @@ public final class ApplyInferenceRuleAction extends AbstractAction implements Pr
                 if (ggn.getGoals() != targetGoals) {
                     return null;
                 }
-                targetFormulae.add(getSentenceFromNode(ggn));
+            infTargets.add(ggn.getInferenceTarget());
             }
-            return new InferenceTarget(targetGoals, targetFormulae);
+            return new InferenceTargets(targetGoals, infTargets);
         }
-    }
-
-    private Sentence getSentenceFromNode(GeneralGoalNode ggn) {
-        if (ggn instanceof GoalsTopComponent.GoalNode) {
-            GoalsTopComponent.GoalNode goalNode = (GoalsTopComponent.GoalNode) ggn;
-            return goalNode.getGoal();
-        }
-
-        return ggn.getFormula();
     }
     //</editor-fold>
 
@@ -258,7 +250,7 @@ public final class ApplyInferenceRuleAction extends AbstractAction implements Pr
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            final InferenceTarget target = getTarget();
+            final InferenceTargets target = getTarget();
             if (target != null && inferenceRuleDescriptor != null) {
                 inferenceRuleDescriptor.getOwner().applyInferenceRule(target, inferenceRuleDescriptor);
             } else {

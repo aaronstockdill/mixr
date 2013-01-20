@@ -46,5 +46,5 @@ public interface AutomatedInferenceRule {
      * 
      * @return the result of the inference rule application.
      */
-    InferenceStepResult applyAutomatedInferenceRule(@NonNull InferenceTarget targets);
+    InferenceStepResult applyAutomatedInferenceRule(@NonNull InferenceTargets targets);
 }

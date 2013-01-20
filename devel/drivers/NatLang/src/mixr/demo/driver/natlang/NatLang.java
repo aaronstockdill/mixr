@@ -24,22 +24,22 @@
  */
 package mixr.demo.driver.natlang;
 
-import mixr.components.MixRComponent;
-import mixr.components.FormulaFormatsProvider;
-import mixr.components.FormulaPresenter;
-import mixr.components.GoalTransformer;
-import mixr.logic.FormulaFormat;
-import mixr.logic.FormulaRepresentation;
-import mixr.logic.InferenceRule;
-import mixr.logic.InferenceRuleDescriptor;
-import mixr.logic.InferenceStepResult;
-import mixr.logic.InferenceTarget;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import mixr.components.FormulaFormatsProvider;
+import mixr.components.FormulaPresenter;
+import mixr.components.GoalTransformer;
+import mixr.components.MixRComponent;
+import mixr.logic.FormulaFormat;
+import mixr.logic.FormulaRepresentation;
+import mixr.logic.InferenceRule;
+import mixr.logic.InferenceRuleDescriptor;
+import mixr.logic.InferenceStepResult;
+import mixr.logic.InferenceTargets;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -91,7 +91,7 @@ public class NatLang implements MixRComponent, FormulaFormatsProvider, FormulaPr
     }
 
     @Override
-    public Collection<InferenceRuleDescriptor> getApplicableInferenceRules(InferenceTarget target) {
+    public Collection<InferenceRuleDescriptor> getApplicableInferenceRules(InferenceTargets target) {
         return getInferenceRules();
     }
 
@@ -101,12 +101,12 @@ public class NatLang implements MixRComponent, FormulaFormatsProvider, FormulaPr
     }
 
     @Override
-    public boolean canTransform(InferenceTarget target) {
+    public boolean canTransform(InferenceTargets target) {
         return true;
     }
 
     @Override
-    public void applyInferenceRule(InferenceTarget targets, InferenceRuleDescriptor inferenceRule) {
+    public void applyInferenceRule(InferenceTargets targets, InferenceRuleDescriptor inferenceRule) {
         if (inferenceRule instanceof InferenceRule) {
             InferenceRule dummyPlaceholderInference = (InferenceRule) inferenceRule;
             dummyPlaceholderInference.applyInferenceRule(targets);
@@ -114,7 +114,7 @@ public class NatLang implements MixRComponent, FormulaFormatsProvider, FormulaPr
     }
 
     @Override
-    public InferenceStepResult applyAutomatedInferenceRule(InferenceTarget targets, InferenceRuleDescriptor inferenceRule) {
+    public InferenceStepResult applyAutomatedInferenceRule(InferenceTargets targets, InferenceRuleDescriptor inferenceRule) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

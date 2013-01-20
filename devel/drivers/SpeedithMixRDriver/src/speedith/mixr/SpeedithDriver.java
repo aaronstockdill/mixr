@@ -32,7 +32,7 @@ import mixr.logic.InferenceRuleDescriptor;
 import mixr.logic.Sentence;
 import mixr.logic.GoalTransformationResult;
 import mixr.logic.Goal;
-import mixr.logic.InferenceTarget;
+import mixr.logic.InferenceTargets;
 import mixr.logic.FormulaRepresentation;
 import mixr.logic.Goals;
 import mixr.MixR;
@@ -149,16 +149,16 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
 
     // <editor-fold defaultstate="collapsed" desc="GoalTransformer Implementation">
     @Override
-    public boolean canTransform(InferenceTarget target) {
+    public boolean canTransform(InferenceTargets target) {
         return getSpiderDiagramFromTarget(target) != null;
     }
 
     @Override
-    public InferenceStepResult applyAutomatedInferenceRule(InferenceTarget targets, InferenceRuleDescriptor inferenceRule) {
+    public InferenceStepResult applyAutomatedInferenceRule(InferenceTargets targets, InferenceRuleDescriptor inferenceRule) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    private SpiderDiagram getSpiderDiagramFromTarget(InferenceTarget target) {
+    private SpiderDiagram getSpiderDiagramFromTarget(InferenceTargets target) {
         if (target == null || target.getSentences().size() != 1) {
             return null;
         } else {
@@ -177,7 +177,7 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
     }
 
     @Override
-    public Collection<InferenceRuleDescriptor> getApplicableInferenceRules(InferenceTarget target) {
+    public Collection<InferenceRuleDescriptor> getApplicableInferenceRules(InferenceTargets target) {
         return getInferenceRules();
     }
 
@@ -213,7 +213,7 @@ public class SpeedithDriver extends BareGoalProvidingReasoner implements
         "SD_application_error_message=The inference rule `{0}` was not applied.\nIt failed for the following reason:\n\n`{1}`"
     })
     @Override
-    public void applyInferenceRule(InferenceTarget targets, InferenceRuleDescriptor infRuleDescriptor) {
+    public void applyInferenceRule(InferenceTargets targets, InferenceRuleDescriptor infRuleDescriptor) {
         if (infRuleDescriptor instanceof SpeedithInferenceRuleDescriptor) {
             SpeedithInferenceRuleDescriptor infRule = (SpeedithInferenceRuleDescriptor) infRuleDescriptor;
             try {

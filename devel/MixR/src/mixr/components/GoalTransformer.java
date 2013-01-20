@@ -31,7 +31,7 @@ import mixr.logic.Goal;
 import mixr.logic.Goals;
 import mixr.logic.InferenceRuleDescriptor;
 import mixr.logic.InferenceStepResult;
-import mixr.logic.InferenceTarget;
+import mixr.logic.InferenceTargets;
 import java.util.Collection;
 import org.netbeans.api.annotations.common.NonNull;
 
@@ -56,7 +56,7 @@ import org.netbeans.api.annotations.common.NonNull;
  *
  * <ol>
  *
- * <li>The user picks a single {@link InferenceTarget inference target} and
+ * <li>The user picks a single {@link InferenceTargets inference target} and
  * invokes a reasoner to work with it.</li>
  *
  * <li>The user picks multiple inference targets and invokes a reasoner to work
@@ -82,7 +82,7 @@ public interface GoalTransformer extends Reasoner {
      * @return a collection of all inference rules that are applicable on the
      * given target.
      */
-    Collection<? extends InferenceRuleDescriptor> getApplicableInferenceRules(InferenceTarget target);
+    Collection<? extends InferenceRuleDescriptor> getApplicableInferenceRules(InferenceTargets target);
 
     /**
      * Returns the collection of all inference rules provided by this reasoner.
@@ -104,7 +104,7 @@ public interface GoalTransformer extends Reasoner {
      * @return {@code true} if this reasoner can work with the given inference
      * target.
      */
-    boolean canTransform(InferenceTarget target);
+    boolean canTransform(InferenceTargets target);
 
     /**
      * This is the main method that lets the user reason about the target
@@ -131,11 +131,11 @@ public interface GoalTransformer extends Reasoner {
      * @param targets the formulae on which to invoke this reasoner.
      * @param inferenceRule the value of inferenceRule
      */
-    void applyInferenceRule(@NonNull InferenceTarget targets, @NonNull InferenceRuleDescriptor inferenceRule);
+    void applyInferenceRule(@NonNull InferenceTargets targets, @NonNull InferenceRuleDescriptor inferenceRule);
 
     /**
      * Similar to
-     * {@link GoalTransformer#applyInferenceRule(mixr.logic.InferenceTarget, mixr.logic.InferenceRuleDescriptor)},
+     * {@link GoalTransformer#applyInferenceRule(mixr.logic.InferenceTargets, mixr.logic.InferenceRuleDescriptor)},
      * however this method will block, apply the inference rule on the given
      * target and return the transformed formulae.
      *
@@ -147,7 +147,7 @@ public interface GoalTransformer extends Reasoner {
      * @param inferenceRule the value of inferenceRule
      * @return the transformed formulae.
      */
-    InferenceStepResult applyAutomatedInferenceRule(@NonNull InferenceTarget targets, @NonNull InferenceRuleDescriptor inferenceRule);
+    InferenceStepResult applyAutomatedInferenceRule(@NonNull InferenceTargets targets, @NonNull InferenceRuleDescriptor inferenceRule);
 
     /**
      * Returns a pretty, human-readable name for the inference system provided

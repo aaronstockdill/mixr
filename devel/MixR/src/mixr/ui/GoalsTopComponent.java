@@ -40,6 +40,7 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.tree.TreeSelectionModel;
+import mixr.logic.InferenceTarget;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -263,6 +264,7 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
 
         private final Goals goals;
         private final int goalIndex;
+        protected InferenceTarget inferenceTarget;
 
         GeneralGoalNode(Goals goals, int goalIndex, Children children, Lookup lookup) {
             super(children, lookup);
@@ -309,7 +311,14 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
 
         @Override
         public Action[] getActions(boolean context) {
-            return new ApplyInferenceRuleAction[] { new ApplyInferenceRuleAction(Utilities.actionsGlobalContext()) };
+            return new ApplyInferenceRuleAction[]{new ApplyInferenceRuleAction(Utilities.actionsGlobalContext())};
+        }
+
+        public InferenceTarget getInferenceTarget() {
+            if (inferenceTarget != null) {
+                inferenceTarget = new InferenceTarget(getGoalIndex());
+            }
+            return inferenceTarget;
         }
     }
 
@@ -350,6 +359,14 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         @Override
         public Formula getFormula() {
             return this.getGoal().getConclusion();
+        }
+
+        @Override
+        public InferenceTarget getInferenceTarget() {
+            if (inferenceTarget != null) {
+                inferenceTarget = new InferenceTarget(getGoalIndex(), getGoal().getPremisesCount());
+            }
+            return inferenceTarget;
         }
     }
 
@@ -408,6 +425,14 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         @Override
         public Formula getFormula() {
             return this.getGoal().getPremiseAt(this.getPremiseIndex());
+        }
+
+        @Override
+        public InferenceTarget getInferenceTarget() {
+            if (inferenceTarget != null) {
+                inferenceTarget = new InferenceTarget(getGoalIndex(), getPremiseIndex());
+            }
+            return inferenceTarget;
         }
     }
     //</editor-fold>

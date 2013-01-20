@@ -32,7 +32,7 @@ import mixr.logic.Goal;
 import mixr.logic.GoalTransformationResult;
 import mixr.logic.InferenceRule;
 import mixr.logic.InferenceRuleDescriptor;
-import mixr.logic.InferenceTarget;
+import mixr.logic.InferenceTargets;
 import mixr.logic.OracleProofTrace;
 import mixr.logic.Sentence;
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class DummyPlaceholderInference implements InferenceRuleDescriptor, Infer
     }
 
     @Override
-    public void applyInferenceRule(InferenceTarget targets) {
+    public void applyInferenceRule(InferenceTargets targets) {
         String natLangSentence = getNatLangSentenceFromTarget(targets);
 
         if (natLangSentence != null) {
@@ -100,7 +100,7 @@ public class DummyPlaceholderInference implements InferenceRuleDescriptor, Infer
         }
     }
 
-    private String getNatLangSentenceFromTarget(InferenceTarget target) {
+    private String getNatLangSentenceFromTarget(InferenceTargets target) {
         if (target != null && target.getSentences().size() == 1) {
             Sentence sentence = target.getSentences().get(0);
             if (sentence instanceof Goal) {

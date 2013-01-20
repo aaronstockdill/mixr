@@ -76,7 +76,6 @@ public interface InferenceStepResult {
      */
     GoalTransformer getSlaveReasoner();
 
-    //<editor-fold defaultstate="collapsed" desc="Properties">
     /**
      * The transformed goals ({@link GoalTransformationResult#getOriginalGoals()
      * original goals} transformed by {@link

@@ -450,6 +450,11 @@ public class Formula implements Sentence {
             return formatReps == null || formatReps.isEmpty() ? 0 : formatReps.size();
         }
     }
+
+    @Override
+    public Formula asFormula() throws UnsupportedOperationException {
+        return this;
+    }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Helper Classes">
@@ -458,6 +463,11 @@ public class Formula implements Sentence {
      */
     public static enum FormulaRole {
 
+        /**
+         * Indicates that the role of the {@link Formula formula} in the 
+         * {@link Goal goal} is not specified or known.
+         */
+        Unknown,
         /**
          * Indicates that the {@link Formula formula} is {@link
          * Goal#getPremises() a premise}.

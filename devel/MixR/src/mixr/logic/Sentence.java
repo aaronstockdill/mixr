@@ -30,5 +30,14 @@ package mixr.logic;
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public interface Sentence {
-    
+
+    /**
+     * Returns a heterogeneous formula which represents this sentence.
+     *
+     * <p>If the sentence cannot be represented with a formula, this method may
+     * either return {@code null} or throw an exception.</p>
+     *
+     * @return a heterogeneous formula which represents this sentence.
+     */
+    Formula asFormula() throws UnsupportedOperationException;
 }

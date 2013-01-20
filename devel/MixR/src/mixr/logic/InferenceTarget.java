@@ -2,7 +2,7 @@
  * File name: InferenceTarget.java
  *    Author: Matej Urbas [matej.urbas@gmail.com]
  * 
- *  Copyright © 2012 Matej Urbas
+ *  Copyright © 2013 Matej Urbas
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,86 +24,79 @@
  */
 package mixr.logic;
 
-import mixr.components.GoalTransformer;
-import mixr.logic.Bundle;
-import java.util.Collections;
-import java.util.List;
-import org.netbeans.api.annotations.common.NonNull;
-import org.openide.util.NbBundle;
-
 /**
- * Contains a collection of formulae that should be applied on by an inference
- * rule. See
- * {@link GoalTransformer#applyInferenceRule(mixr.logic.InferenceTarget, mixr.logic.InferenceRuleDescriptor)}
- * for more information.
+ * This object uniquely describes the exact target of a rule application.
+ *
+ * <p>It tells which goal or which of its subformulae should be the target of
+ * the inference.</p>
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public class InferenceTarget {
 
-    // <editor-fold defaultstate="collapsed" desc="Fields">
-    /**
-     * This {@link Goals goals} object contains all the selected formulae that
-     * should be the target of the rule application.
-     *
-     * <p>This object also provides a reference to the master reasoner who owns
-     * the formulae and which should accept the transformed goals.</p>
-     */
-    private final Goals goals;
-    /**
-     * A collection of sentences (formulae) the user has selected for rule
-     * application.
-     */
-    private final List<Sentence> sentences;
-    // </editor-fold>
+    //<editor-fold defaultstate="collapsed" desc="Fields">
+    private int goalIndex;
+    private int subformulaIndex;
+    //</editor-fold>
 
     //<editor-fold defaultstate="collapsed" desc="Constructors">
-    /**
-     *
-     * @param goals this {@link Goals goals} object contains all the selected
-     * formulae that should be the target of the rule application.
-     * 
-     * @param sentences a collection of sentences (formulae) the user has
-     * selected for rule application. Can be {@code null}, which indicates
-     * that the inference rule should be applied on all goals.
-     */
-    @NbBundle.Messages({
-        "IT_goals_null=Goals are missing from the inference target."
-    })
-    public InferenceTarget(@NonNull Goals goals, List<Sentence> sentences) {
-        if (goals == null) {
-            throw new IllegalArgumentException(Bundle.IT_goals_null());
-        }
-        this.goals = goals;
-        this.sentences = Collections.unmodifiableList(sentences);
+    public InferenceTarget(int goalIndex) {
+        this(goalIndex, -1);
+    }
+    
+    public InferenceTarget(int goalIndex, int subformulaIndex) {
+        this.goalIndex = goalIndex;
+        this.subformulaIndex = subformulaIndex;
     }
     //</editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="Formulae Selection">
-    /**
-     * This {@link Goals goals} object contains all the selected formulae that
-     * should be the target of the rule application.
-     *
-     * <p>This object also provides a reference to the master reasoner who owns
-     * the formulae and which should accept the transformed goals.</p>
-     *
-     * @return returns the {@link Goals goals} object that contains all the
-     * {@link InferenceTarget#getSentences() selected formulae} that should be
-     * the target of the rule application.
-     */
-    public Goals getGoals() {
-        return goals;
+    //<editor-fold defaultstate="collapsed" desc="Public Interface">
+    public int getGoalIndex() {
+        return goalIndex;
     }
-
+    
+    public int getSubformulaIndex() {
+        return subformulaIndex;
+    }
+    
+    public boolean isGoal() {
+        return getSubformulaIndex() < 0;
+    }
+    
+    public boolean isPremiseOf(Goal goal) {
+        return getSubformulaIndex() >= 0 && getSubformulaIndex() < goal.getPremisesCount();
+    }
+    
+    public boolean isConclusionOf(Goal goal) {
+        return getSubformulaIndex() == goal.getPremisesCount();
+    }
+    
     /**
-     * A collection of sentences (formulae) the user has selected for rule
-     * application.
-     * 
-     * @return a collection of sentences (formulae) the user has selected for rule
-     * application.
+     * Returns the sentence on which the inference rule should be applied.
+     *
+     * <p>If this target object points to a goal or as subformula that is not
+     * within the given {@link Goals goals collection}, then {@code null} is
+     * returned.</p>
+     *
+     * @param goals the goals within which to search for the target sentence of
+     * the inference.
+     * @return the sentence on which the inference rule should be applied.
      */
-    public List<Sentence> getSentences() {
-        return sentences;
+    public Sentence getTargetSentenceFromGoals(Goals goals) {
+        if (goals == null || getGoalIndex() >= goals.size() || getGoalIndex() < 0) {
+            return null;
+        }
+        Goal theGoal = goals.get(getGoalIndex());
+        if (getSubformulaIndex() < 0) {
+            return theGoal;
+        }
+        if (getSubformulaIndex() < theGoal.getPremisesCount()) {
+            return theGoal.getPremiseAt(getSubformulaIndex());
+        } else if (getSubformulaIndex() == theGoal.getPremisesCount()) {
+            return theGoal.getConclusion();
+        } else {
+            return null;
+        }
     }
     //</editor-fold>
 }

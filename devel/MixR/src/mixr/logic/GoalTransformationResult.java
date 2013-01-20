@@ -24,6 +24,7 @@
  */
 package mixr.logic;
 
+import java.util.ArrayList;
 import mixr.components.GoalTransformer;
 import mixr.logic.Bundle;
 import java.util.Arrays;
@@ -36,8 +37,8 @@ import propity.util.MovableArrayList;
 
 /**
  * This inference step result is produced by
- * {@link GoalTransformer goal-transforming reasoners} by applying an
- * inference rule on the
+ * {@link GoalTransformer goal-transforming reasoners} by applying an inference
+ * rule on the
  * {@link GoalTransformationResult#getOriginalGoals() original goals} and
  * producing
  * {@link GoalTransformationResult#getTransformedGoals() some transformed goals}.
@@ -94,7 +95,7 @@ public class GoalTransformationResult implements InferenceStepResult {
     public GoalTransformationResult(@NonNull GoalTransformer slaveReasoner, @NonNull Goals originalGoals, MovableArrayList<Goal>... transformedGoals) {
         this(slaveReasoner, originalGoals, transformedGoals, null);
     }
-    
+
     /**
      * Creates a new goal-transformation result.
      *
@@ -237,7 +238,7 @@ public class GoalTransformationResult implements InferenceStepResult {
         if (transformedGoal.size() == 1 && transformedGoal.get(0) == getOriginalGoals().get(goalIndex)) {
             return false;
         }
-        
+
         // In all other cases the goal has changed
         return true;
     }
@@ -285,7 +286,7 @@ public class GoalTransformationResult implements InferenceStepResult {
         }
         return goalChangesCount.get();
     }
-    
+
     /**
      * Returns the number of elements in
      * {@link GoalTransformationResult#transformedGoals}.
@@ -304,4 +305,72 @@ public class GoalTransformationResult implements InferenceStepResult {
         return proofTrace;
     }
     //</editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Static Convenience Methods">
+    @NbBundle.Messages({
+        "GTR_multiple_inferences_per_goal=Could not create the goal transformation result. MixR currently does not support multiple inferences on a single goal."
+    })
+    public static GoalTransformationResult create(GoalTransformer owner, InferenceTargets targets, ArrayList<InferenceTarget> transformedTargets, List<Sentence>[] transformedSentences, ProofTrace proofTrace) {
+        MovableArrayList<Goal>[] transformedGoals = new MovableArrayList[targets.getGoals().size()];
+        for (int i = transformedTargets.size() - 1; i >= 0; i++) {
+            InferenceTarget inferenceTarget = transformedTargets.get(i);
+            List<Sentence> resultForTarget = transformedSentences[i];
+
+            // There should be just one transformation per goal
+            int goalIndex = inferenceTarget.getGoalIndex();
+            if (transformedGoals[goalIndex] != null) {
+                throw new IllegalArgumentException(Bundle.GTR_multiple_inferences_per_goal());
+            }
+            Goal originalGoal = targets.getGoals().get(goalIndex);
+
+            // Create the new goals from the transformation results.
+            transformedGoals[i] = convertToGoals(resultForTarget, inferenceTarget, originalGoal);
+        }
+        return new GoalTransformationResult(owner, targets.getGoals(), transformedGoals, proofTrace);
+    }
+
+    public static GoalTransformationResult create(GoalTransformer owner, InferenceTargets targets, ArrayList<InferenceTarget> transformedTargets, List<Sentence>[] transformedSentences) {
+        return create(owner, targets, transformedTargets, transformedSentences, OracleProofTrace.getInstance());
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="Private Helper Methods">
+    private static MovableArrayList<Goal> convertToGoals(List<Sentence> resultsForTarget, InferenceTarget originalSentenceLocation, Goal originalGoal) {
+        final MovableArrayList<Goal> goals = new MovableArrayList<>(resultsForTarget.size());
+        for (Sentence sentence : resultsForTarget) {
+            if (sentence instanceof Goal) {
+                goals.add((Goal) sentence);
+            } else if (sentence instanceof Formula) {
+                Formula formula = (Formula) sentence;
+                switch (formula.getRole()) {
+                    case Conclusion:
+                        goals.add(new Goal(null, null, formula, null));
+                        break;
+                    case Premise:
+                        goals.add(new Goal(new ArrayList<>(Arrays.asList(formula)), formula, null, null));
+                        break;
+                    case Goal:
+                        goals.add(new Goal(null, null, null, formula));
+                        break;
+                    default:
+                        throw new AssertionError();
+                }
+            } else if (sentence instanceof FormulaRepresentation) {
+                FormulaRepresentation formulaRepresentation = (FormulaRepresentation) sentence;
+                if (originalSentenceLocation.isGoal()) {
+                    goals.add(new Goal(null, null, null, new Formula(formulaRepresentation, Formula.FormulaRole.Goal)));
+                } else if (originalSentenceLocation.isPremiseOf(originalGoal)) {
+                    goals.add(new Goal(new ArrayList<>(Arrays.asList(new Formula(formulaRepresentation, Formula.FormulaRole.Premise))), null, null, null));
+                } else if (originalSentenceLocation.isConclusionOf(originalGoal)) {
+                    goals.add(new Goal(null, null, new Formula(formulaRepresentation, Formula.FormulaRole.Conclusion), null));
+                } else {
+                    throw new AssertionError();
+                }
+            } else {
+                throw new AssertionError();
+            }
+        }
+        return goals;
+    }
+    // </editor-fold>
 }

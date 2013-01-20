@@ -168,6 +168,7 @@ public class Goal implements Sentence {
      * @return a formula that represents the whole goal.
      */
     @NonNull
+    @Override
     public Formula asFormula() {
         return goalFormula;
     }

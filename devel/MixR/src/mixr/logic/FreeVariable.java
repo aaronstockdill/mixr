@@ -24,7 +24,7 @@
  */
 package mixr.logic;
 
-import mixr.logic.Bundle;
+import java.util.TreeSet;
 import org.openide.util.NbBundle;
 
 /**
@@ -37,6 +37,11 @@ public class FreeVariable implements Comparable<FreeVariable> {
     private final String name;
     private final Object type;
 
+    /**
+     * 
+     * @param name the name of the variable.
+     * @param type the type of the variable.
+     */
     @NbBundle.Messages({
         "FreeVariable_name_empty=The name of a free variable must not be empty."
     })
@@ -79,4 +84,23 @@ public class FreeVariable implements Comparable<FreeVariable> {
     public int hashCode() {
         return this.getName().hashCode();
     }
+
+    // <editor-fold defaultstate="collapsed" desc="Static Convenience Methods">
+    /**
+     * Creates a variable set containing a single variable.
+     *
+     * <p>This method is useful when implementing the method in a new formula
+     * format
+     * {@link VariableReferencingFormulaFormat#getFreeVariables(mixr.logic.FormulaRepresentation)}</p>
+     *
+     * @param name the name of the variable.
+     * @param type the type of the variable.
+     * @return a variable set containing a single variable.
+     */
+    public static TreeSet<FreeVariable> createSingletonSet(String name, Object type) {
+        TreeSet<FreeVariable> varSet = new TreeSet<>();
+        varSet.add(new FreeVariable(name, type));
+        return varSet;
+    }
+    // </editor-fold>
 }

@@ -30,10 +30,12 @@ import org.netbeans.api.annotations.common.NonNull;
 import org.openide.util.NbBundle;
 
 /**
- * Contains {@link FormulaRepresentation#getFormula() a formula} and {@link 
+ * Contains {@link FormulaRepresentation#getFormula() a formula} and {@link
  * FormulaRepresentation#getFormat() a descriptor} of the format in which the
  * formula is encoded.
- * @param <T> the type of the {@link FormulaRepresentation#getFormula() raw formula}.
+ *
+ * @param <T> the type of the
+ * {@link FormulaRepresentation#getFormula() raw formula}.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public final class FormulaRepresentation implements Sentence {
@@ -72,6 +74,7 @@ public final class FormulaRepresentation implements Sentence {
         this.format = format;
         this.freeVariables = freeVariables;
     }
+
     public FormulaRepresentation(@NonNull Object formula, @NonNull FormulaFormat format) {
         this(formula, format, null);
     }
@@ -102,31 +105,42 @@ public final class FormulaRepresentation implements Sentence {
     }
 
     /**
-     * 
+     *
      * @return The placeholder from which this representation originates.
      * Otherwise it returns {@code null}.
      */
     public Set<FreeVariable> getFreeVariables() {
         return freeVariables;
     }
-    
+
     /**
      * Returns the formula of which this is a representation.
-     * 
-     * <p><span style="font-weight:bold">Note</span>: this method may return {@code null}
-     * if this representation is not associated with any formula.</p>
-     * 
+     *
+     * <p><span style="font-weight:bold">Note</span>: this method may return
+     * {@code null} if this representation is not associated with any
+     * formula.</p>
+     *
      * @return the formula of which this is a representation.
      */
     public Formula getParentFormula() {
         return parentFormula;
     }
+
+    @Override
+    public Formula asFormula() throws UnsupportedOperationException {
+        if (getParentFormula() != null) {
+            return getParentFormula();
+        } else {
+            return new Formula(this, Formula.FormulaRole.Unknown);
+        }
+    }
     //</editor-fold>
-    
+
     // <editor-fold defaultstate="collapsed" desc="Parent Formula">
     /**
-     * This method is called by the parent formula itself once this representation
-     * is added to the formula's collection of representations.
+     * This method is called by the parent formula itself once this
+     * representation is added to the formula's collection of representations.
+     *
      * @param parentFormula the formula of which this is a representation.
      */
     void setParentFormula(Formula parentFormula) {

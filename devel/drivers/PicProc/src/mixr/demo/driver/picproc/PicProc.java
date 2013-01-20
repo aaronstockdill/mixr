@@ -24,7 +24,23 @@
  */
 package mixr.demo.driver.picproc;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import mixr.components.FormulaFormatsProvider;
+import mixr.components.FormulaPresenter;
+import mixr.components.GoalTransformer;
 import mixr.components.MixRComponent;
+import mixr.logic.FormulaFormat;
+import mixr.logic.FormulaRepresentation;
+import mixr.logic.InferenceRule;
+import mixr.logic.InferenceRuleDescriptor;
+import mixr.logic.InferenceStepResult;
+import mixr.logic.InferenceTargets;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  * A demonstration driver which enables integration of images into the MixR
@@ -37,10 +53,89 @@ import mixr.components.MixRComponent;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public class PicProc implements MixRComponent {
+@ServiceProvider(service = MixRComponent.class)
+public class PicProc implements MixRComponent, FormulaFormatsProvider, FormulaPresenter, GoalTransformer {
+
+    private final List<InferenceRuleDescriptor> inferenceRules;
+
+    public PicProc() {
+        ArrayList<InferenceRuleDescriptor> tmp = new ArrayList<>();
+
+        tmp.add(new DummyInference(this));
+
+        inferenceRules = Collections.unmodifiableList(tmp);
+    }
 
     @Override
     public String getName() {
         return "PicProc";
+    }
+
+    @Override
+    public Collection<FormulaFormat> getFormulaFormats() {
+        return FormulaFormatsContainer.FormulaFormats;
+    }
+
+    @Override
+    public Set<FormulaFormat> getPresentedFormats() {
+        return FormulaFormatsContainer.FormulaFormats;
+    }
+
+    public boolean canPresent(FormulaFormat format) {
+        return ImageUrlFormat.getInstance() == format;
+    }
+
+    @Override
+    public ImagePresenter createVisualiserFor(FormulaRepresentation formula) throws VisualisationException {
+        if (formula.getFormula() instanceof ImageUrlFormula) {
+            ImageUrlFormula imageUrlFormula = (ImageUrlFormula) formula.getFormula();
+            return new ImagePresenter(imageUrlFormula);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public Collection<InferenceRuleDescriptor> getApplicableInferenceRules(InferenceTargets target) {
+        return getInferenceRules();
+    }
+
+    @Override
+    public Collection<InferenceRuleDescriptor> getInferenceRules() {
+        return inferenceRules;
+    }
+
+    @Override
+    public boolean canTransform(InferenceTargets target) {
+        return true;
+    }
+
+    @Override
+    public void applyInferenceRule(InferenceTargets targets, InferenceRuleDescriptor inferenceRule) {
+        if (inferenceRule instanceof InferenceRule) {
+            InferenceRule dummyPlaceholderInference = (InferenceRule) inferenceRule;
+            dummyPlaceholderInference.applyInferenceRule(targets);
+        }
+    }
+
+    @Override
+    public InferenceStepResult applyAutomatedInferenceRule(InferenceTargets targets, InferenceRuleDescriptor inferenceRule) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public String getInferenceSetName() {
+        return "PicProc";
+    }
+
+    private static class FormulaFormatsContainer {
+
+        private static final Set<FormulaFormat> FormulaFormats;
+
+        static {
+            HashSet<FormulaFormat> tmp = new HashSet<>();
+            tmp.add(ImageUrlFormat.getInstance());
+            FormulaFormats = Collections.unmodifiableSet(tmp);
+        }
     }
 }

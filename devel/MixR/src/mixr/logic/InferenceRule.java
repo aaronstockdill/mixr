@@ -47,5 +47,5 @@ public interface InferenceRule {
      *
      * @param targets the statements on which to apply the inference rule.
      */
-    void applyInferenceRule(@NonNull InferenceTarget targets);
+    void applyInferenceRule(@NonNull InferenceTargets targets);
 }
