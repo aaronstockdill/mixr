@@ -156,10 +156,28 @@ public class DummyInference implements InferenceRuleDescriptor, InferenceRule, A
             }
         }
         // Is it a square?
-        double Csquare = (double) (maxPixels + partlyVisiblePixels) / (double) partlyVisiblePixels * 4 * 4;
-        double Ccircle = (double) (maxPixels + partlyVisiblePixels) / (double) partlyVisiblePixels * 2 * 2 * Math.PI;
-        double Ctriangle = (double) (maxPixels + partlyVisiblePixels) / (double) partlyVisiblePixels * 12 * Math.sqrt(3);
-        JOptionPane.showMessageDialog(null, String.format("Real circumference: %d :: Square: %g :: Circle: %g :: Triangle: %g", partlyVisiblePixels, Csquare, Ccircle, Ctriangle));
-        return "Triangle";
+        double[] distances = new double[]{
+            Math.abs((double) (maxPixels + partlyVisiblePixels) / (double) partlyVisiblePixels * 4 * 4 - partlyVisiblePixels),
+            Math.abs((double) (maxPixels + partlyVisiblePixels) / (double) partlyVisiblePixels * 2 * 2 * Math.PI - partlyVisiblePixels),
+            Math.abs((double) (maxPixels + partlyVisiblePixels) / (double) partlyVisiblePixels * 12 * Math.sqrt(3) - partlyVisiblePixels)
+        };
+        // Is it a square?
+        String[] shapes = new String[]{
+            "Square",
+            "Circle",
+            "Triangle"
+        };
+        
+        double min = Double.MAX_VALUE;
+        int minIdx = 0;
+        for (int i = 0; i < distances.length; i++) {
+            double d = distances[i];
+            if (d <= min) {
+                min = d;
+                minIdx = i;
+            }
+        }
+        
+        return shapes[minIdx];
     }
 }
