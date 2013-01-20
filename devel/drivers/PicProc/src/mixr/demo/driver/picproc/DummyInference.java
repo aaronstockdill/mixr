@@ -24,9 +24,11 @@
  */
 package mixr.demo.driver.picproc;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import javax.swing.JOptionPane;
 import mixr.MixR;
 import mixr.components.GoalTransformer;
 import mixr.isabelle.terms.StringFormat;
@@ -135,6 +137,29 @@ public class DummyInference implements InferenceRuleDescriptor, InferenceRule, A
     }
 
     private String extractShape(ImageUrlFormula imageUrlFormula) {
+        BufferedImage image = imageUrlFormula.getImage();
+        int minPixels = 0;
+        int maxPixels = 0;
+        int partlyVisiblePixels = 0;
+        for (int i = 0; i < image.getWidth(); i++) {
+            for (int j = 0; j < image.getHeight(); j++) {
+                int pixelColour = image.getRGB(i, j);
+                // Get the alpha component:
+                int alpha = (pixelColour & 0xff000000) >>> 24;
+                if (alpha >= 0xf9) {
+                    maxPixels++;
+                } else if (alpha > 0x05) {
+                    partlyVisiblePixels++;
+                } else {
+                    minPixels++;
+                }
+            }
+        }
+        // Is it a square?
+        double Csquare = (double) (maxPixels + partlyVisiblePixels) / (double) partlyVisiblePixels * 4 * 4;
+        double Ccircle = (double) (maxPixels + partlyVisiblePixels) / (double) partlyVisiblePixels * 2 * 2 * Math.PI;
+        double Ctriangle = (double) (maxPixels + partlyVisiblePixels) / (double) partlyVisiblePixels * 12 * Math.sqrt(3);
+        JOptionPane.showMessageDialog(null, String.format("Real circumference: %d :: Square: %g :: Circle: %g :: Triangle: %g", partlyVisiblePixels, Csquare, Ccircle, Ctriangle));
         return "Triangle";
     }
 }
