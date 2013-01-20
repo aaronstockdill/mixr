@@ -65,7 +65,7 @@ import org.openide.util.NbBundle;
 @NbBundle.Messages({
     "F_toFormat_null=A target format has to be specified."
 })
-public class Formula implements Sentence {
+public class Formula implements Sentence, Cloneable {
 
     // <editor-fold defaultstate="collapsed" desc="Fields">
     private final FormulaRepresentation mainRepresentation;
@@ -454,6 +454,16 @@ public class Formula implements Sentence {
     @Override
     public Formula asFormula() throws UnsupportedOperationException {
         return this;
+    }
+    
+    public Formula newCopy() {
+        try {
+            Formula f = (Formula)this.clone();
+            f.hostingGoal = null;
+            return f;
+        } catch (CloneNotSupportedException ex) {
+            throw new RuntimeException(ex);
+        }
     }
     // </editor-fold>
 

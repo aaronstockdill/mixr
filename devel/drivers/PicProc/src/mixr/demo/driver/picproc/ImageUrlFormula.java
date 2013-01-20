@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import mixr.logic.TextEncodedFormulaFormat;
 import org.openide.util.NbBundle;
 import org.openide.util.Utilities;
@@ -76,7 +77,8 @@ public class ImageUrlFormula {
      * @return the name of the image file.
      */
     String getName() {
-        return sourceFile.getName();
+        final String name = sourceFile.getName();
+        return name.substring(0, name.lastIndexOf('.'));
     }
 
     /**

@@ -111,7 +111,7 @@ public class DummyInference implements InferenceRuleDescriptor, InferenceRule, A
     public InferenceStepResult applyAutomatedInferenceRule(InferenceTargets targets) {
         final int targetsCount = targets.getInferenceTargetsCount();
         List<Sentence>[] transformedSentences = new List[targetsCount];
-        ArrayList<InferenceTarget> transformedTargets = new ArrayList<>();
+        InferenceTarget[] transformedTargets = new InferenceTarget[targetsCount];
         for (int i = 0; i < targetsCount; i++) {
             Sentence s = targets.getSentenceAt(i);
             try {
@@ -124,6 +124,7 @@ public class DummyInference implements InferenceRuleDescriptor, InferenceRule, A
                         String shape = extractShape(imageUrlFormula);
                         Formula inferedFormula = new Formula(StringFormat.createFormula("ShapeOf " + imageUrlFormula.getName() + " " + shape), f.getRole());
                         transformedSentences[i] = Arrays.asList((Sentence) inferedFormula);
+                        transformedTargets[i] = targets.getInferenceTargets().get(i);
                     }
                 }
             } catch (UnsupportedOperationException uoe) {

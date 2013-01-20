@@ -185,7 +185,7 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
     @Override
     @NbBundle.Messages({
         "ID_multiple_goals_unsupported=The Isabelle driver does currently not support changes to multiple goals.",
-        "ID_transformed_goal_unknown=The Isabelle driver canno commit the inference step since the transformed goal is in an unknown format."
+        "ID_transformed_goal_unknown=The Isabelle driver cannot commit the inference step since the transformed goal is in an unknown format."
     })
     public void commitTransformedGoals(InferenceStepResult step) throws UnsupportedOperationException {
         // Insert the changed goals if the committed inference step transformed them:

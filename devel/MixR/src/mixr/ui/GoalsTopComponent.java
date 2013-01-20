@@ -315,7 +315,7 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
         }
 
         public InferenceTarget getInferenceTarget() {
-            if (inferenceTarget != null) {
+            if (inferenceTarget == null) {
                 inferenceTarget = new InferenceTarget(getGoalIndex());
             }
             return inferenceTarget;
@@ -363,7 +363,7 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
 
         @Override
         public InferenceTarget getInferenceTarget() {
-            if (inferenceTarget != null) {
+            if (inferenceTarget == null) {
                 inferenceTarget = new InferenceTarget(getGoalIndex(), getGoal().getPremisesCount());
             }
             return inferenceTarget;
@@ -429,7 +429,7 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
 
         @Override
         public InferenceTarget getInferenceTarget() {
-            if (inferenceTarget != null) {
+            if (inferenceTarget == null) {
                 inferenceTarget = new InferenceTarget(getGoalIndex(), getPremiseIndex());
             }
             return inferenceTarget;

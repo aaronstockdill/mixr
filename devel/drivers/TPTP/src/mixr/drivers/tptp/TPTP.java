@@ -24,11 +24,6 @@
  */
 package mixr.drivers.tptp;
 
-import mixr.components.MixRComponent;
-import mixr.components.FormulaFormatsProvider;
-import mixr.components.FormulaPresenter;
-import mixr.logic.FormulaFormat;
-import mixr.logic.FormulaRepresentation;
 import java.awt.Component;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,6 +31,11 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import mixr.components.FormulaFormatsProvider;
+import mixr.components.FormulaPresenter;
+import mixr.components.MixRComponent;
+import mixr.logic.FormulaFormat;
+import mixr.logic.FormulaRepresentation;
 import org.openide.util.lookup.ServiceProvider;
 import tptp_parser.SimpleTptpParserOutput;
 import tptp_parser.SimpleTptpParserOutput.TopLevelItem;

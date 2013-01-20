@@ -310,10 +310,10 @@ public class GoalTransformationResult implements InferenceStepResult {
     @NbBundle.Messages({
         "GTR_multiple_inferences_per_goal=Could not create the goal transformation result. MixR currently does not support multiple inferences on a single goal."
     })
-    public static GoalTransformationResult create(GoalTransformer owner, InferenceTargets targets, ArrayList<InferenceTarget> transformedTargets, List<Sentence>[] transformedSentences, ProofTrace proofTrace) {
+    public static GoalTransformationResult create(GoalTransformer owner, InferenceTargets targets, InferenceTarget[] transformedTargets, List<Sentence>[] transformedSentences, ProofTrace proofTrace) {
         MovableArrayList<Goal>[] transformedGoals = new MovableArrayList[targets.getGoals().size()];
-        for (int i = transformedTargets.size() - 1; i >= 0; i++) {
-            InferenceTarget inferenceTarget = transformedTargets.get(i);
+        for (int i = transformedTargets.length - 1; i >= 0; i--) {
+            InferenceTarget inferenceTarget = transformedTargets[i];
             List<Sentence> resultForTarget = transformedSentences[i];
 
             // There should be just one transformation per goal
@@ -329,7 +329,7 @@ public class GoalTransformationResult implements InferenceStepResult {
         return new GoalTransformationResult(owner, targets.getGoals(), transformedGoals, proofTrace);
     }
 
-    public static GoalTransformationResult create(GoalTransformer owner, InferenceTargets targets, ArrayList<InferenceTarget> transformedTargets, List<Sentence>[] transformedSentences) {
+    public static GoalTransformationResult create(GoalTransformer owner, InferenceTargets targets, InferenceTarget[] transformedTargets, List<Sentence>[] transformedSentences) {
         return create(owner, targets, transformedTargets, transformedSentences, OracleProofTrace.getInstance());
     }
     // </editor-fold>
@@ -340,14 +340,34 @@ public class GoalTransformationResult implements InferenceStepResult {
         for (Sentence sentence : resultsForTarget) {
             if (sentence instanceof Goal) {
                 goals.add((Goal) sentence);
-            } else if (sentence instanceof Formula) {
-                Formula formula = (Formula) sentence;
+            } else {
+                Formula formula;
+                // Extract the formula
+                if (sentence instanceof Formula) {
+                    formula = (Formula) sentence;
+                } else if (sentence instanceof FormulaRepresentation) {
+                    FormulaRepresentation formulaRepresentation = (FormulaRepresentation) sentence;
+                    if (originalSentenceLocation.isGoal()) {
+                        formula = new Formula(formulaRepresentation, Formula.FormulaRole.Goal);
+                    } else if (originalSentenceLocation.isPremiseOf(originalGoal)) {
+                        formula = new Formula(formulaRepresentation, Formula.FormulaRole.Premise);
+                    } else if (originalSentenceLocation.isConclusionOf(originalGoal)) {
+                        formula = new Formula(formulaRepresentation, Formula.FormulaRole.Conclusion);
+                    } else {
+                        throw new AssertionError();
+                    }
+                } else {
+                    throw new AssertionError();
+                }
+                // Put the formula into the new goal:
                 switch (formula.getRole()) {
                     case Conclusion:
-                        goals.add(new Goal(null, null, formula, null));
+                        goals.add(new Goal(getCopiesOfFormulae(originalGoal), originalGoal.getPremisesFormula() == null ? null : originalGoal.getPremisesFormula().newCopy(), formula, null));
                         break;
                     case Premise:
-                        goals.add(new Goal(new ArrayList<>(Arrays.asList(formula)), formula, null, null));
+                        ArrayList<Formula> premises = getCopiesOfFormulae(originalGoal);
+                        premises.set(originalSentenceLocation.getSubformulaIndex(), formula);
+                        goals.add(new Goal(premises, null, originalGoal.getConclusion() == null ? null : originalGoal.getConclusion().newCopy(), null));
                         break;
                     case Goal:
                         goals.add(new Goal(null, null, null, formula));
@@ -355,22 +375,22 @@ public class GoalTransformationResult implements InferenceStepResult {
                     default:
                         throw new AssertionError();
                 }
-            } else if (sentence instanceof FormulaRepresentation) {
-                FormulaRepresentation formulaRepresentation = (FormulaRepresentation) sentence;
-                if (originalSentenceLocation.isGoal()) {
-                    goals.add(new Goal(null, null, null, new Formula(formulaRepresentation, Formula.FormulaRole.Goal)));
-                } else if (originalSentenceLocation.isPremiseOf(originalGoal)) {
-                    goals.add(new Goal(new ArrayList<>(Arrays.asList(new Formula(formulaRepresentation, Formula.FormulaRole.Premise))), null, null, null));
-                } else if (originalSentenceLocation.isConclusionOf(originalGoal)) {
-                    goals.add(new Goal(null, null, new Formula(formulaRepresentation, Formula.FormulaRole.Conclusion), null));
-                } else {
-                    throw new AssertionError();
-                }
-            } else {
-                throw new AssertionError();
             }
         }
         return goals;
+    }
+
+    private static ArrayList<Formula> getCopiesOfFormulae(Goal originalGoal) {
+        if (originalGoal.getPremises() == null) {
+            return null;
+        } else {
+            ArrayList<Formula> nf = new ArrayList<>(originalGoal.getPremises());
+            for (int i = 0; i < nf.size(); i++) {
+                Formula formula = nf.get(i);
+                nf.set(i, formula.newCopy());
+            }
+            return nf;
+        }
     }
     // </editor-fold>
 }
