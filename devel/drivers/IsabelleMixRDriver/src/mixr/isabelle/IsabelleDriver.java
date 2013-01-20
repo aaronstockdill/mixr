@@ -57,6 +57,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JLabel;
 import javax.swing.Timer;
 import mixr.isabelle.terms.StringFormat;
 import mixr.isabelle.terms.StringFormula;
@@ -84,9 +85,9 @@ import org.openide.util.lookup.ServiceProvider;
 import org.openide.windows.TopComponent;
 
 /**
- * This is the main class of the Isabelle driver for MixR. It provides
- * current Isabelle's goals to MixR and gives changed goals back to the
- * active Isabelle script.
+ * This is the main class of the Isabelle driver for MixR. It provides current
+ * Isabelle's goals to MixR and gives changed goals back to the active Isabelle
+ * script.
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
@@ -147,7 +148,7 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
         if (canPresent(formula.getFormat()) && formula.getFormula() instanceof StringFormula) {
             StringFormula f = (StringFormula) formula.getFormula();
             if (f.getMarkedUpFormula() == null) {
-                return null;
+                return new JLabel(f.getFormulaString());
             }
             MarkedupTextDisplay mtd = new MarkedupTextDisplay(true);
             mtd.addMessages(new Message[]{f.getMarkedUpFormula()});
@@ -218,9 +219,10 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
                 if (transformedGoals.size() > 1) {
                     throw new UnsupportedOperationException("The Isabelle driver does not yet support creation of multiple sub-goals from a single one.");
                 }
+                final Goal transformedGoal = transformedGoals.get(0);
                 // Okay, now get the Isabelle string formula and submit it to
                 // the proof script:
-                Formula goalFormula = transformedGoals.get(0).asFormula();
+                Formula goalFormula = transformedGoal.asFormula();
                 if (goalFormula == null) {
                     throw new RuntimeException(Bundle.ID_transformed_goal_unknown());
                 }
@@ -231,6 +233,34 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
                         theStringFormula = createPlaceholder(goalFormula);
                     } else {
                         theStringFormula = isabelleStringRepresentation.get(0).getFormula();
+                    }
+                    // We couldn't extract the string formula of the whole goal. Let's construct the formula instead:
+                    if (theStringFormula == null) {
+                        boolean hasConclusion = transformedGoal.getConclusion() != null && !transformedGoal.getConclusion().isEmpty();
+                        FormulaRepresentation strConclusion = hasConclusion ? transformedGoal.getConclusion().getRepresentation(StringFormat.getInstance()) : null;
+                        hasConclusion = hasConclusion && strConclusion != null && strConclusion.getFormula() != null && !strConclusion.getFormula().toString().isEmpty();
+                        StringBuilder sb = new StringBuilder();
+                        // Get the premises together and put them between [| |] signs:
+                        if (transformedGoal.getPremisesCount() > 0) {
+                            sb.append("[| ");
+                            // Place in the plageholders:
+                            for (Formula premise : transformedGoal.getPremises()) {
+                                FormulaRepresentation strPremise = premise.getRepresentation(StringFormat.getInstance());
+                                if (strPremise != null) {
+                                    sb.append(strPremise.getFormula()).append("; ");
+                                }
+                            }
+                            sb.delete(sb.length() - 2, sb.length());
+                            sb.append(" |]");
+                            if (hasConclusion) {
+                                sb.append(" ==> ");
+                            }
+                        }
+
+                        if (hasConclusion) {
+                            sb.append(strConclusion.getFormula());
+                        }
+                        theStringFormula = sb.toString();
                     }
                     if (theStringFormula == null) {
                         throw new RuntimeException(Bundle.ID_transformed_goal_unknown());
@@ -326,9 +356,9 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
 
     /**
      * This method is invoked by the default implementation of
-     * {@link BareGoalProvidingReasoner#setGoals(mixr.logic.Goals)} just
-     * before it actually changes the goals. Subclasses may override this method
-     * to veto the change (by throwing a {@link PropertyVetoException}).
+     * {@link BareGoalProvidingReasoner#setGoals(mixr.logic.Goals)} just before
+     * it actually changes the goals. Subclasses may override this method to
+     * veto the change (by throwing a {@link PropertyVetoException}).
      *
      * @param oldGoals goals before the change.
      * @param newGoals goals after the change.
@@ -463,7 +493,22 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
                             Term term = TermYXML.parseYXML(unescapedYXML);
                             final TermGoal toGoal = TermsToMixR.toGoal(term, injectionContext.getProofDocument());
                             // Get the string version of this goal:
-                            toGoal.asFormula().addRepresentation(new FormulaRepresentation(new StringFormula(results[i + 1]), StringFormat.getInstance()));
+                            final FormulaRepresentation stringRep = new FormulaRepresentation(new StringFormula(results[i + 1]), StringFormat.getInstance());
+                            toGoal.asFormula().addRepresentation(stringRep);
+                            // Extract the conclusion from the string formula and add it as another representation to the conclusion (if it exists):
+                            String strFormat = results[i + 1].getText();
+                            String metaImplication = "==>";
+                            int indexOfMetaImplication = strFormat.lastIndexOf(metaImplication);
+                            if (indexOfMetaImplication < 0) {
+                                metaImplication = "⟹";
+                                indexOfMetaImplication = strFormat.lastIndexOf(metaImplication);
+                            }
+                            if (indexOfMetaImplication >= 0) {
+                                String conclusion = strFormat.substring(indexOfMetaImplication + metaImplication.length());
+                                if (!conclusion.isEmpty() && toGoal.getConclusion() != null) {
+                                    toGoal.getConclusion().addRepresentation(StringFormat.createFormula(conclusion.trim()));
+                                }
+                            }
                             goals.add(toGoal);
                         }
                     }

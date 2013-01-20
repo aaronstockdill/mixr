@@ -24,13 +24,13 @@
  */
 package mixr.isabelle.terms;
 
-import mixr.logic.Formula;
-import mixr.logic.Goal;
 import isabelle.Term.Free;
 import isabelle.Term.Term;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import mixr.logic.Formula;
+import mixr.logic.Goal;
 import org.isabelle.iapp.proofdocument.ProofDocument;
 
 /**
