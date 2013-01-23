@@ -24,10 +24,6 @@
  */
 package mixr.ui;
 
-import mixr.ui.GoalsTopComponent.ConclusionNode;
-import mixr.ui.GoalsTopComponent.GeneralGoalNode;
-import mixr.ui.GoalsTopComponent.PremiseNode;
-import mixr.ui.GoalsTopComponent.PremisesNode;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Arrays;
@@ -42,6 +38,10 @@ import mixr.logic.Formula;
 import mixr.logic.FormulaRepresentation;
 import mixr.logic.Goal;
 import mixr.logic.Goals;
+import mixr.ui.GoalsTopComponent.ConclusionNode;
+import mixr.ui.GoalsTopComponent.GeneralGoalNode;
+import mixr.ui.GoalsTopComponent.PremiseNode;
+import mixr.ui.GoalsTopComponent.PremisesNode;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -467,8 +467,8 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
         final int representationIndex;
 
         @Messages({
-            "FormatRepresentationNode_displayName=Representation {0}: {1}",
-            "FormatRepresentationNode_displayName_main_representation=Main representation: {0}"
+            "FormatRepresentationNode_displayName={0}",
+            "FormatRepresentationNode_displayName_main_representation={0}"
         })
         RepresentationFormulaNode(GeneralFormulaNode<T> selection, List<? extends FormulaRepresentation> representations, int representationIndex) {
             super(selection, Children.LEAF);
@@ -477,7 +477,7 @@ public final class CurrentFormulaTopComponent extends TopComponent implements Ex
             if (selection.getSelectedFormula().getMainRepresentation() == representations.get(representationIndex)) {
                 setDisplayName(Bundle.FormatRepresentationNode_displayName_main_representation(representations.get(representationIndex).getFormat().getPrettyName()));
             } else {
-                setDisplayName(Bundle.FormatRepresentationNode_displayName(representationIndex + 1, representations.get(representationIndex).getFormat().getPrettyName()));
+                setDisplayName(Bundle.FormatRepresentationNode_displayName(representations.get(representationIndex).getFormat().getPrettyName()));
             }
         }
 

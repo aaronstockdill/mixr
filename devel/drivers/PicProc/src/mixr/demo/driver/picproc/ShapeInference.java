@@ -25,28 +25,23 @@
 package mixr.demo.driver.picproc;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javax.swing.JOptionPane;
 import mixr.MixR;
 import mixr.components.GoalTransformer;
 import mixr.isabelle.terms.StringFormat;
 import mixr.logic.AutomatedInferenceRule;
 import mixr.logic.Formula;
 import mixr.logic.FormulaRepresentation;
-import mixr.logic.Goal;
 import mixr.logic.GoalTransformationResult;
 import mixr.logic.InferenceRule;
 import mixr.logic.InferenceRuleDescriptor;
 import mixr.logic.InferenceStepResult;
 import mixr.logic.InferenceTarget;
 import mixr.logic.InferenceTargets;
-import mixr.logic.OracleProofTrace;
 import mixr.logic.Sentence;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
-import propity.util.MovableArrayList;
 
 /**
  * A simple inference rule that extracts the shape of the object from the image.
@@ -68,17 +63,17 @@ import propity.util.MovableArrayList;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public class DummyInference implements InferenceRuleDescriptor, InferenceRule, AutomatedInferenceRule {
+public class ShapeInference implements InferenceRuleDescriptor, InferenceRule, AutomatedInferenceRule {
 
     private final GoalTransformer owner;
 
-    DummyInference(GoalTransformer owner) {
+    ShapeInference(GoalTransformer owner) {
         this.owner = owner;
     }
 
     @Override
     @NbBundle.Messages({
-        "DI_name=Extract the shape of object"
+        "DI_name=Get object shape"
     })
     public String getName() {
         return Bundle.DI_name();

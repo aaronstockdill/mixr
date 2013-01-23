@@ -326,11 +326,15 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
      * This node corresponds directly to a particular {@link Goal goal} in the
      * displayed {@link GoalsManager#getCurrentGoals() currently active goals}.
      */
+    @Messages({
+        "# {0} - goalNumber",
+        "FN_goal_display_name=Goal {0}"
+    })
     public static final class GoalNode extends GeneralGoalNode {
 
         GoalNode(Goals goals, int goalIndex) {
             super(goals, goalIndex, Children.LEAF, Lookups.singleton(goals));
-            setDisplayName("Goal #" + (goalIndex + 1));
+            setDisplayName(Bundle.FN_goal_display_name(goalIndex + 1));
             setChildren(Children.create(new GoalPremisesConclusionFactory(this), false));
         }
 
@@ -399,7 +403,8 @@ public final class GoalsTopComponent extends TopComponent implements ExplorerMan
      * {@link GoalsManager#getCurrentGoals() currently active goals}.
      */
     @Messages({
-        "PN_premise_display_name=Premise #{0}"
+        "# {0} - premiseNumber",
+        "PN_premise_display_name=Premise {0}"
     })
     public static final class PremiseNode extends GeneralGoalNode {
 

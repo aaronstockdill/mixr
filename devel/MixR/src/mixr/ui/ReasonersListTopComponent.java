@@ -24,10 +24,6 @@
  */
 package mixr.ui;
 
-import mixr.MixR;
-import mixr.components.MixRComponent;
-import mixr.components.Reasoner;
-import mixr.ui.Bundle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +31,9 @@ import java.util.Comparator;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
+import mixr.MixR;
+import mixr.components.MixRComponent;
+import mixr.components.Reasoner;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -65,9 +64,9 @@ persistenceType = TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.OpenActionRegistration(displayName = "#CTL_ReasonersListAction",
 preferredID = "ReasonersListTopComponent")
 @Messages({
-    "CTL_ReasonersListAction=MixR Components",
-    "CTL_ReasonersListTopComponent=MixR Components",
-    "HINT_ReasonersListTopComponent=This is a list of all MixR components (reasoners, presenters, etc.)."
+    "CTL_ReasonersListAction=MixR Drivers",
+    "CTL_ReasonersListTopComponent=MixR Drivers",
+    "HINT_ReasonersListTopComponent=This is a list of all MixR drivers (reasoners, presenters, etc.)."
 })
 public final class ReasonersListTopComponent extends TopComponent implements ExplorerManager.Provider {
 

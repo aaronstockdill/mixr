@@ -34,12 +34,14 @@ import mixr.components.FormulaFormatsProvider;
 import mixr.components.FormulaPresenter;
 import mixr.components.GoalTransformer;
 import mixr.components.MixRComponent;
+import mixr.logic.AutomatedInferenceRule;
 import mixr.logic.FormulaFormat;
 import mixr.logic.FormulaRepresentation;
 import mixr.logic.InferenceRule;
 import mixr.logic.InferenceRuleDescriptor;
 import mixr.logic.InferenceStepResult;
 import mixr.logic.InferenceTargets;
+import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
 
 /**
@@ -61,7 +63,8 @@ public class PicProc implements MixRComponent, FormulaFormatsProvider, FormulaPr
     public PicProc() {
         ArrayList<InferenceRuleDescriptor> tmp = new ArrayList<>();
 
-        tmp.add(new DummyInference(this));
+        tmp.add(new ShapeInference(this));
+        tmp.add(new AreaInference(this));
 
         inferenceRules = Collections.unmodifiableList(tmp);
     }
@@ -113,14 +116,22 @@ public class PicProc implements MixRComponent, FormulaFormatsProvider, FormulaPr
     @Override
     public void applyInferenceRule(InferenceTargets targets, InferenceRuleDescriptor inferenceRule) {
         if (inferenceRule instanceof InferenceRule) {
-            InferenceRule dummyPlaceholderInference = (InferenceRule) inferenceRule;
-            dummyPlaceholderInference.applyInferenceRule(targets);
+            InferenceRule inf = (InferenceRule) inferenceRule;
+            inf.applyInferenceRule(targets);
         }
     }
 
     @Override
+    @NbBundle.Messages({
+        "PP_not_an_auto_rule=Could not apply the rule automatically. The given rule is not automated."
+    })
     public InferenceStepResult applyAutomatedInferenceRule(InferenceTargets targets, InferenceRuleDescriptor inferenceRule) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        if (inferenceRule instanceof AutomatedInferenceRule) {
+            AutomatedInferenceRule inf = (AutomatedInferenceRule) inferenceRule;
+            return inf.applyAutomatedInferenceRule(targets);
+        } else {
+            throw new IllegalArgumentException(Bundle.PP_not_an_auto_rule());
+        }
     }
 
     @Override
