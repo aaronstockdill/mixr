@@ -225,7 +225,8 @@ object TermUtils {
       case App(Const(IsaDia_About, Type(Fun, List(Type(List_list, List(_)), Type_PlaceholderVars))), vars) => {
         traverseListElements(vars, t => {t match {
           case Free(varName, varType) =>  {outVars += FreeVar(varName, varType);}
-          case _ =>  throw new IllegalArgumentException("Not a valid group of placeholder variables.");
+          case Const(varName, varType) =>  {outVars += FreeVar(varName, varType);}
+          case tAny =>  throw new IllegalArgumentException("Not a valid group of placeholder variables. The offending term: " + tAny);
         }});
       }
       case _ => throw new IllegalArgumentException("Not a valid group of placeholder variables.");
