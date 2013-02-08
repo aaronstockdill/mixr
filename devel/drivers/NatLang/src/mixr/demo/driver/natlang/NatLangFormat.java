@@ -38,7 +38,7 @@ import org.openide.util.NbBundle;
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 @NbBundle.Messages({
-    "NatLang_format_pretty_name=Dummy natural language"
+    "NatLang_format_pretty_name=Natural language"
 })
 public class NatLangFormat extends FormulaFormatDescriptor implements TextEncodedFormulaFormat {
 
