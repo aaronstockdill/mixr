@@ -174,12 +174,12 @@ object TermUtils {
     }
   }
 
-  private val Placeholder_MixR = "IsaDia.MixR";
-  private val Placeholder_MixRVars = "IsaDia.MixRVars";
-  private val Placeholder_Vars = "IsaDia.mixr_var";
+  private val Placeholder_MixR = "IsaMixR.MixR";
+  private val Placeholder_MixRVars = "IsaMixR.MixRVars";
+  private val Placeholder_Vars = "IsaMixR.mixr_var";
   private val Type_PlaceholderVars = Type(Placeholder_Vars, List());
   private val Type_PlaceholderVars_List = List(Type_PlaceholderVars);
-  private val IsaDia_About = "IsaDia.About";
+  private val IsaMixR_About = "IsaMixR.About";
 
   /**
    * If the term is a placeholder then this method extracts and returns it. If it is not a placeholder, it returns `null`.
@@ -222,7 +222,7 @@ object TermUtils {
 
   def extractPlaceholderVarGroup(t: Term, outVars: Buffer[FreeVar]) = {
     t match {
-      case App(Const(IsaDia_About, Type(Fun, List(Type(List_list, List(_)), Type_PlaceholderVars))), vars) => {
+      case App(Const(IsaMixR_About, Type(Fun, List(Type(List_list, List(_)), Type_PlaceholderVars))), vars) => {
         traverseListElements(vars, t => {t match {
           case Free(varName, varType) =>  {outVars += FreeVar(varName, varType);}
           case Const(varName, varType) =>  {outVars += FreeVar(varName, varType);}
