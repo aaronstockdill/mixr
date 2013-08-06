@@ -24,7 +24,7 @@
  */
 package mixr.implementation;
 
-import mixr.components.MixRComponent;
+import mixr.components.MixRDriver;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,9 +59,9 @@ public final class MixRImpl implements MixR, Runnable {
 
     // <editor-fold defaultstate="collapsed" desc="Private Fields">
     private InstanceContent instanceContent;
-    private Result<MixRComponent> lookupResult;
+    private Result<MixRDriver> lookupResult;
     private AbstractLookup componentsLookup;
-    private Set<MixRComponent> components;
+    private Set<MixRDriver> components;
     private final ArrayList<ManagerInternals> managers = new ArrayList<>();
     private boolean initialised = false;
     // </editor-fold>
@@ -94,7 +94,7 @@ public final class MixRImpl implements MixR, Runnable {
     }
 
     @Override
-    public Set<? extends MixRComponent> getRegisteredComponents() {
+    public Set<? extends MixRDriver> getRegisteredComponents() {
         return components;
     }
 
@@ -121,8 +121,8 @@ public final class MixRImpl implements MixR, Runnable {
     // <editor-fold defaultstate="collapsed" desc="Components Registration">
     private void updateComponentsList() {
         components = new HashSet<>();
-        Collection<? extends MixRComponent> comps = lookupResult.allInstances();
-        for (MixRComponent comp : comps) {
+        Collection<? extends MixRDriver> comps = lookupResult.allInstances();
+        for (MixRDriver comp : comps) {
             instanceContent.add(comp);
             components.add(comp);
         }
@@ -169,7 +169,7 @@ public final class MixRImpl implements MixR, Runnable {
         }
 
         // Find all MixR components and register them.
-        lookupResult = Lookup.getDefault().lookupResult(MixRComponent.class);
+        lookupResult = Lookup.getDefault().lookupResult(MixRDriver.class);
 //        lookupResult.addLookupListener(new LookupListener() {
 //
 //            @Override

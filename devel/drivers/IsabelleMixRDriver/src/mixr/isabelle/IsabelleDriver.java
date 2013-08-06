@@ -45,7 +45,7 @@ import javax.swing.Timer;
 import mixr.components.FormulaFormatsProvider;
 import mixr.components.FormulaPresenter;
 import mixr.components.GoalAcceptingReasoner;
-import mixr.components.MixRComponent;
+import mixr.components.MixRDriver;
 import mixr.components.util.BareGoalProvidingReasoner;
 import mixr.isabelle.pure.lib.TermYXML;
 import mixr.isabelle.terms.StringFormat;
@@ -91,7 +91,7 @@ import org.openide.windows.TopComponent;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-@ServiceProvider(service = MixRComponent.class)
+@ServiceProvider(service = MixRDriver.class)
 public class IsabelleDriver extends BareGoalProvidingReasoner implements
         GoalAcceptingReasoner,
         FormulaFormatsProvider,
@@ -301,9 +301,9 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
                     // Build the Isabelle formula string:
                     String isabellePlaceholderFormula;
                     if (freeVariables == null || freeVariables.isEmpty()) {
-                        isabellePlaceholderFormula = "MixR ''" + format.getFormatName() + ": " + formulaAsString + "''";
+                        isabellePlaceholderFormula = "MixRNoVars ''" + format.getFormatName() + ": " + formulaAsString + "''";
                     } else {
-                        StringBuilder sb = new StringBuilder("MixRVars [");
+                        StringBuilder sb = new StringBuilder("MixR [");
                         while (!freeVariables.isEmpty()) {
                             FreeVariable var1 = freeVariables.first();
                             freeVariables.remove(var1);
@@ -556,7 +556,7 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
      */
     private void fetchGoalsFromIsabelle() {
         try {
-            InjectionResult cmd = executeCommand("GoalsExport.i3p_write_sds_goals ()");
+            InjectionResult cmd = executeCommand("GoalsExport.mixr_write_sds_goals ()");
             cmd.addInjectionResultListener(isabelleListener);
         } catch (UnsupportedOperationException uoex) {
             Exceptions.attachSeverity(uoex, Level.INFO);

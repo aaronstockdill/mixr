@@ -32,7 +32,7 @@ import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import mixr.MixR;
-import mixr.components.MixRComponent;
+import mixr.components.MixRDriver;
 import mixr.components.Reasoner;
 import org.netbeans.api.settings.ConvertAsProperties;
 import org.openide.awt.ActionID;
@@ -158,16 +158,16 @@ public final class ReasonersListTopComponent extends TopComponent implements Exp
 
     private static class ComponentNode extends AbstractNode implements Comparable<ComponentNode> {
 
-        private MixRComponent component;
+        private MixRDriver component;
 
-        public MixRComponent getComponent() {
+        public MixRDriver getComponent() {
             return component;
         }
 
         @Messages({
             "ComponentNode_component_null=The component must not be null."
         })
-        public ComponentNode(MixRComponent component) {
+        public ComponentNode(MixRDriver component) {
             super(Children.LEAF, Lookups.singleton(component));
             if (component == null) {
                 throw new IllegalArgumentException(Bundle.ComponentNode_component_null());
@@ -185,11 +185,11 @@ public final class ReasonersListTopComponent extends TopComponent implements Exp
 
     private static class ComponentsRootNode extends Children.Array {
 
-        private Lookup.Result<MixRComponent> reasonersLookupResult;
+        private Lookup.Result<MixRDriver> reasonersLookupResult;
 
         public ComponentsRootNode() {
             MixR mixr = Lookup.getDefault().lookup(MixR.class);
-            reasonersLookupResult = mixr.getLookup().lookupResult(MixRComponent.class);
+            reasonersLookupResult = mixr.getLookup().lookupResult(MixRDriver.class);
             reasonersLookupResult.addLookupListener(new LookupListener() {
                 @Override
                 public void resultChanged(LookupEvent ev) {
@@ -200,11 +200,11 @@ public final class ReasonersListTopComponent extends TopComponent implements Exp
 
         @Override
         protected Collection<Node> initCollection() {
-            Collection<? extends MixRComponent> allReasoners = reasonersLookupResult.allInstances();
+            Collection<? extends MixRDriver> allReasoners = reasonersLookupResult.allInstances();
 
             ArrayList<Node> reasonerNodes = new ArrayList<>();
             if (allReasoners != null) {
-                for (MixRComponent reasoner : allReasoners) {
+                for (MixRDriver reasoner : allReasoners) {
                     if (reasoner instanceof Reasoner) {
                         Reasoner r = (Reasoner) reasoner;
                         reasonerNodes.add(new ReasonersNode(r));

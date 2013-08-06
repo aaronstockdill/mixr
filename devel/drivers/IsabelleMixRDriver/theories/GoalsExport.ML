@@ -57,7 +57,7 @@ sig
      printed and it will contain the string "INVALID".
 
      *)
-  val i3p_write_sds_goals: unit -> unit
+  val mixr_write_sds_goals: unit -> unit
   
   val replace_subgoal_tac: string -> Proof.context -> int -> tactic
   
@@ -124,7 +124,7 @@ val mixr_response_goal     = "Goal: ";
 val mixr_response_goal_str = "Goal string: ";
 val mixr_response_no_goals = "No Goals: ";
 
-fun i3p_write_sds_goals _ =
+fun mixr_write_sds_goals _ =
   let
       val (terms, proof_state) = get_goal_terms ();
       val context = Proof.context_of proof_state;

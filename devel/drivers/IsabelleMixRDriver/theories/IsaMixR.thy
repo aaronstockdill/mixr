@@ -23,7 +23,7 @@ consts
   About :: "'a list \<Rightarrow> mixr_var"
 
 consts
-  MixRVars :: "mixr_var list \<Rightarrow> string \<Rightarrow> bool"
-  MixR :: "string \<Rightarrow> bool"
+  MixR :: "mixr_var list \<Rightarrow> string \<Rightarrow> bool"
+  MixRNoVars :: "string \<Rightarrow> bool"
 
 end

@@ -26,7 +26,7 @@ package mixr.implementation;
 
 import mixr.MixR;
 import mixr.ReasonersManager;
-import mixr.components.MixRComponent;
+import mixr.components.MixRDriver;
 import mixr.components.GoalProvider;
 import mixr.components.GoalTransformer;
 import mixr.implementation.Bundle;
@@ -128,7 +128,7 @@ class ReasonersManagerImpl implements ReasonersManager, ManagerInternals {
     @Override
     public void onAfterComponentsLoaded() {
         // Set the first goal providing reasoner as the active one:
-        for (MixRComponent mixrComponent : mixr.getRegisteredComponents()) {
+        for (MixRDriver mixrComponent : mixr.getRegisteredComponents()) {
             if (mixrComponent instanceof GoalProvider) {
                 requestActive((GoalProvider)mixrComponent);
                 break;
@@ -137,7 +137,7 @@ class ReasonersManagerImpl implements ReasonersManager, ManagerInternals {
         
         // Now populate the list of all goal-transforming reasoners:
         HashSet<GoalTransformer> gtrs = new HashSet<>();
-        for (MixRComponent mixrComponent : mixr.getRegisteredComponents()) {
+        for (MixRDriver mixrComponent : mixr.getRegisteredComponents()) {
             if (mixrComponent instanceof GoalTransformer) {
                 GoalTransformer gtr = (GoalTransformer) mixrComponent;
                 gtrs.add(gtr);

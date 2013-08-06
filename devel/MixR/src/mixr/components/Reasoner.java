@@ -33,5 +33,5 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface Reasoner extends MixRComponent {
+public interface Reasoner extends MixRDriver {
 }

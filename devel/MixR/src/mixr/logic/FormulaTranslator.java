@@ -25,7 +25,7 @@
 package mixr.logic;
 
 import mixr.MixR;
-import mixr.components.MixRComponent;
+import mixr.components.MixRDriver;
 import mixr.logic.Bundle;
 import java.util.List;
 import org.netbeans.api.annotations.common.NonNull;
@@ -33,7 +33,7 @@ import org.openide.util.NbBundle;
 
 /**
  * Formula translators provide translation capabilities to MixR. Available
- * translators may be registered by {@link MixRComponent MixR components}
+ * translators may be registered by {@link MixRDriver MixR components}
  * that implement the {@link mixr.components.FormulaTranslationsProvider formula
  * translations provider interface}. {@link MixR#getFormulaFormatManager() The
  * formula format manager} will pick all these components up, fetch their

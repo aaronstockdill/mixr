@@ -54,9 +54,9 @@ public class ImageUrlFormula {
             throw new IllegalArgumentException(Bundle.ImgUrlFormula_source_empty());
         }
         try {
-            this.sourceFile = Utilities.toFile(new URI(sourceUrl));
+            this.sourceFile = new File(sourceUrl);
             image = javax.imageio.ImageIO.read(sourceFile);
-        } catch (IOException | URISyntaxException ex) {
+        } catch (IOException ex) {
             throw new TextEncodedFormulaFormat.FormulaEncodingException(Bundle.ImgUrlFormula_image_not_opened(sourceUrl), ex);
         }
     }

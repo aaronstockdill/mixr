@@ -37,7 +37,7 @@ import java.util.Collection;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface FormulaTranslationsProvider extends MixRComponent {
+public interface FormulaTranslationsProvider extends MixRDriver {
 
     /**
      * Returns a list of formula translators provided by this MixR

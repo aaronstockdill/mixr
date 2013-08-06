@@ -45,7 +45,7 @@ import org.netbeans.api.annotations.common.NonNull;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface FormulaPresenter extends MixRComponent {
+public interface FormulaPresenter extends MixRDriver {
 
     /**
      * Returns the format type of formulae this presenter is capable of

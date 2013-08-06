@@ -36,7 +36,7 @@ import mixr.logic.InferenceTargets;
 import mixr.logic.FormulaRepresentation;
 import mixr.logic.Goals;
 import mixr.MixR;
-import mixr.components.MixRComponent;
+import mixr.components.MixRDriver;
 import mixr.components.FormulaFormatsProvider;
 import mixr.components.FormulaPresenter;
 import mixr.components.FormulaPresenter.VisualisationException;
@@ -79,7 +79,7 @@ import speedith.ui.rules.InteractiveRuleApplication;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-@ServiceProvider(service = MixRComponent.class)
+@ServiceProvider(service = MixRDriver.class)
 public class SpeedithDriver extends BareGoalProvidingReasoner implements
         GoalTransformer,
         FormulaFormatsProvider,

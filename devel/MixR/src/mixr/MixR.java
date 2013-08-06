@@ -24,7 +24,7 @@
  */
 package mixr;
 
-import mixr.components.MixRComponent;
+import mixr.components.MixRDriver;
 import mixr.components.FormulaPresenter;
 import mixr.components.GoalProvider;
 import mixr.components.Reasoner;
@@ -38,7 +38,7 @@ import org.openide.util.Lookup.Provider;
  * class can be found through the {@link Lookup#getDefault() Lookup API}.
  *
  * <p>This class provides a catalogue of all available {@link Reasoner reasoners}
- * and {@link MixRComponent other components} that plug into MixR and
+ * and {@link MixRDriver other components} that plug into MixR and
  * provide a certain kind of functionality.</p>
  *
  * <p>Additionally, this class provides central access to, for example, </p>
@@ -81,7 +81,7 @@ public interface MixR extends Provider {
      *
      * @return the set of all registered MixR components.
      */
-    Set<? extends MixRComponent> getRegisteredComponents();
+    Set<? extends MixRDriver> getRegisteredComponents();
     
     /**
      * Returns the manager which keeps track of all {@link

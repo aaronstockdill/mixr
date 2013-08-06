@@ -24,7 +24,7 @@
  */
 package mixr;
 
-import mixr.components.MixRComponent;
+import mixr.components.MixRDriver;
 import mixr.components.FormulaFormatsProvider;
 import mixr.logic.FormulaFormat;
 import mixr.logic.FormulaRepresentation;
@@ -40,7 +40,7 @@ import org.netbeans.api.annotations.common.NonNull;
  * different formats. Since MixR's main goal is to connect different
  * reasoners, all of which may understand different representations, this class
  * provides a solution for ease of translation between the reasoners. <p>Formula
- * formats are registered when {@link MixRComponent MixR components} are
+ * formats are registered when {@link MixRDriver MixR components} are
  * loaded. The components which want to register new formula formats must
  * implement the {@link FormulaFormatsProvider} interface.</p>
  *

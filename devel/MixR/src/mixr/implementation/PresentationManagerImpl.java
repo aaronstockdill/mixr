@@ -25,7 +25,7 @@
 package mixr.implementation;
 
 import mixr.PresentationManager;
-import mixr.components.MixRComponent;
+import mixr.components.MixRDriver;
 import mixr.components.FormulaPresenter;
 import mixr.implementation.Bundle;
 import mixr.logic.FormulaFormat;
@@ -61,7 +61,7 @@ class PresentationManagerImpl implements ManagerInternals, PresentationManager {
     public void onAfterComponentsLoaded() {
         HashSet<FormulaPresenter> ps = new HashSet<>();
         HashMap<FormulaFormat, Set<FormulaPresenter>> f2ps = new HashMap<>();
-        for (MixRComponent mixrComponent : host.getRegisteredComponents()) {
+        for (MixRDriver mixrComponent : host.getRegisteredComponents()) {
             if (mixrComponent instanceof FormulaPresenter) {
                 final FormulaPresenter fp = (FormulaPresenter) mixrComponent;
                 Set<FormulaFormat> presentedFormats = fp.getPresentedFormats();

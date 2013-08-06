@@ -24,7 +24,6 @@
  */
 package mixr.logic;
 
-import mixr.logic.Bundle;
 import java.util.Set;
 import org.netbeans.api.annotations.common.NonNull;
 import org.openide.util.NbBundle;
@@ -34,8 +33,6 @@ import org.openide.util.NbBundle;
  * FormulaRepresentation#getFormat() a descriptor} of the format in which the
  * formula is encoded.
  *
- * @param <T> the type of the
- * {@link FormulaRepresentation#getFormula() raw formula}.
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public final class FormulaRepresentation implements Sentence {

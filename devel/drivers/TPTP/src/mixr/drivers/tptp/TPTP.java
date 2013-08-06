@@ -33,7 +33,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import mixr.components.FormulaFormatsProvider;
 import mixr.components.FormulaPresenter;
-import mixr.components.MixRComponent;
+import mixr.components.MixRDriver;
 import mixr.logic.FormulaFormat;
 import mixr.logic.FormulaRepresentation;
 import org.openide.util.lookup.ServiceProvider;
@@ -46,8 +46,8 @@ import tptp_parser.SimpleTptpParserOutput.TopLevelItem;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-@ServiceProvider(service = MixRComponent.class)
-public class TPTP implements MixRComponent, FormulaFormatsProvider, FormulaPresenter {
+@ServiceProvider(service = MixRDriver.class)
+public class TPTP implements MixRDriver, FormulaFormatsProvider, FormulaPresenter {
 
     @Override
     public String getName() {

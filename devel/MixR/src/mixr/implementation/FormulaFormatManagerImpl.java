@@ -26,7 +26,7 @@ package mixr.implementation;
 
 import mixr.MixR;
 import mixr.FormulaFormatManager;
-import mixr.components.MixRComponent;
+import mixr.components.MixRDriver;
 import mixr.components.FormulaFormatsProvider;
 import mixr.components.FormulaTranslationsProvider;
 import mixr.logic.FormulaFormat;
@@ -224,7 +224,7 @@ class FormulaFormatManagerImpl implements FormulaFormatManager, ManagerInternals
     @Override
     public void onAfterComponentsLoaded() {
         // Register all available formula formats and translations:
-        for (MixRComponent mixrComponent : mixr.getRegisteredComponents()) {
+        for (MixRDriver mixrComponent : mixr.getRegisteredComponents()) {
             if (mixrComponent instanceof FormulaFormatsProvider) {
                 FormulaFormatsProvider formulaFormatProvider = (FormulaFormatsProvider) mixrComponent;
                 try {

@@ -33,7 +33,7 @@ import java.util.Set;
 import mixr.components.FormulaFormatsProvider;
 import mixr.components.FormulaPresenter;
 import mixr.components.GoalTransformer;
-import mixr.components.MixRComponent;
+import mixr.components.MixRDriver;
 import mixr.logic.AutomatedInferenceRule;
 import mixr.logic.FormulaFormat;
 import mixr.logic.FormulaRepresentation;
@@ -55,8 +55,8 @@ import org.openide.util.lookup.ServiceProvider;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-@ServiceProvider(service = MixRComponent.class)
-public class PicProc implements MixRComponent, FormulaFormatsProvider, FormulaPresenter, GoalTransformer {
+@ServiceProvider(service = MixRDriver.class)
+public class PicProc implements MixRDriver, FormulaFormatsProvider, FormulaPresenter, GoalTransformer {
 
     private final List<InferenceRuleDescriptor> inferenceRules;
 

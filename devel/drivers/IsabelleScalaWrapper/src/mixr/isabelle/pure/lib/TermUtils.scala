@@ -174,8 +174,8 @@ object TermUtils {
     }
   }
 
-  private val Placeholder_MixR = "IsaMixR.MixR";
-  private val Placeholder_MixRVars = "IsaMixR.MixRVars";
+  private val Placeholder_MixR = "IsaMixR.MixRNoVars";
+  private val Placeholder_MixRVars = "IsaMixR.MixR";
   private val Placeholder_Vars = "IsaMixR.mixr_var";
   private val Type_PlaceholderVars = Type(Placeholder_Vars, List());
   private val Type_PlaceholderVars_List = List(Type_PlaceholderVars);

@@ -37,7 +37,7 @@ import java.util.Collection;
  *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface FormulaFormatsProvider extends MixRComponent {
+public interface FormulaFormatsProvider extends MixRDriver {
 
     /**
      * Returns a list of formula formats provided by this MixR component.

@@ -1,5 +1,5 @@
 /*
- * File name: MixRComponent.java
+ * File name: MixRDriver.java
  *    Author: Matej Urbas [matej.urbas@gmail.com]
  * 
  *  Copyright © 2012 Matej Urbas
@@ -39,7 +39,7 @@ import org.openide.util.lookup.ServiceProvider;
  * 
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
-public interface MixRComponent {
+public interface MixRDriver {
     /**
      * Returns a human-readable name of this component.
      * 
