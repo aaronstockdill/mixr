@@ -102,8 +102,8 @@
                 <package>propity.util</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/Propity.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/Propity.jar</binary-origin>
+                <runtime-relative-path>ext/propity-1.0-SNAPSHOT.jar</runtime-relative-path>
+                <binary-origin>../../target/dependency/propity-1.0-SNAPSHOT.jar</binary-origin>
             </class-path-extension>
         </data>
         <spellchecker-wordlist xmlns="http://www.netbeans.org/ns/spellchecker-wordlist/1">

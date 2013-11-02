@@ -34,11 +34,11 @@
             <public-packages/>
             <class-path-extension>
                 <runtime-relative-path>ext/antlr-2.7.5.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/antlr-2.7.5.jar</binary-origin>
+                <binary-origin>../../../external/libs/antlr-2.7.5.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/TptpParser.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/TptpParser.jar</binary-origin>
+                <binary-origin>../../../external/libs/TptpParser.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>

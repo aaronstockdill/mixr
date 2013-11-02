@@ -24,9 +24,7 @@
 /devel/drivers/TPTP/build/
 /devel/drivers/TPTP/nbproject/private/
 /devel/drivers/HyperblocksDiabelli/nbproject/private/
-/devel/drivers/HyperblocksDiabelli/release/modules/ext/jogl.jar
-/devel/drivers/HyperblocksDiabelli/release/modules/ext/Openproof.jar
-/devel/drivers/HyperblocksDiabelli/release/modules/ext/MRJAdapter.jar
+/devel/drivers/HyperblocksDiabelli/release/
 /devel/drivers/HyperblocksDiabelli/build/
 /devel/drivers/HyperblocksDiabelli/release/modules/ext/
 /devel/drivers/HyperblocksDiabelli/release/
@@ -46,3 +44,9 @@
 /devel/drivers/TPTP/release/
 /devel/drivers/HyperblocksMixR/release/
 /devel/Diabelli/dist/
+/drivers/speedith-driver/target/
+/drivers/isabelle-driver/target/
+/DELETE-drivers/isabelle-driver/target/
+*.iml
+/target/
+/devel/MixR/release/
