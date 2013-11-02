@@ -31,36 +31,30 @@ Both of the examples above use the novel concept of _placeholders_ to insert nat
 
     To build Diabelli (with Isabelle, Speedith, NatLang, PicProc, and TPTP support), proceed as follows:
 
-3.  Download and unpack Isabelle 2012  into the `~/bin/Isabelle2012` folder. Isabelle 2012 can be downloaded from:
+4.  Download and unpack Isabelle 2012  into the `~/bin/Isabelle2012` folder. Isabelle 2012 can be downloaded from:
 
         http://isabelle.in.tum.de/website-Isabelle2012/index.html
 
-4.  Install Scala 2.9.2+:
+5.  Install Maven:
 
-        http://www.scala-lang.org/download/
+        http://maven.apache.org/download.cgi
 
-5.  Install autotools (Makefile).
-
-6.  Clone the Speedith repository and follow Speedith's installation instructions:
+6.  Clone the Speedith and iCircles repositories (follow their installation instructions from README.md):
 
         git clone https://github.com/urbas/speedith.git
+        git clone https://github.com/urbas/iCircles.git
 
-7.  Once you've build Speedith, go to the MixR repository and into the folder
-    `devel/drivers`. Here run the following command:
+    The `Speedith` and `iCircles` folders must be siblings to the `mixr` folder.
 
-        make
+7.  Go to the `mixr` folder and run the following:
 
-8.  Once the `make` command finishes, go into the folder `devel/drivers/IsabelleMixRDriver` and run:
+      mvn install
 
-        fix-references.sh
-
-    Do the same in the folder `devel/drivers/SpeedithMixRDriver`.
-
-9.  Clone I3P from here:
+8.  Clone I3P from here:
 
         http://pu.inf.uni-tuebingen.de/i3p/
 
-10. Open the `Diabelli` project (`devel/Diabelli`) and make sure all dependencies are resolved. Try to build and run.
+9.  Open the `Diabelli` project (`devel/Diabelli`) within NetBeans and make sure all dependencies are resolved. Try to build and run.
 
     Feel free to contact developers in case the build fails.
 
