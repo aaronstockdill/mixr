@@ -104,11 +104,11 @@
                 <binary-origin>../../../target/dependency/scala-swing-2.10.2.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/scala-pure-2012.jar</runtime-relative-path>
+                <runtime-relative-path>ext/scala-pure-2012-lib.jar</runtime-relative-path>
                 <binary-origin>../../../target/dependency/scala-pure-2012.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/isabelle-api-2012.jar</runtime-relative-path>
+                <runtime-relative-path>ext/isabelle-api-2012-lib.jar</runtime-relative-path>
                 <binary-origin>../../../target/dependency/isabelle-api-2012.jar</binary-origin>
             </class-path-extension>
         </data>

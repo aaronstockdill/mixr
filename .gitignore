@@ -50,3 +50,4 @@
 *.iml
 /target/
 /devel/MixR/release/
+.idea/

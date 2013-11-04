@@ -26,6 +26,7 @@
             <groupId>isabelle</groupId>
             <artifactId>scala-pure</artifactId>
             <version>2012</version>
+            <classifier>lib</classifier>
         </dependency>
 
         <!--Test dependencies-->
