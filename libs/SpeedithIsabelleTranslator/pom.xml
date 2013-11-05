@@ -72,7 +72,7 @@
                 <version>3.1.6</version>
                 <configuration>
                     <recompileMode>incremental</recompileMode>
-                    <useZincServer>false</useZincServer>
+                    <useZincServer>true</useZincServer>
                 </configuration>
                 <executions>
                     <execution>
