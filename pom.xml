@@ -7,7 +7,7 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>MixR</name>
+    <name>MixR All</name>
 
     <modules>
         <module>libs/IsabelleScala</module>
@@ -17,63 +17,8 @@
         <module>../iCircles/iCircles</module>
         <module>../speedith/Speedith.Core</module>
         <module>../speedith/Speedith</module>
+        <module>devel/MixR</module>
+        <module>devel/drivers/IsabelleMixRDriver</module>
+        <module>devel/drivers/SpeedithMixRDriver</module>
     </modules>
-
-    <dependencies>
-        <dependency>
-            <groupId>mixr</groupId>
-            <artifactId>isabelle-api</artifactId>
-            <version>2012</version>
-        </dependency>
-
-        <dependency>
-            <groupId>mixr</groupId>
-            <artifactId>speedith-isabelle-translator</artifactId>
-            <version>2012</version>
-        </dependency>
-
-        <dependency>
-            <groupId>isabelle</groupId>
-            <artifactId>scala-pure</artifactId>
-            <version>2012</version>
-            <classifier>lib</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>speedith</groupId>
-            <artifactId>core</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>speedith</groupId>
-            <artifactId>speedith</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>propity</groupId>
-            <artifactId>propity</artifactId>
-            <version>1.0-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.8</version>
-                <executions>
-                    <execution>
-                        <id>unpack-direct-dependencies</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 </project>

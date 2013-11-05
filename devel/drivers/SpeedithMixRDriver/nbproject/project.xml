@@ -82,33 +82,130 @@
                 </dependency>
             </module-dependencies>
             <public-packages>
+                <package>icircles.abstractDescription</package>
+                <package>icircles.abstractDualGraph</package>
+                <package>icircles.concreteDiagram</package>
+                <package>icircles.decomposition</package>
+                <package>icircles.gui</package>
+                <package>icircles.i18n</package>
+                <package>icircles.recomposition</package>
+                <package>icircles.test</package>
+                <package>icircles.util</package>
+                <package>org.antlr.runtime</package>
+                <package>org.antlr.runtime.debug</package>
+                <package>org.antlr.runtime.misc</package>
+                <package>org.antlr.runtime.tree</package>
+                <package>org.apache.commons.cli</package>
+                <package>speedith</package>
+                <package>speedith.cli</package>
+                <package>speedith.core.i18n</package>
+                <package>speedith.core.lang</package>
+                <package>speedith.core.lang.export</package>
+                <package>speedith.core.lang.reader</package>
+                <package>speedith.core.reasoning</package>
+                <package>speedith.core.reasoning.args</package>
+                <package>speedith.core.reasoning.args.selection</package>
+                <package>speedith.core.reasoning.rules</package>
+                <package>speedith.core.reasoning.rules.instructions</package>
+                <package>speedith.core.reasoning.rules.transformers</package>
+                <package>speedith.core.reasoning.util.unitary</package>
+                <package>speedith.i18n</package>
+                <package>speedith.icircles.util</package>
+                <package>speedith.logging</package>
                 <package>speedith.mixr</package>
+                <package>speedith.mixr.isabelle</package>
                 <package>speedith.mixr.logic</package>
                 <package>speedith.mixr.ui</package>
+                <package>speedith.preferences</package>
+                <package>speedith.ui</package>
+                <package>speedith.ui.input</package>
+                <package>speedith.ui.rules</package>
+                <package>speedith.ui.selection</package>
+                <package>speedith.ui.selection.helpers</package>
             </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/commons-cli-1.2.jar</runtime-relative-path>
-                <binary-origin>../../../target/dependency/commons-cli-1.2.jar</binary-origin>
+                <binary-origin>release/modules/ext/commons-cli-1.2.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/speedith-isabelle-translator-2012.jar</runtime-relative-path>
-                <binary-origin>../../../target/dependency/speedith-isabelle-translator-2012.jar</binary-origin>
+                <runtime-relative-path>ext/batik-dom-1.6-1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/batik-dom-1.6-1.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/batik-css-1.6-1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/batik-css-1.6-1.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/icircles-1.0-SNAPSHOT.jar</runtime-relative-path>
-                <binary-origin>../../../target/dependency/icircles-1.0-SNAPSHOT.jar</binary-origin>
+                <binary-origin>release/modules/ext/icircles-1.0-SNAPSHOT.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/batik-bridge-1.6-1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/batik-bridge-1.6-1.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/core-1.0-SNAPSHOT.jar</runtime-relative-path>
-                <binary-origin>../../../target/dependency/core-1.0-SNAPSHOT.jar</binary-origin>
+                <binary-origin>release/modules/ext/core-1.0-SNAPSHOT.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/antlr-runtime-3.3.jar</runtime-relative-path>
-                <binary-origin>../../../target/dependency/antlr-runtime-3.3.jar</binary-origin>
+                <binary-origin>release/modules/ext/antlr-runtime-3.3.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/log4j-1.2.17.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/log4j-1.2.17.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/batik-ext-1.6-1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/batik-ext-1.6-1.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/batik-xml-1.6-1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/batik-xml-1.6-1.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/speedith-1.0-SNAPSHOT.jar</runtime-relative-path>
-                <binary-origin>../../../target/dependency/speedith-1.0-SNAPSHOT.jar</binary-origin>
+                <binary-origin>release/modules/ext/speedith-1.0-SNAPSHOT.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/batik-script-1.6-1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/batik-script-1.6-1.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/speedith-isabelle-translator-2012.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/speedith-isabelle-translator-2012.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/batik-awt-util-1.6-1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/batik-awt-util-1.6-1.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/batik-gvt-1.6-1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/batik-gvt-1.6-1.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/batik-svggen-1.6-1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/batik-svggen-1.6-1.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/batik-svg-dom-1.6-1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/batik-svg-dom-1.6-1.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/batik-util-1.6-1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/batik-util-1.6-1.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/antlr-3.3.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/antlr-3.3.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/batik-parser-1.6-1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/batik-parser-1.6-1.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/batik-gui-util-1.6-1.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/batik-gui-util-1.6-1.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>
