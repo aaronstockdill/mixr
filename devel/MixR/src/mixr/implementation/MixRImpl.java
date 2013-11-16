@@ -57,27 +57,21 @@ import org.openide.util.lookup.ServiceProvider;
 @OnStart
 public final class MixRImpl implements MixR, Runnable {
 
-    // <editor-fold defaultstate="collapsed" desc="Private Fields">
     private InstanceContent instanceContent;
     private Result<MixRDriver> lookupResult;
     private AbstractLookup componentsLookup;
     private Set<MixRDriver> components;
     private final ArrayList<ManagerInternals> managers = new ArrayList<>();
     private boolean initialised = false;
-    // </editor-fold>
-    // <editor-fold defaultstate="collapsed" desc="Managers Fields">
     final ReasonersManagerImpl reasonersManager = new ReasonersManagerImpl();
     final GoalsManagerImpl goalManager = new GoalsManagerImpl();
     final FormulaFormatManagerImpl formulaFormatManager = new FormulaFormatManagerImpl();
     final PresentationManagerImpl presentationManager = new PresentationManagerImpl();
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Constructor">
     public MixRImpl() {
         initialise();
     }
 
-    // <editor-fold defaultstate="collapsed" desc="MixR Interface Implementation">
     @Override
     public GoalsManager getGoalManager() {
         return goalManager;
@@ -102,23 +96,17 @@ public final class MixRImpl implements MixR, Runnable {
     public PresentationManager getPresentationManager() {
         return presentationManager;
     }
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Lookup Provider Implementation">
     @Override
     public Lookup getLookup() {
         return componentsLookup;
     }
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Overrides">
     @Override
     public String toString() {
         return "MixR is awesome!";
     }
-    // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Components Registration">
     private void updateComponentsList() {
         components = new HashSet<>();
         Collection<? extends MixRDriver> comps = lookupResult.allInstances();
@@ -128,9 +116,7 @@ public final class MixRImpl implements MixR, Runnable {
         }
         components = Collections.unmodifiableSet(components);
     }
-    // </editor-fold>
 
-    //<editor-fold defaultstate="collapsed" desc="MixR Startup">
     @Override
     public void run() {
         if (!initialised) {
@@ -178,5 +164,4 @@ public final class MixRImpl implements MixR, Runnable {
 //            }
 //        });
     }
-    //</editor-fold>
 }
