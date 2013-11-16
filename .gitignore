@@ -51,3 +51,7 @@
 /target/
 /devel/MixR/release/
 .idea/
+/samples/minimal-driver/build/
+/samples/minimal-driver/nbproject/private/
+/samples/mixr-plain/nbproject/private/
+/samples/mixr-plain/build/

@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module: org.mixr.samples.minimaldriver
+OpenIDE-Module-Localizing-Bundle: org/mixr/samples/minimaldriver/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+
