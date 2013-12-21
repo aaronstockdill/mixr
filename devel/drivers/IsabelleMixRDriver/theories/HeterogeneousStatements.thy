@@ -66,6 +66,7 @@ lemma "MixR [About [ShapeA]] ''ImgUrl:/home/matej/Pictures/ShapeA.png'' \<Longri
 
 
 
+
 section {* Verification of MixR's proof concepts *}
 (* ================== MixR Heterogeneous Proof Verification ================== *)
 

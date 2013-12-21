@@ -16,7 +16,7 @@
         <module>Propity</module>
         <module>../iCircles/iCircles</module>
         <module>../speedith/Speedith.Core</module>
-        <module>../speedith/Speedith</module>
+        <module>../speedith/Speedith.Gui</module>
         <module>devel/MixR</module>
         <module>devel/drivers/IsabelleMixRDriver</module>
         <module>devel/drivers/SpeedithMixRDriver</module>
