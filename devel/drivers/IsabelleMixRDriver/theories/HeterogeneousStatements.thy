@@ -103,14 +103,6 @@ section {* Placeholders Theory *}
 
 text {* These are all the definitions that are needed for supporting placeholders: *}
 
-(*typedecl mixr_var
-consts
-  About :: "'a list \<Rightarrow> mixr_var"
-
-consts
-  MixR :: "mixr_var list \<Rightarrow> string \<Rightarrow> bool"
-  MixRNoVars :: "string \<Rightarrow> bool"*)
-
 typedecl person
 consts
   Ann :: person
@@ -122,6 +114,12 @@ axiomatization where
 
 
 lemma "MixRNoVars ''NatLang: Ann is a child of Bob.''"
+  apply (mixrOracle "MixRNoVars ''NatLang: Bob is a parent of Ann.''")
+  apply (mixrOracle "ParentOf Ann Bob")
+  by (simp add: Relation1)
+
+
+lemma withoutLeadingSpace: "MixRNoVars ''NatLang:Ann is a child of Bob.''"
   apply (mixrOracle "MixRNoVars ''NatLang: Bob is a parent of Ann.''")
   apply (mixrOracle "ParentOf Ann Bob")
   by (simp add: Relation1)

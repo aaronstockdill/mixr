@@ -45,8 +45,8 @@ object Translations {
     }
     val premisesHOL = premises.map(t => {
       t match {
-        case App(Const(HOLTrueprop, typ), body) => body
-        case t => throw new ReadingException("The list of premises contains a term that is not a Trueprop: '%s;.".format(t.toString()))
+        case App(Const(HOL_TRUEPROP, typ), body) => body
+        case _ => throw new ReadingException("The list of premises contains a term that is not a Trueprop: '%s;.".format(t.toString()))
       }
     })
     // Handle the case where each premise is a PSD itself (just try each
@@ -97,19 +97,19 @@ object Translations {
       orElse recogniseExistential
       orElse recogniseNegation
       orElse {
-      case _ => throw new ReadingException("Not an SNF formula. Found an unknown term '%s'.".format(x));
+      case _ => throw new ReadingException("Not an SNF formula. Found an unknown term '%s'.".format(x))
     }: Recogniser)(x)
   }
 
   private val recogniseNegation: Recogniser = {
-    case (App(Const(HOLNot, typ), body), spiderType) => {
+    case (App(Const(HOL_NOT, typ), body), spiderType) => {
       val (negSD, spiderType1) = recognise(body, spiderType)
       (SpiderDiagrams.createCompoundSD(Negation, negSD), spiderType1)
     }
   }
 
   private val recogniseExistential: Recogniser = {
-    case (term@App(Const(HOLExistential, typ), Abs(spider, spiderType1, body)), spiderType) => {
+    case (term@App(Const(HOL_EXISTENTIAL, typ), Abs(spider, spiderType1, body)), spiderType) => {
       if (!checkSpiderType(spiderType1, spiderType)) throw new ReadingException("Not all spiders are of the same type.")
 
       // Extract all spiders and the conjuncts of the body:
@@ -128,11 +128,11 @@ object Translations {
   }
 
   private val recogniseTrueprop: Recogniser = {
-    case (App(Const(HOLTrueprop, typ), body), spiderType) => recognise(body, spiderType)
+    case (App(Const(HOL_TRUEPROP, typ), body), spiderType) => recognise(body, spiderType)
   }
 
   private val recogniseMetaAll: Recogniser = {
-    case (term@App(Const(MetaAll, typ), Abs(spider, spiderType1, body)), spiderType) => {
+    case (term@App(Const(ISA_META_ALL, typ), Abs(spider, spiderType1, body)), spiderType) => {
       if (!checkSpiderType(spiderType1, spiderType)) throw new ReadingException("Not all spiders are of the same type.")
 
       // We have to extract all quantified spiders.
@@ -160,7 +160,7 @@ object Translations {
   }
 
   // HELPER FUNCTIONS
-  private val BinaryOperators = Set(HOLConjunction, HOLDisjunction, HOLImplication, HOLEquality, MetaImplication)
+  private val BinaryOperators = Set(HOL_CONJUNCTION, HOL_DISJUNCTION, HOL_IMPLICATION, HOL_EQUALITY, ISA_META_IMPLICATION)
 
   private val HOLListDistinct = "List.distinct"
   private val HOLSetMember = "Set.member"
@@ -185,7 +185,7 @@ object Translations {
         else sds = SpiderDiagrams.createCompoundSD(Operator.Conjunction, sd, sds)
         conjuncts.remove(i)
       } catch {
-        case e => println(e)
+        case e: Throwable => println(e)
       }
     }
     sds
@@ -214,27 +214,27 @@ object Translations {
   }
 
   private def operatorsIsaToSD = HashMap(
-    HOLConjunction -> Conjunction,
-    HOLDisjunction -> Disjunction,
-    HOLImplication -> Implication,
-    HOLEquality -> Equivalence,
-    MetaImplication -> Implication,
-    HOLNot -> Negation)
+    HOL_CONJUNCTION -> Conjunction,
+    HOL_DISJUNCTION -> Disjunction,
+    HOL_IMPLICATION -> Implication,
+    HOL_EQUALITY -> Equivalence,
+    ISA_META_IMPLICATION -> Implication,
+    HOL_NOT -> Negation)
 
   private def extractConjuncts(term: Term, conjuncts: Buffer[Term]): Unit = {
     term match {
-      case App(App(Const(HOLConjunction, _), lhs), rhs) => {
+      case App(App(Const(HOL_CONJUNCTION, _), lhs), rhs) => {
         extractConjuncts(lhs, conjuncts)
         extractConjuncts(rhs, conjuncts)
       }
-      case App(Const(HOLTrueprop, typ), body) => extractConjuncts(body, conjuncts)
+      case App(Const(HOL_TRUEPROP, typ), body) => extractConjuncts(body, conjuncts)
       case x => conjuncts += x
     }
   }
 
   private def extractConjuncts(terms: Traversable[Term], conjuncts: Buffer[Term]): Unit = {
     terms foreach {
-      term => extractConjuncts(term, conjuncts);
+      term => extractConjuncts(term, conjuncts)
     }
   }
 
@@ -245,7 +245,7 @@ object Translations {
    */
   private def extractSpidersAndBody(t: Term, variables: Buffer[Free]): Term = {
     t match {
-      case App(Const(HOLExistential, _), Abs(varName, varType, body)) => {
+      case App(Const(HOL_EXISTENTIAL, _), Abs(varName, varType, body)) => {
         variables += Free(varName, varType)
         extractSpidersAndBody(body, variables)
       }
@@ -259,8 +259,8 @@ object Translations {
 
   private def extractDistinctTerm(conjuncts: Buffer[Term]): App = {
     val distinctTerms = getAndRemove(conjuncts, (t: Term) => t match {
-      case x@App(Const(HOLListDistinct, _), _) => Some(x);
-      case _ => None;
+      case x@App(Const(HOLListDistinct, _), _) => Some(x)
+      case _ => None
     })
     if (distinctTerms.length > 1) throw new ReadingException("More than one 'distinct' term found in a unitary SNF formula.")
     else if (distinctTerms.length == 1) {
@@ -275,7 +275,7 @@ object Translations {
       val inequalities = new Array[Boolean](spiders.length * spiders.length)
       val spiderType = spiders(0).typ
       rlRemoveWhere(conjuncts, (t: Term) => t match {
-        case App(Const(HOLNot, _), App(App(Const(HOLEquality, Type(_, List(spiderType1, Type(_, List(spiderType2, _))))), Bound(spider1)), Bound(spider2))) if spiderType1.equals(spiderType2) && checkSpiderType(spiderType1, spiderType) => {
+        case App(Const(HOL_NOT, _), App(App(Const(HOL_EQUALITY, Type(_, List(spiderType1, Type(_, List(spiderType2, _))))), Bound(spider1)), Bound(spider2))) if spiderType1.equals(spiderType2) && checkSpiderType(spiderType1, spiderType) => {
           inequalities(scala.math.min(spider1, spider2) * spiders.length + scala.math.max(spider1, spider2)) = true
           true
         }
@@ -325,7 +325,7 @@ object Translations {
       }
       case Abs(_, _, body) => findContoursInTerm(body, spiderType, outContours)
       case App(lhs, rhs) => {
-        findContours(List(lhs, rhs), spiderType, outContours)._2;
+        findContours(List(lhs, rhs), spiderType, outContours)._2
       }
       case _ => spiderType
     }
@@ -334,7 +334,7 @@ object Translations {
   private def findContours(conjuncts: Seq[Term], spiderType: Typ, outContours: HashSet[Free] = HashSet[Free]()): (HashSet[Free], Typ) = {
     var spiderType1 = spiderType
     for (t <- conjuncts) {
-      spiderType1 = findContoursInTerm(t, spiderType1, outContours);
+      spiderType1 = findContoursInTerm(t, spiderType1, outContours)
     }
     (outContours, spiderType)
   }
@@ -392,21 +392,21 @@ object Translations {
 
   private def isaHabitatSpecifiersToFormulaTerm(spiderIndex: Int, term: Term): Formula[Free] = {
     term match {
-      case App(App(Const(HOLConjunction, _), lhs), rhs) => {
+      case App(App(Const(HOL_CONJUNCTION, _), lhs), rhs) => {
         val flhs = isaHabitatSpecifiersToFormulaTerm(spiderIndex, lhs)
         if (flhs == null) return null
         val frhs = isaHabitatSpecifiersToFormulaTerm(spiderIndex, rhs)
         if (frhs == null) return null
         Inf(flhs, frhs)
       }
-      case App(App(Const(HOLDisjunction, _), lhs), rhs) => {
+      case App(App(Const(HOL_DISJUNCTION, _), lhs), rhs) => {
         val flhs = isaHabitatSpecifiersToFormulaTerm(spiderIndex, lhs)
         if (flhs == null) return null
         val frhs = isaHabitatSpecifiersToFormulaTerm(spiderIndex, rhs)
         if (frhs == null) return null
         Sup(flhs, frhs)
       }
-      case App(Const(HOLNot, _), region) => {
+      case App(Const(HOL_NOT, _), region) => {
         val f = isaHabitatSpecifiersToFormulaTerm(spiderIndex, region)
         if (f == null) null else Neg(f)
       }
@@ -449,8 +449,8 @@ object Translations {
         val disjuncts = extractDistincsDisjuncts(toDNF(habitatTerms)).map(d => NormalForms.extractDistincsConjuncts(d))
         // Remove all self-contradicting disjuncts:
         disjuncts.retain(d => d.forall(c => c match {
-          case Neg(s) => !d.contains(s);
-          case _ => true;
+          case Neg(s) => !d.contains(s)
+          case _ => true
         }))
 
         // A disjunct may not be fully specified (which means that in each clause
@@ -464,16 +464,16 @@ object Translations {
           //		then '{x in P(other) | positive union x}' is the set of all
           //		sub zones of the region specified in clause 'd':
           val positive = d.filter(a => a match {
-            case Atom(s) => true;
-            case _ => false;
+            case Atom(s) => true
+            case _ => false
           }).map(a => a match {
-            case Atom(s) => s;
-            case _ => throw new RuntimeException("Found an unknown term in a set which should contain only contour atoms.");
+            case Atom(s) => s
+            case _ => throw new RuntimeException("Found an unknown term in a set which should contain only contour atoms.")
           })
           val specified = d.map(a => a match {
-            case Atom(s) => s;
-            case Neg(Atom(s)) => s;
-            case _ => throw new RuntimeException("Found an unknown term in a set which should contain only contour literals.");
+            case Atom(s) => s
+            case Neg(Atom(s)) => s
+            case _ => throw new RuntimeException("Found an unknown term in a set which should contain only contour literals.")
           })
           val other = contours.filter(a => !specified.contains(a))
           addSubsetsFromTo(other.toBuffer, positive, inZones)

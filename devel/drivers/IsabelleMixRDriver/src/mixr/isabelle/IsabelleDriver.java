@@ -372,8 +372,9 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
     // <editor-fold defaultstate="collapsed" desc="Isabelle Goal-Change Monitoring">
     /**
      * Tries to fetch the current prover. It will throw an exception if the
-     * prover could not have been obtained for any reason. <p>This prover is
-     * needed to listen for messages from Isabelle to I3P.</p>
+     * prover could not have been obtained for any reason.
+     * <p>
+     * This prover is needed to listen for messages from Isabelle to I3P.</p>
      *
      * @return the current prover instance. It never returns {@code null}, it
      * rather throws exceptions.
@@ -398,7 +399,8 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
 
     /**
      * Issues an ML command to the prover and returns an injection result.
-     * <p>You may wish to add an {@link InjectionResultListener} to the returned
+     * <p>
+     * You may wish to add an {@link InjectionResultListener} to the returned
      * {@link InjectionResult}. With this you will receive the response of the
      * prover.</p>
      *
@@ -491,25 +493,18 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
                             String escapedYXML = message.getText().substring(DIABELLI_ISABELLE_RESPONSE_GOAL.length());
                             String unescapedYXML = TermYXML.unescapeControlChars(escapedYXML);
                             Term term = TermYXML.parseYXML(unescapedYXML);
-                            final TermGoal toGoal = TermsToMixR.toGoal(term, injectionContext.getProofDocument());
-                            // Get the string version of this goal:
-                            final FormulaRepresentation stringRep = new FormulaRepresentation(new StringFormula(results[i + 1]), StringFormat.getInstance());
-                            toGoal.asFormula().addRepresentation(stringRep);
+                            final TermGoal goal = TermsToMixR.toGoal(term, injectionContext.getProofDocument());
+                            addFormulaStringToGoal(goal, results[i + 1]);
                             // Extract the conclusion from the string formula and add it as another representation to the conclusion (if it exists):
-                            String strFormat = results[i + 1].getText();
-                            String metaImplication = "==>";
-                            int indexOfMetaImplication = strFormat.lastIndexOf(metaImplication);
+                            String formulaAsString = results[i + 1].getText();
+                            String metaImplication = META_IMPLICATION;
+                            int indexOfMetaImplication = formulaAsString.lastIndexOf(metaImplication);
                             if (indexOfMetaImplication < 0) {
-                                metaImplication = "⟹";
-                                indexOfMetaImplication = strFormat.lastIndexOf(metaImplication);
+                                metaImplication = META_IMPLICATION_UNICODE;
+                                indexOfMetaImplication = formulaAsString.lastIndexOf(metaImplication);
                             }
-                            if (indexOfMetaImplication >= 0) {
-                                String conclusion = strFormat.substring(indexOfMetaImplication + metaImplication.length());
-                                if (!conclusion.isEmpty() && toGoal.getConclusion() != null) {
-                                    toGoal.getConclusion().addRepresentation(StringFormat.createFormula(conclusion.trim()));
-                                }
-                            }
-                            goals.add(toGoal);
+                            addConclusionStringToGoal(indexOfMetaImplication, formulaAsString, metaImplication, goal);
+                            goals.add(goal);
                         }
                     }
                 }
@@ -519,6 +514,23 @@ public class IsabelleDriver extends BareGoalProvidingReasoner implements
                 setGoals(goals);
             }
         }
+
+        private void addFormulaStringToGoal(final TermGoal goal, Message formulaAsString) {
+            // Get the string version of this goal:
+            final FormulaRepresentation stringRep = new FormulaRepresentation(new StringFormula(formulaAsString), StringFormat.getInstance());
+            goal.asFormula().addRepresentation(stringRep);
+        }
+
+        private void addConclusionStringToGoal(int indexOfMetaImplication, String formulaString, String metaImplication, final TermGoal toGoal) {
+            if (indexOfMetaImplication >= 0) {
+                String conclusion = formulaString.substring(indexOfMetaImplication + metaImplication.length());
+                if (!conclusion.isEmpty() && toGoal.getConclusion() != null) {
+                    toGoal.getConclusion().addRepresentation(StringFormat.createFormula(conclusion.trim()));
+                }
+            }
+        }
+        private static final String META_IMPLICATION_UNICODE = "⟹";
+        private static final String META_IMPLICATION = "==>";
 
         /**
          * This method is invoked by I3P when the state of the Isabelle prover
