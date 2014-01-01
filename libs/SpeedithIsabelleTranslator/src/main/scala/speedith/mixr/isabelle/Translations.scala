@@ -5,7 +5,6 @@ import speedith.core.lang.Region
 import speedith.core.lang.SpiderDiagram
 import speedith.core.lang.SpiderDiagrams
 import speedith.core.lang.reader.ReadingException
-import mixr.isabelle.pure.lib.TermYXML._
 import mixr.isabelle.pure.lib.TermUtils._
 import speedith.core.lang.Operator
 import speedith.core.lang.Operator._
@@ -15,9 +14,19 @@ import scala.collection.mutable.HashSet
 import scala.collection.mutable.Buffer
 import speedith.core.lang.PrimarySpiderDiagram
 import mixr.isabelle.pure.lib.TermUtils
+import mixr.logic.normalization._
 import NormalForms._
 import speedith.core.lang.Zone
 import scala.collection.JavaConversions._
+import isabelle.Term.App
+import isabelle.Term.Free
+import mixr.logic.normalization.Atom
+import mixr.logic.normalization.Inf
+import isabelle.Term.Abs
+import mixr.logic.normalization.Neg
+import isabelle.Term.Type
+import isabelle.Term.Const
+import isabelle.Term.Bound
 
 object Translations {
 
@@ -43,12 +52,10 @@ object Translations {
     if (premises == null || premises.size() == 0) {
       throw new ReadingException("The list of premises must not be empty.")
     }
-    val premisesHOL = premises.map(t => {
-      t match {
-        case App(Const(HOL_TRUEPROP, typ), body) => body
-        case _ => throw new ReadingException("The list of premises contains a term that is not a Trueprop: '%s;.".format(t.toString()))
-      }
-    })
+    val premisesHOL = premises.map {
+      case App(Const(HOL_TRUEPROP, typ), body) => body
+      case t => throw new ReadingException("The list of premises contains a term that is not a Trueprop: '%s;.".format(t.toString()))
+    }
     // Handle the case where each premise is a PSD itself (just try each
     // premise) and then conjunctively connect these primary spider diagrams
     // with the rest of the premises.
@@ -58,9 +65,9 @@ object Translations {
     else {
       // There are still some premises left. Extract a spider diagram from them:
       val psd = if (spiders == null || spiders.size() == 0) {
-        convertoToPSD(ArrayBuffer[Free](), null, premisesHOL)._1
+        converToToPSD(ArrayBuffer[Free](), null, premisesHOL)._1
       } else {
-        convertoToPSD(spiders, spiders.get(0).typ, premisesHOL)._1
+        converToToPSD(spiders, spiders.get(0).typ, premisesHOL)._1
       }
       if (psd == null)
         null
@@ -70,10 +77,6 @@ object Translations {
         psd
     }
   }
-
-  // Everything below here is just implementation detail.
-
-  // RECOGNISERS: Just functions of a special type that convert Isabelle terms to spider diagrams.
 
   private type RecogniserIn = ( /*term:*/ Term, /*spiderType:*/ Typ)
   private type RecogniserOut = (SpiderDiagram, /*spiderType:*/ Typ)
@@ -123,7 +126,7 @@ object Translations {
       }) throw new ReadingException("Not all spiders are of the same type.")
 
       // Now extract the unitary spider diagram out of the data:
-      convertoToPSD(spiders, spiderType1, conjuncts)
+      converToToPSD(spiders, spiderType1, conjuncts)
     }
   }
 
@@ -152,14 +155,13 @@ object Translations {
       extractConjuncts(premises, conjuncts)
 
       // We've got enough info to extract a spider diagram from the premises:
-      val (lhsSD, spiderType2) = convertoToPSD(spiders, spiderType1, conjuncts)
+      val (lhsSD, spiderType2) = converToToPSD(spiders, spiderType1, conjuncts)
       val (rhsSD, spiderType3) = recognise(conclusion, spiderType2)
 
       (SpiderDiagrams.createCompoundSD(Implication, lhsSD, rhsSD), spiderType3)
     }
   }
 
-  // HELPER FUNCTIONS
   private val BinaryOperators = Set(HOL_CONJUNCTION, HOL_DISJUNCTION, HOL_IMPLICATION, HOL_EQUALITY, ISA_META_IMPLICATION)
 
   private val HOLListDistinct = "List.distinct"
@@ -345,17 +347,6 @@ object Translations {
    */
   private def getSpiderWithBoundIndex(boundIndex: Int, spiders: Buffer[Free]): Free = spiders(spiders.length - 1 - boundIndex)
 
-  private def extractHabitat(t: Term, spiders: Buffer[Free], contours: HashSet[Term], spiderType: Typ, habitats: HashMap[Free, Region]): (Boolean, Typ) = {
-    t match {
-      case App(App(Const(HOLSetMember, _), Bound(spiderIndex)), region) => {
-        val spider = getSpiderWithBoundIndex(spiderIndex, spiders)
-        if (habitats.contains(spider)) throw new ReadingException("The spider '%s' has two regions. Only one region may be specified for a given spider.")
-        (true, spiderType)
-      }
-      case _ => (false, spiderType)
-    }
-  }
-
   private def isaSetsToNormalForms(term: Term): Formula[Free] = {
     term match {
       case App(App(Const(HOLSetUnion, _), lhs), rhs) => Sup(isaSetsToNormalForms(lhs), isaSetsToNormalForms(rhs))
@@ -446,12 +437,12 @@ object Translations {
         // There are some habitat-specifying terms. Calculate the disjunctive
         // normal form of the habitat-specifying formula (this makes it then
         // easy to find all zones of the habitat):
-        val disjuncts = extractDistincsDisjuncts(toDNF(habitatTerms)).map(d => NormalForms.extractDistincsConjuncts(d))
+        val disjuncts = extractDistinctDisjuncts(toDNF(habitatTerms)).map(d => NormalForms.extractDistinctConjuncts(d))
         // Remove all self-contradicting disjuncts:
-        disjuncts.retain(d => d.forall(c => c match {
+        disjuncts.retain(d => d.forall {
           case Neg(s) => !d.contains(s)
           case _ => true
-        }))
+        })
 
         // A disjunct may not be fully specified (which means that in each clause
         // some contours might be missing). In this case, we have to calculate
@@ -485,7 +476,7 @@ object Translations {
     (habitats, spiderType)
   }
 
-  private def convertoToPSD(spiders: Buffer[Free], spiderType: Typ, conjuncts: Buffer[Term]): (PrimarySpiderDiagram, Typ) = {
+  private def converToToPSD(spiders: Buffer[Free], spiderType: Typ, conjuncts: Buffer[Term]): (PrimarySpiderDiagram, Typ) = {
     // Check spider inequalities:
     checkSpiderInequalities(spiders, conjuncts)
 

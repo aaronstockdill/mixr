@@ -24,7 +24,7 @@
  */
 package speedith.mixr;
 
-import mixr.logic.Formula;
+import mixr.logic.normalization.Formula;
 import mixr.logic.FormulaTranslator;
 import mixr.logic.InferenceStepResult;
 import mixr.logic.FormulaFormat;

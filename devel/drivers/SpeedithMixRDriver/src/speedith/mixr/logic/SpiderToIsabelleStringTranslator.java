@@ -26,12 +26,12 @@ package speedith.mixr.logic;
 
 import mixr.isabelle.terms.StringFormat;
 import mixr.isabelle.terms.StringFormula;
-import mixr.logic.Formula;
+import mixr.logic.normalization.Formula;
 import mixr.logic.FormulaRepresentation;
 import mixr.logic.FormulaTranslator;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TreeMap;
+
 import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import speedith.core.lang.SpiderDiagram;

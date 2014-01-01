@@ -26,7 +26,7 @@ package speedith.mixr.logic;
 
 import mixr.isabelle.terms.TermFormatDescriptor;
 import mixr.isabelle.terms.TermGoal;
-import mixr.logic.Formula;
+import mixr.logic.normalization.Formula;
 import mixr.logic.FormulaRepresentation;
 import mixr.logic.FormulaTranslator;
 import isabelle.Term;
