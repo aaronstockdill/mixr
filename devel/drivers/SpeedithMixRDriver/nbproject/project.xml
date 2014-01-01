@@ -96,36 +96,18 @@
                 <package>org.antlr.runtime.misc</package>
                 <package>org.antlr.runtime.tree</package>
                 <package>org.apache.commons.cli</package>
-                <package>speedith</package>
-                <package>speedith.cli</package>
-                <package>speedith.core.i18n</package>
-                <package>speedith.core.lang</package>
-                <package>speedith.core.lang.export</package>
-                <package>speedith.core.lang.reader</package>
-                <package>speedith.core.reasoning</package>
-                <package>speedith.core.reasoning.args</package>
-                <package>speedith.core.reasoning.args.selection</package>
-                <package>speedith.core.reasoning.rules</package>
-                <package>speedith.core.reasoning.rules.instructions</package>
-                <package>speedith.core.reasoning.rules.transformers</package>
-                <package>speedith.core.reasoning.util.unitary</package>
-                <package>speedith.i18n</package>
-                <package>speedith.icircles.util</package>
-                <package>speedith.logging</package>
                 <package>speedith.mixr</package>
                 <package>speedith.mixr.isabelle</package>
                 <package>speedith.mixr.logic</package>
                 <package>speedith.mixr.ui</package>
-                <package>speedith.preferences</package>
-                <package>speedith.ui</package>
-                <package>speedith.ui.input</package>
-                <package>speedith.ui.rules</package>
-                <package>speedith.ui.selection</package>
-                <package>speedith.ui.selection.helpers</package>
             </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/commons-cli-1.2.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/commons-cli-1.2.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/speedith-core-1.0-SNAPSHOT.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/speedith-core-1.0-SNAPSHOT.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/batik-dom-1.6-1.jar</runtime-relative-path>
@@ -144,10 +126,6 @@
                 <binary-origin>release/modules/ext/batik-bridge-1.6-1.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/core-1.0-SNAPSHOT.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/core-1.0-SNAPSHOT.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/antlr-runtime-3.3.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/antlr-runtime-3.3.jar</binary-origin>
             </class-path-extension>
@@ -164,10 +142,6 @@
                 <binary-origin>release/modules/ext/batik-xml-1.6-1.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/speedith-1.0-SNAPSHOT.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/speedith-1.0-SNAPSHOT.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/batik-script-1.6-1.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/batik-script-1.6-1.jar</binary-origin>
             </class-path-extension>
@@ -178,6 +152,10 @@
             <class-path-extension>
                 <runtime-relative-path>ext/batik-awt-util-1.6-1.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/batik-awt-util-1.6-1.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/speedith-gui-1.0-SNAPSHOT.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/speedith-gui-1.0-SNAPSHOT.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/batik-gvt-1.6-1.jar</runtime-relative-path>

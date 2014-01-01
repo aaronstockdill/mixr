@@ -24,7 +24,6 @@
  */
 package speedith.mixr;
 
-import mixr.logic.normalization.Formula;
 import mixr.logic.FormulaTranslator;
 import mixr.logic.InferenceStepResult;
 import mixr.logic.FormulaFormat;
@@ -49,6 +48,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import mixr.logic.Formula;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 import org.openide.util.lookup.ServiceProvider;
