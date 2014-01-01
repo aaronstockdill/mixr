@@ -10,8 +10,7 @@ import speedith.core.lang.Operator
 import speedith.core.lang.Operator._
 import scala.collection.immutable.HashMap
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable.HashSet
-import scala.collection.mutable.Buffer
+import scala.collection.{mutable, JavaConversions}
 import speedith.core.lang.PrimarySpiderDiagram
 import mixr.isabelle.pure.lib.TermUtils
 import mixr.logic.normalization._
@@ -27,10 +26,10 @@ import mixr.logic.normalization.Neg
 import isabelle.Term.Type
 import isabelle.Term.Const
 import isabelle.Term.Bound
+import isabelle.Term
+import isabelle.Term.Term
 
 object Translations {
-
-  // TRANSLATIONS (public interface)
 
   /**
    * Takes an Isabelle term and tries to translate it to a spider diagram.
@@ -52,10 +51,7 @@ object Translations {
     if (premises == null || premises.size() == 0) {
       throw new ReadingException("The list of premises must not be empty.")
     }
-    val premisesHOL = premises.map {
-      case App(Const(HOL_TRUEPROP, typ), body) => body
-      case t => throw new ReadingException("The list of premises contains a term that is not a Trueprop: '%s;.".format(t.toString()))
-    }
+    val premisesHOL = extractHOLPremises(premises)
     // Handle the case where each premise is a PSD itself (just try each
     // premise) and then conjunctively connect these primary spider diagrams
     // with the rest of the premises.
@@ -65,9 +61,9 @@ object Translations {
     else {
       // There are still some premises left. Extract a spider diagram from them:
       val psd = if (spiders == null || spiders.size() == 0) {
-        converToToPSD(ArrayBuffer[Free](), null, premisesHOL)._1
+        convertToPSD(ArrayBuffer[Free](), null, premisesHOL)._1
       } else {
-        converToToPSD(spiders, spiders.get(0).typ, premisesHOL)._1
+        convertToPSD(spiders.toIterable.toIndexedSeq, spiders.get(0).typ, premisesHOL)._1
       }
       if (psd == null)
         null
@@ -75,6 +71,14 @@ object Translations {
         SpiderDiagrams.createCompoundSD(Operator.Conjunction, sd, psd)
       else
         psd
+    }
+  }
+
+
+  private def extractHOLPremises(premises: java.util.List[Term.Term]): mutable.Buffer[Term.Term] = {
+    premises.map {
+      case App(Const(HOL_TRUEPROP, typ), body) => body
+      case t => throw new ReadingException("The list of premises contains a term that is not a Trueprop: '%s;.".format(t.toString))
     }
   }
 
@@ -91,17 +95,6 @@ object Translations {
       val (rhsSD, spiderType2) = recognise(rhs, spiderType1)
       (SpiderDiagrams.createCompoundSD(operatorsIsaToSD(operator), lhsSD, rhsSD), spiderType2)
     }
-  }
-
-  private val recognise: Recogniser = {
-    case x => (recogniseBinaryHOLOperator
-      orElse recogniseMetaAll
-      orElse recogniseTrueprop
-      orElse recogniseExistential
-      orElse recogniseNegation
-      orElse {
-      case _ => throw new ReadingException("Not an SNF formula. Found an unknown term '%s'.".format(x))
-    }: Recogniser)(x)
   }
 
   private val recogniseNegation: Recogniser = {
@@ -126,7 +119,7 @@ object Translations {
       }) throw new ReadingException("Not all spiders are of the same type.")
 
       // Now extract the unitary spider diagram out of the data:
-      converToToPSD(spiders, spiderType1, conjuncts)
+      convertToPSD(spiders, spiderType1, conjuncts)
     }
   }
 
@@ -155,11 +148,22 @@ object Translations {
       extractConjuncts(premises, conjuncts)
 
       // We've got enough info to extract a spider diagram from the premises:
-      val (lhsSD, spiderType2) = converToToPSD(spiders, spiderType1, conjuncts)
+      val (lhsSD, spiderType2) = convertToPSD(spiders, spiderType1, conjuncts)
       val (rhsSD, spiderType3) = recognise(conclusion, spiderType2)
 
       (SpiderDiagrams.createCompoundSD(Implication, lhsSD, rhsSD), spiderType3)
     }
+  }
+
+  private val recognise: Recogniser = {
+    case x => (recogniseBinaryHOLOperator
+      orElse recogniseMetaAll
+      orElse recogniseTrueprop
+      orElse recogniseExistential
+      orElse recogniseNegation
+      orElse {
+      case _ => throw new ReadingException("Not an SNF formula. Found an unknown term '%s'.".format(x))
+    }: Recogniser)(x)
   }
 
   private val BinaryOperators = Set(HOL_CONJUNCTION, HOL_DISJUNCTION, HOL_IMPLICATION, HOL_EQUALITY, ISA_META_IMPLICATION)
@@ -174,7 +178,7 @@ object Translations {
   /**
    * Extracts conjunctively connected spider diagrams from the list of premises.
    */
-  def sdFromConjuncts(conjuncts: Buffer[Term]): SpiderDiagram = {
+  private def sdFromConjuncts(conjuncts: mutable.Buffer[Term]): SpiderDiagram = {
     if (conjuncts == null || conjuncts.isEmpty)
       return null
     var typ: Typ = null
@@ -193,7 +197,7 @@ object Translations {
     sds
   }
 
-  private def getAndRemove[A, T <: A, B](buffer: Buffer[T], filter: A => Option[B]): ArrayBuffer[B] = {
+  private def getAndRemove[A, T <: A, B](buffer: mutable.Buffer[T], filter: A => Option[B]): ArrayBuffer[B] = {
     val retVal = ArrayBuffer[B]()
     var i = 0
     while (i < buffer.length) {
@@ -205,7 +209,7 @@ object Translations {
     retVal
   }
 
-  private def rlRemoveWhere[A, T <: A](buffer: Buffer[T], filter: A => Boolean): Unit = {
+  private def rlRemoveWhere[A, T <: A](buffer: mutable.Buffer[T], filter: A => Boolean): Unit = {
     var i = buffer.length - 1
     while (i >= 0) {
       if (filter(buffer(i))) {
@@ -223,7 +227,7 @@ object Translations {
     ISA_META_IMPLICATION -> Implication,
     HOL_NOT -> Negation)
 
-  private def extractConjuncts(term: Term, conjuncts: Buffer[Term]): Unit = {
+  private def extractConjuncts(term: Term, conjuncts: mutable.Buffer[Term]): Unit = {
     term match {
       case App(App(Const(HOL_CONJUNCTION, _), lhs), rhs) => {
         extractConjuncts(lhs, conjuncts)
@@ -234,7 +238,7 @@ object Translations {
     }
   }
 
-  private def extractConjuncts(terms: Traversable[Term], conjuncts: Buffer[Term]): Unit = {
+  private def extractConjuncts(terms: Traversable[Term], conjuncts: mutable.Buffer[Term]): Unit = {
     terms foreach {
       term => extractConjuncts(term, conjuncts)
     }
@@ -245,7 +249,7 @@ object Translations {
    * into the given array list packed as separate `Free`s, and returns the
    * body.
    */
-  private def extractSpidersAndBody(t: Term, variables: Buffer[Free]): Term = {
+  private def extractSpidersAndBody(t: Term, variables: mutable.Buffer[Free]): Term = {
     t match {
       case App(Const(HOL_EXISTENTIAL, _), Abs(varName, varType, body)) => {
         variables += Free(varName, varType)
@@ -259,7 +263,7 @@ object Translations {
     if (oldSpiderType == null) true else oldSpiderType.equals(newSpiderType)
   }
 
-  private def extractDistinctTerm(conjuncts: Buffer[Term]): App = {
+  private def extractDistinctTerm(conjuncts: mutable.Buffer[Term]): App = {
     val distinctTerms = getAndRemove(conjuncts, (t: Term) => t match {
       case x@App(Const(HOLListDistinct, _), _) => Some(x)
       case _ => None
@@ -272,7 +276,7 @@ object Translations {
     null
   }
 
-  private def extractSpiderInequalities(conjuncts: Buffer[Term], spiders: Buffer[Free]): Boolean = {
+  private def extractSpiderInequalities(conjuncts: mutable.Buffer[Term], spiders: IndexedSeq[Free]): Boolean = {
     if (spiders != null && spiders.length > 1) {
       val inequalities = new Array[Boolean](spiders.length * spiders.length)
       val spiderType = spiders(0).typ
@@ -292,11 +296,10 @@ object Translations {
     } else false
   }
 
-  private def checkSpiderInequalities(spiders: Buffer[Free], conjuncts: Buffer[Term]): Unit = {
+  private def checkSpiderInequalities(spiders: IndexedSeq[Free], conjuncts: mutable.Buffer[Term]): Unit = {
     if (spiders != null && spiders.length > 1) {
       // We need spider inequalities only if there are at least two spiders...
       // Is there a distinct term present?
-
       val inequalitiesPresent = extractSpiderInequalities(conjuncts, spiders)
       // If the user specified inequalities, then that's fine. But if
       // inequalities are not specified, then let's look for the distinct clause:
@@ -307,18 +310,18 @@ object Translations {
           throw new ReadingException("Did not find a 'distinct' assertion. This is needed to tell that spiders are distinct elements.")
         } else {
           // If there is a `distinct` term, check that it contains all spiders:
-          val distincts = TermUtils.getListElements(distinctTerm.arg).map {
+          val distinctSpiders = TermUtils.getListElements(distinctTerm.arg).map {
             case Bound(i) => spiders(spiders.length - i - 1)
             case _ => throw new ReadingException("The 'distinct' term does not contain only spiders.")
           }.toSet
-          if (spiders exists (s => !distincts.contains(s))) throw new ReadingException("The 'distinct' assertion does not contain all spiders.")
+          if (spiders exists (s => !distinctSpiders.contains(s))) throw new ReadingException("The 'distinct' assertion does not contain all spiders.")
           // Okay, all spiders are distinct...
         }
       }
     }
   }
 
-  private def findContoursInTerm(term: Term, spiderType: Typ, outContours: HashSet[Free] = HashSet[Free]()): Typ = {
+  private def findContoursInTerm(term: Term, spiderType: Typ, outContours: mutable.HashSet[Free] = mutable.HashSet[Free]()): Typ = {
     term match {
       case t@Free(predicateName, Type(fun, List(spiderType1))) => {
         if (!checkSpiderType(spiderType1, spiderType)) throw new ReadingException("A contour's type '%s' does not match the spider's type '%s'.".format(spiderType1, spiderType))
@@ -333,7 +336,7 @@ object Translations {
     }
   }
 
-  private def findContours(conjuncts: Seq[Term], spiderType: Typ, outContours: HashSet[Free] = HashSet[Free]()): (HashSet[Free], Typ) = {
+  private def findContours(conjuncts: Seq[Term], spiderType: Typ, outContours: mutable.HashSet[Free] = mutable.HashSet[Free]()): (mutable.HashSet[Free], Typ) = {
     var spiderType1 = spiderType
     for (t <- conjuncts) {
       spiderType1 = findContoursInTerm(t, spiderType1, outContours)
@@ -345,7 +348,7 @@ object Translations {
    * Returns the spider at the 'from-behind' index (i.e.: index `0` maps to
    * `length - 1` and index `length - 1` maps to `0`).
    */
-  private def getSpiderWithBoundIndex(boundIndex: Int, spiders: Buffer[Free]): Free = spiders(spiders.length - 1 - boundIndex)
+  private def getSpiderWithBoundIndex(boundIndex: Int, spiders: IndexedSeq[Free]): Free = spiders(spiders.length - 1 - boundIndex)
 
   private def isaSetsToNormalForms(term: Term): Formula[Free] = {
     term match {
@@ -358,7 +361,7 @@ object Translations {
     }
   }
 
-  private def addSubsetsFromTo[A](fromSet: Seq[A], mustContain: HashSet[A], toSet: HashSet[HashSet[A]], out: HashSet[A] = HashSet[A](), startIndex: Int = 0): Unit = {
+  private def addSubsetsFromTo[A](fromSet: Seq[A], mustContain: mutable.HashSet[A], toSet: mutable.HashSet[mutable.HashSet[A]], out: mutable.HashSet[A] = mutable.HashSet[A](), startIndex: Int = 0): Unit = {
     var i = startIndex
     toSet += mustContain ++ out
     while (i < fromSet.length) {
@@ -369,7 +372,7 @@ object Translations {
     }
   }
 
-  private def fromInZonesToSDRegion(inZones: HashSet[HashSet[Free]], contours: HashSet[Free]): Region = {
+  private def fromInZonesToSDRegion(inZones: mutable.HashSet[mutable.HashSet[Free]], contours: mutable.HashSet[Free]): Region = {
     val zones = new java.util.TreeSet[Zone]()
     for (z <- inZones) {
       val inContours = new java.util.TreeSet[String]()
@@ -408,7 +411,7 @@ object Translations {
     }
   }
 
-  private def isaHabitatSpecifiersToFormula(spiderIndex: Int, conjuncts: Buffer[Term]): Formula[Free] = {
+  private def isaHabitatSpecifiersToFormula(spiderIndex: Int, conjuncts: mutable.Buffer[Term]): Formula[Free] = {
     var formulae = ArrayBuffer[Formula[Free]]()
     var i = conjuncts.length - 1
     while (i >= 0) {
@@ -422,17 +425,17 @@ object Translations {
     if (formulae.length == 0) null else toConjuncts(formulae, (f: Formula[Free]) => f)
   }
 
-  private def extractHabitats(conjuncts: Buffer[Term], spiders: Buffer[Free], contours: HashSet[Free], spiderType: Typ, habitats: java.util.HashMap[String, Region] = new java.util.HashMap()): (java.util.HashMap[String, Region], Typ) = {
+  private def extractHabitats(conjuncts: mutable.Buffer[Term], spiders: IndexedSeq[Free], contours: mutable.HashSet[Free], spiderType: Typ, habitats: java.util.HashMap[String, Region] = new java.util.HashMap()): (java.util.HashMap[String, Region], Typ) = {
     // For each spider, find all the terms that talk about its set membership:
     for (spiderIndex <- 0 to spiders.length - 1) {
       // This set will contain all zones of this spider's habitat:
-      val inZones = new HashSet[HashSet[Free]]()
+      val inZones = new mutable.HashSet[mutable.HashSet[Free]]()
       // First fetch all the 'habitat-specifying' terms for this spider and
       // convert them into a 'set-lattice' formula, which we will normalise:
       val habitatTerms = isaHabitatSpecifiersToFormula(spiderIndex, conjuncts)
       // If there are no habitat-specifying terms, then the spider can live anywhere:
       if (habitatTerms == null) {
-        addSubsetsFromTo(contours.toSeq, HashSet.empty, inZones)
+        addSubsetsFromTo(contours.toSeq, mutable.HashSet.empty, inZones)
       } else {
         // There are some habitat-specifying terms. Calculate the disjunctive
         // normal form of the habitat-specifying formula (this makes it then
@@ -454,18 +457,18 @@ object Translations {
           //		'd', and 'other' are all contours not mentioned in 'd',
           //		then '{x in P(other) | positive union x}' is the set of all
           //		sub zones of the region specified in clause 'd':
-          val positive = d.filter(a => a match {
+          val positive = d.filter {
             case Atom(s) => true
             case _ => false
-          }).map(a => a match {
+          }.map {
             case Atom(s) => s
             case _ => throw new RuntimeException("Found an unknown term in a set which should contain only contour atoms.")
-          })
-          val specified = d.map(a => a match {
+          }
+          val specified = d.map {
             case Atom(s) => s
             case Neg(Atom(s)) => s
             case _ => throw new RuntimeException("Found an unknown term in a set which should contain only contour literals.")
-          })
+          }
           val other = contours.filter(a => !specified.contains(a))
           addSubsetsFromTo(other.toBuffer, positive, inZones)
         }
@@ -476,8 +479,7 @@ object Translations {
     (habitats, spiderType)
   }
 
-  private def converToToPSD(spiders: Buffer[Free], spiderType: Typ, conjuncts: Buffer[Term]): (PrimarySpiderDiagram, Typ) = {
-    // Check spider inequalities:
+  private def convertToPSD(spiders: IndexedSeq[Free], spiderType: Typ, conjuncts: mutable.Buffer[Term]): (PrimarySpiderDiagram, Typ) = {
     checkSpiderInequalities(spiders, conjuncts)
 
     // Get all contour names mentioned in this unitary spider diagram, the
