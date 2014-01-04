@@ -2,7 +2,7 @@ package mixr.isabelle.pure.lib
 
 import org.junit.Assert._
 import org.junit.Test
-import isabelle.Term.{Free, Type, Const, App}
+import isabelle.Term._
 import TermYXMLTest._
 import java.io.{LineNumberReader, InputStreamReader}
 import java.nio.charset.Charset
@@ -70,5 +70,9 @@ object TermYXMLTest {
     val inputStream = classOf[TermYXMLTest].getResourceAsStream(file)
     val reader = new InputStreamReader(inputStream, Charset.forName("US-ASCII"))
     new LineNumberReader(reader).readLine()
+  }
+
+  def parseYXMLFile(file: String): Term = {
+    TermYXML.parseYXML(readFirstLine(file))
   }
 }

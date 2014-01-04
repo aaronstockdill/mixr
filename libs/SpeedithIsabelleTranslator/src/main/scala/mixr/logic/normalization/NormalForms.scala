@@ -5,11 +5,12 @@ import scala.collection.mutable
 
 object NormalForms {
 
-  def toConjuncts[A, B](conjuncts: Seq[B], converter: B => Formula[A]) = {
-    if (conjuncts == null || conjuncts.length < 1)
+  def toConjuncts[A, B](conjuncts: Seq[B], converter: B => Formula[A]): Formula[A] = {
+    if (conjuncts == null || conjuncts.length < 1) {
       null
-    else
+    } else {
       ((null: Formula[A]) /: conjuncts)((x, y) => if (x == null) converter(y) else Inf(x, converter(y)))
+    }
   }
 
   def toNNF[A](formula: Formula[A]): Formula[A] = {
@@ -55,40 +56,76 @@ object NormalForms {
 
   def extractDistinctDisjuncts[A](formula: Formula[A], terms: mutable.HashSet[Formula[A]] = mutable.HashSet[Formula[A]]()): mutable.HashSet[Formula[A]] = {
     formula match {
-      case Sup(Sup(a, b), c) => extractDistinctDisjuncts(a, terms); extractDistinctDisjuncts(b, terms); extractDistinctDisjuncts(c, terms)
-      case Sup(a, Sup(b, c)) => extractDistinctDisjuncts(a, terms); extractDistinctDisjuncts(b, terms); extractDistinctDisjuncts(c, terms)
-      case Sup(lhs, rhs) => terms += lhs; terms += rhs
-      case x => terms += x
+      case Sup(Sup(a, b), c) =>
+        extractDistinctDisjuncts(a, terms)
+        extractDistinctDisjuncts(b, terms)
+        extractDistinctDisjuncts(c, terms)
+      case Sup(a, Sup(b, c)) =>
+        extractDistinctDisjuncts(a, terms)
+        extractDistinctDisjuncts(b, terms)
+        extractDistinctDisjuncts(c, terms)
+      case Sup(lhs, rhs) =>
+        terms += lhs
+        terms += rhs
+      case x =>
+        terms += x
     }
     terms
   }
 
   def extractDisjuncts[A](formula: Formula[A], terms: ArrayBuffer[Formula[A]] = ArrayBuffer[Formula[A]]()): ArrayBuffer[Formula[A]] = {
     formula match {
-      case Sup(Sup(a, b), c) => extractDisjuncts(a, terms); extractDisjuncts(b, terms); extractDisjuncts(c, terms)
-      case Sup(a, Sup(b, c)) => extractDisjuncts(a, terms); extractDisjuncts(b, terms); extractDisjuncts(c, terms)
-      case Sup(lhs, rhs) => terms += lhs; terms += rhs
-      case x => terms += x
+      case Sup(Sup(a, b), c) =>
+        extractDisjuncts(a, terms)
+        extractDisjuncts(b, terms)
+        extractDisjuncts(c, terms)
+      case Sup(a, Sup(b, c)) =>
+        extractDisjuncts(a, terms)
+        extractDisjuncts(b, terms)
+        extractDisjuncts(c, terms)
+      case Sup(lhs, rhs) =>
+        terms += lhs
+        terms += rhs
+      case x =>
+        terms += x
     }
     terms
   }
 
   def extractDistinctConjuncts[A](formula: Formula[A], terms: mutable.HashSet[Formula[A]] = mutable.HashSet[Formula[A]]()): mutable.HashSet[Formula[A]] = {
     formula match {
-      case Inf(Inf(a, b), c) => extractDistinctConjuncts(a, terms); extractDistinctConjuncts(b, terms); extractDistinctConjuncts(c, terms)
-      case Inf(a, Inf(b, c)) => extractDistinctConjuncts(a, terms); extractDistinctConjuncts(b, terms); extractDistinctConjuncts(c, terms)
-      case Inf(lhs, rhs) => terms += lhs; terms += rhs
-      case x => terms += x
+      case Inf(Inf(a, b), c) =>
+        extractDistinctConjuncts(a, terms)
+        extractDistinctConjuncts(b, terms)
+        extractDistinctConjuncts(c, terms)
+      case Inf(a, Inf(b, c)) =>
+        extractDistinctConjuncts(a, terms)
+        extractDistinctConjuncts(b, terms)
+        extractDistinctConjuncts(c, terms)
+      case Inf(lhs, rhs) =>
+        terms += lhs
+        terms += rhs
+      case x =>
+        terms += x
     }
     terms
   }
 
   def extractConjuncts[A](formula: Formula[A], terms: ArrayBuffer[Formula[A]] = ArrayBuffer[Formula[A]]()): ArrayBuffer[Formula[A]] = {
     formula match {
-      case Inf(Inf(a, b), c) => extractConjuncts(a, terms); extractConjuncts(b, terms); extractConjuncts(c, terms)
-      case Inf(a, Inf(b, c)) => extractConjuncts(a, terms); extractConjuncts(b, terms); extractConjuncts(c, terms)
-      case Inf(lhs, rhs) => terms += lhs; terms += rhs
-      case x => terms += x
+      case Inf(Inf(a, b), c) =>
+        extractConjuncts(a, terms)
+        extractConjuncts(b, terms)
+        extractConjuncts(c, terms)
+      case Inf(a, Inf(b, c)) =>
+        extractConjuncts(a, terms)
+        extractConjuncts(b, terms)
+        extractConjuncts(c, terms)
+      case Inf(lhs, rhs) =>
+        terms += lhs
+        terms += rhs
+      case x =>
+        terms += x
     }
     terms
   }

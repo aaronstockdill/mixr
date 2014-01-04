@@ -42,7 +42,7 @@ object TermUtils {
   private val HOL_EMPTY_STRING_TERM = Const(HOL_LIST_NIL, HOL_CHAR_LIST_TYPE)
   private val HOL_BOOL_TYPE = Type("HOL.bool", List())
   private val HOL_NON_EMPTY_STRING_TERM = Const(HOL_LIST_CONS, Type(ISA_FUN, List(HOL_CHAR_TYPE, Type(ISA_FUN, List(HOL_CHAR_LIST_TYPE, HOL_CHAR_LIST_TYPE)))))
-  private val HOL_LIST_TYPE = List("HOL.type")
+  val HOL_LIST_TYPE = List("HOL.type")
   private val HOL_LIST_FREE_TYPE = TFree("'a", HOL_LIST_TYPE)
   private val PLACEHOLDER_MIXR = "IsaMixR.MixRNoVars"
   private val PLACEHOLDER_MIXRVARS = "IsaMixR.MixR"

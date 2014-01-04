@@ -1,33 +1,19 @@
 package speedith.mixr.isabelle
 
 import isabelle.Term._
-import speedith.core.lang.Region
-import speedith.core.lang.SpiderDiagram
-import speedith.core.lang.SpiderDiagrams
+import speedith.core.lang._
 import speedith.core.lang.reader.ReadingException
 import mixr.isabelle.pure.lib.TermUtils._
 import speedith.core.lang.Operator
 import speedith.core.lang.Operator._
 import scala.collection.immutable.HashMap
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.{mutable, JavaConversions}
-import speedith.core.lang.PrimarySpiderDiagram
+import scala.collection.mutable
 import mixr.isabelle.pure.lib.TermUtils
 import mixr.logic.normalization._
 import NormalForms._
-import speedith.core.lang.Zone
 import scala.collection.JavaConversions._
-import isabelle.Term.App
-import isabelle.Term.Free
-import mixr.logic.normalization.Atom
-import mixr.logic.normalization.Inf
-import isabelle.Term.Abs
-import mixr.logic.normalization.Neg
-import isabelle.Term.Type
-import isabelle.Term.Const
-import isabelle.Term.Bound
-import isabelle.Term
-import isabelle.Term.Term
+import mixr.logic.normalization._
 
 object Translations {
 
@@ -75,7 +61,7 @@ object Translations {
   }
 
 
-  private def extractHOLPremises(premises: java.util.List[Term.Term]): mutable.Buffer[Term.Term] = {
+  private def extractHOLPremises(premises: java.util.List[Term]): mutable.Buffer[Term] = {
     premises.map {
       case App(Const(HOL_TRUEPROP, typ), body) => body
       case t => throw new ReadingException("The list of premises contains a term that is not a Trueprop: '%s;.".format(t.toString))
@@ -491,11 +477,20 @@ object Translations {
     val (habitats, spiderType2) = extractHabitats(conjuncts, spiders, contours, spiderType1)
 
     // TODO: Handle shaded zones.
+    val shadedZones: Seq[Zone] = ShadedZoneTranslator(conjuncts, spiders.length, contours.map(_.name)).shadedZones
 
     // Check that no other terms are left in the conjuncts. Otherwise the translation must fail:
     if (conjuncts.length != 0) throw new ReadingException("The formula is not in the SNF form. There is an unknown term in the specification of a unitary spider diagram: %s".format(conjuncts(0)))
 
-    (SpiderDiagrams.createPrimarySD(new java.util.TreeSet[String](scala.collection.JavaConversions.asJavaCollection(spiders.map(s => s.name))), habitats, null, null), spiderType1)
+    Pair(
+      SpiderDiagrams.createPrimarySD(
+        spiders.map(_.name),
+        habitats,
+        shadedZones,
+        null
+      ),
+      spiderType1
+    )
   }
 
 }

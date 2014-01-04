@@ -10,7 +10,19 @@ lemma test1: "(\<exists>s1 s2. distinct[s1, s2] \<and> s1 \<in> A \<inter> B \<a
   apply(auto)
   oops
 
+(* Spider Diagram Shaded zones translation test. *)
+lemma test_shaded_zones: "(\<exists>s1 s2. distinct[s1, s2] \<and> s1 \<in> A \<inter> B \<and> s2 \<in> (A - B) \<union> (B - A) \<and> A \<subseteq> {s1, s2}) \<longrightarrow> (\<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<and> t2 \<in> B) \<and> (A \<inter> B) \<noteq> {}"
+  apply(auto)
+  oops
 
+lemma set_parsing_test_emptySet: "{} \<subseteq> {a}"
+  oops
+
+lemma set_parsing_test_largeSet: "{a,b} \<subseteq> {a,b,c,d}"
+  oops
+
+lemma shaded_zone_test_simple: "\<exists>s1 s2. A \<subseteq> {s1, s2}"
+  oops
 
 
 lemma test2: "\<lbrakk> \<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<inter> B \<and> t2 \<in> (A - B) \<union> (B - A) \<rbrakk>

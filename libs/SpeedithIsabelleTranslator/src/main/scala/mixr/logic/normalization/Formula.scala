@@ -84,8 +84,10 @@ case class Inf[+A](lhs: Formula[A], rhs: Formula[A]) extends Formula[A] {
 case class Neg[+A](body: Formula[A]) extends Formula[A] {
   override def toString: String = {
     body match {
-      case Neg(_) | Atom(_) => "¬" + body.toString
-      case _ => "!(%s)".format(body)
+      case Neg(_) | Atom(_) =>
+        "!" + body.toString
+      case _ =>
+        "!(%s)".format(body)
     }
   }
 
