@@ -5,6 +5,10 @@ import mixr.isabelle.pure.lib.TermUtils
 
 object Sets {
 
+  val HOL_SET_DIFFERENCE = "Groups.minus_class.minus"
+  val HOL_SET_COMPLEMENT = "Groups.uminus_class.uminus"
+  val HOL_SET_INTERSECTION = "Lattices.inf_class.inf"
+  val HOL_SET_UNION = "Lattices.sup_class.sup"
   val HOL_EMPTY_SET_CONST = Const("Orderings.bot_class.bot", Type("Set.set", List(TFree("'a", TermUtils.HOL_LIST_TYPE))))
   val HOL_SET_INSERT_CONST = Const("Set.insert", Type("fun", List(TFree("'a", TermUtils.HOL_LIST_TYPE), Type("fun", List(Type("Set.set", List(TFree("'a", TermUtils.HOL_LIST_TYPE))), Type("Set.set", List(TFree("'a", TermUtils.HOL_LIST_TYPE))))))))
   val HOL_SUBSET_CONST = Const("Orderings.ord_class.less_eq", Type("fun", List(Type("Set.set", List(TFree("'a", TermUtils.HOL_LIST_TYPE))), Type("fun", List(Type("Set.set", List(TFree("'a", TermUtils.HOL_LIST_TYPE))), Type("HOL.bool", List()))))))

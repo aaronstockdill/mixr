@@ -24,6 +24,9 @@ lemma set_parsing_test_largeSet: "{a,b} \<subseteq> {a,b,c,d}"
 lemma shaded_zone_test_simple: "\<exists>s1 s2. A \<subseteq> {s1, s2}"
   oops
 
+lemma shaded_zone_test_complex: "\<exists>s1 s2. (A \<setminus> ((B \<union> C) \<inter> D)) \<subseteq> {s1, s2}"
+  oops
+
 
 lemma test2: "\<lbrakk> \<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<inter> B \<and> t2 \<in> (A - B) \<union> (B - A) \<rbrakk>
             \<Longrightarrow> (\<exists>u1 u2. distinct[u1, u2] \<and> u1 \<in> A \<and> u2 \<in> B)"

@@ -54,23 +54,23 @@ object NormalForms {
     toDNFImpl(nnf)
   }
 
-  def extractDistinctDisjuncts[A](formula: Formula[A], terms: mutable.HashSet[Formula[A]] = mutable.HashSet[Formula[A]]()): mutable.HashSet[Formula[A]] = {
+  def extractDistinctDisjuncts[A](formula: Formula[A], extractedDisjuncts: mutable.HashSet[Formula[A]] = mutable.HashSet[Formula[A]]()): mutable.HashSet[Formula[A]] = {
     formula match {
       case Sup(Sup(a, b), c) =>
-        extractDistinctDisjuncts(a, terms)
-        extractDistinctDisjuncts(b, terms)
-        extractDistinctDisjuncts(c, terms)
+        extractDistinctDisjuncts(a, extractedDisjuncts)
+        extractDistinctDisjuncts(b, extractedDisjuncts)
+        extractDistinctDisjuncts(c, extractedDisjuncts)
       case Sup(a, Sup(b, c)) =>
-        extractDistinctDisjuncts(a, terms)
-        extractDistinctDisjuncts(b, terms)
-        extractDistinctDisjuncts(c, terms)
+        extractDistinctDisjuncts(a, extractedDisjuncts)
+        extractDistinctDisjuncts(b, extractedDisjuncts)
+        extractDistinctDisjuncts(c, extractedDisjuncts)
       case Sup(lhs, rhs) =>
-        terms += lhs
-        terms += rhs
+        extractedDisjuncts += lhs
+        extractedDisjuncts += rhs
       case x =>
-        terms += x
+        extractedDisjuncts += x
     }
-    terms
+    extractedDisjuncts
   }
 
   def extractDisjuncts[A](formula: Formula[A], terms: ArrayBuffer[Formula[A]] = ArrayBuffer[Formula[A]]()): ArrayBuffer[Formula[A]] = {

@@ -1,7 +1,7 @@
 
 package speedith.mixr.isabelle
 
-import org.junit.{Ignore, Test}
+import org.junit.Test
 import isabelle.Term._
 import org.junit.Assert.{assertEquals, assertThat}
 import org.hamcrest.CoreMatchers.equalTo
@@ -14,20 +14,20 @@ import ShadedZoneTranslator._
 class ShadedZoneTranslatorTest {
 
   val numberOfSpiders = 2
-  val allContours1 = Set("A", "B")
-  val shadedZoneTranslator1 = ShadedZoneTranslator(List(SHADED_ZONE_A_SPEC_TERM), numberOfSpiders, allContours1)
+  val allContoursSimple = Set("A", "B")
+  val allContoursComplex = Set("A", "B", "C", "D")
+  val shadedZoneTranslator1 = ShadedZoneTranslator(List(SHADED_ZONE_SPEC_SIMPLE), numberOfSpiders, allContoursSimple)
 
   @Test
   def extractShadingSpecificationTerms_should_return_a_pair_of_terms(): Unit = {
-    val setSpecification = extractShadingSpecificationTerms(SHADED_ZONE_A_SPEC_TERM)
+    val setSpecification = extractShadingSpecificationTerms(SHADED_ZONE_SPEC_SIMPLE)
     assertEquals(
-      Some((setA, setOfSpiders_s1_s2)),
+      Some((SHADED_SET_TERM_SIMPLE, SPIDER_SET_TERM_SIMPLE)),
       setSpecification
     )
   }
 
   @Test
-  @Ignore
   def extractShadedZones_must_return_the_shaded_zones(): Unit = {
     val shadedZones = shadedZoneTranslator1.shadedZones
     assertThat(
@@ -39,20 +39,33 @@ class ShadedZoneTranslatorTest {
     )
   }
 
+  @Test
+  def extractShadedZones_must_return_the_shaded_zones_in_a_complex_set_specification(): Unit = {
+    val shadedZones = ShadedZoneTranslator(List(SHADED_ZONE_SPEC_COMPLEX), numberOfSpiders, allContoursComplex).shadedZones
+    assertThat(
+      shadedZones,
+      equalTo(Seq[Zone](
+        Zone.fromInContours("A", "D").withOutContours("B", "C"),
+        Zone.fromInContours("A").withOutContours("B", "C", "D"),
+        Zone.fromInContours("A", "B", "C").withOutContours("D"),
+        Zone.fromInContours("A", "B").withOutContours("C", "D"),
+        Zone.fromInContours("A", "C").withOutContours("B", "D")
+      ))
+    )
+  }
+
   @Test(expected = classOf[IllegalArgumentException])
-  @Ignore
   def extractShadedZones_must_throw_an_exception_if_some_spiders_are_missing(): Unit = {
     val largerNumberOfSpiders = 3
-    ShadedZoneTranslator(List(SHADED_ZONE_A_SPEC_TERM), largerNumberOfSpiders, Set.empty)
+    ShadedZoneTranslator(List(SHADED_ZONE_SPEC_SIMPLE), largerNumberOfSpiders, Set.empty)
   }
 
   @Test
-  @Ignore
   def extractShadedZones_must_return_some_terms_without_shading(): Unit = {
-    val termsWithoutShading = ShadedZoneTranslator(List(setA, setOfSpiders_s1_s2), numberOfSpiders, Set.empty).termsWithoutShading
+    val termsWithoutShading = ShadedZoneTranslator(List(SHADED_SET_TERM_SIMPLE, SPIDER_SET_TERM_SIMPLE), numberOfSpiders, Set.empty).termsWithoutShading
     assertThat(
       termsWithoutShading,
-      equalTo(Seq(setA, setOfSpiders_s1_s2))
+      equalTo(Seq(SHADED_SET_TERM_SIMPLE, SPIDER_SET_TERM_SIMPLE))
     )
   }
 
@@ -70,15 +83,41 @@ object ShadedZoneTranslatorTest {
   /**
    * `∃s1 s2. A ⊆ {s1, s2}`
    */
-  val SIMPLE_SHADED_ZONE_FORMULA = parseYXMLFile("/speedith/mixr/isabelle/UnescapedYXML_shaded_zone_simple")
+  private val SIMPLE_SHADING_FULL_FORMULA = parseYXMLFile("/speedith/mixr/isabelle/UnescapedYXML_shaded_zone_simple")
+  val SHADED_ZONE_SPEC_SIMPLE = extractShadingSpecification(SIMPLE_SHADING_FULL_FORMULA)
+  val SHADED_SET_TERM_SIMPLE = extractSetFromShadingSpec(SHADED_ZONE_SPEC_SIMPLE)
+  val SPIDER_SET_TERM_SIMPLE = extractSpiderSetFromShadingSpec(SHADED_ZONE_SPEC_SIMPLE)
+  /**
+   * `∃s1 s2. (A - ((B ∪ C) ∩ D)) ⊆ {s1, s2}`
+   * A & !((B | C) & D)
+   * A & (!(B | C) | !D)
+   * A & ((!B & !C) | !D)
+   * (A & !B & !C) | (A & !D)
+   */
+  private val COMPLEX_SHADING_FULL_FORMULA = parseYXMLFile("/speedith/mixr/isabelle/UnescapedYXML_shaded_zone_complex")
+  val SHADED_ZONE_SPEC_COMPLEX = extractShadingSpecification(COMPLEX_SHADING_FULL_FORMULA)
+  val SHADED_SET_TERM_COMPLEX = extractSetFromShadingSpec(SHADED_ZONE_SPEC_COMPLEX)
+  val SPIDER_SET_TERM_COMPLEX = extractSpiderSetFromShadingSpec(SHADED_ZONE_SPEC_COMPLEX)
 
-  val SHADED_ZONE_A_SPEC_TERM = SIMPLE_SHADED_ZONE_FORMULA match {
-    case App(_, App(exHOLConst, Abs(s1, typ1, App(exHOLConst2, Abs(s2, typ2, setSpec))))) => setSpec
-    case _ => throw new IllegalStateException()
+
+  private def extractSetFromShadingSpec(shadingSpecTerm: Term): Term = {
+    shadingSpecTerm match {
+      case App(App(lessEqConst, setATerm), setOfSpiders) => setATerm
+      case _ => throw new IllegalStateException()
+    }
   }
 
-  val (setA, setOfSpiders_s1_s2) = SHADED_ZONE_A_SPEC_TERM match {
-    case App(App(lessEqConst, setATerm), setOfSpiders) => (setATerm, setOfSpiders)
-    case _ => throw new IllegalStateException()
+  private def extractSpiderSetFromShadingSpec(shadingSpecTerm: Term): Term = {
+    shadingSpecTerm match {
+      case App(App(lessEqConst, setATerm), setOfSpiders) => setOfSpiders
+      case _ => throw new IllegalStateException()
+    }
+  }
+
+  private def extractShadingSpecification(term: Term): Term = {
+    term match {
+      case App(_, App(exHOLConst, Abs(s1, typ1, App(exHOLConst2, Abs(s2, typ2, setSpec))))) => setSpec
+      case _ => throw new IllegalStateException()
+    }
   }
 }

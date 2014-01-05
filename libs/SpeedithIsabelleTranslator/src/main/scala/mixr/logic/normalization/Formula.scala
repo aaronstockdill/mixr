@@ -33,6 +33,7 @@ sealed abstract class Formula[+A] {
 
 object Formula {
   implicit def string2atom(str: String): Formula[String] = Atom(str)
+
   implicit def symbol2atom(atomSymbol: Symbol): Formula[Symbol] = Atom(atomSymbol)
 }
 
@@ -50,17 +51,6 @@ case class Atom[+A](atom: A) extends Formula[A] {
 }
 
 case class Inf[+A](lhs: Formula[A], rhs: Formula[A]) extends Formula[A] {
-  override def toString: String = {
-    val lhsStr = lhs match {
-      case Sup(_, _) => "(" + lhs.toString + ")"
-      case _ => lhs.toString
-    }
-    val rhsStr = rhs match {
-      case Sup(_, _) => "(" + rhs.toString + ")"
-      case _ => rhs.toString
-    }
-    lhsStr + " \u2227 " + rhsStr
-  }
 
   /**
    * This formula is in CNF if and only if its children are in CNF.
@@ -78,14 +68,27 @@ case class Inf[+A](lhs: Formula[A], rhs: Formula[A]) extends Formula[A] {
     case _ => lhs.isDNF && rhs.isDNF
   }
 
-  def isNNF: Boolean = lhs.isNNF && rhs.isNNF
+  def isNNF: Boolean = {
+    lhs.isNNF && rhs.isNNF
+  }
+
+  override def toString: String = {
+    parenthesize(lhs) + " \u2227 " + parenthesize(rhs)
+  }
+
+  private def parenthesize(nestedTerm: Formula[_]): String = {
+    nestedTerm match {
+      case Sup(_, _) => "(" + nestedTerm + ")"
+      case _ => nestedTerm.toString
+    }
+  }
 }
 
 case class Neg[+A](body: Formula[A]) extends Formula[A] {
   override def toString: String = {
     body match {
       case Neg(_) | Atom(_) =>
-        "!" + body.toString
+        "!" + body
       case _ =>
         "!(%s)".format(body)
     }
@@ -106,7 +109,10 @@ case class Neg[+A](body: Formula[A]) extends Formula[A] {
 }
 
 case class Sup[+A](lhs: Formula[A], rhs: Formula[A]) extends Formula[A] {
-  override def toString: String = "%s \u2228 %s".format(lhs.toString, rhs.toString)
+
+  override def toString: String = {
+    "%s \u2228 %s".format(lhs, rhs)
+  }
 
   /**
    * This formula is in CNF if and only if it contains no Inf(_, _) children
@@ -124,5 +130,7 @@ case class Sup[+A](lhs: Formula[A], rhs: Formula[A]) extends Formula[A] {
     lhs.isDNF && rhs.isDNF
   }
 
-  def isNNF: Boolean = lhs.isNNF && rhs.isNNF
+  def isNNF: Boolean = {
+    lhs.isNNF && rhs.isNNF
+  }
 }

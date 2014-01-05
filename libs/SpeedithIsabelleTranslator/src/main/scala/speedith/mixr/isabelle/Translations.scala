@@ -156,10 +156,6 @@ object Translations {
 
   private val HOLListDistinct = "List.distinct"
   private val HOLSetMember = "Set.member"
-  private val HOLSetDifference = "Groups.minus_class.minus"
-  private val HOLSetComplement = "Groups.uminus_class.uminus"
-  private val HOLSetIntersection = "Lattices.inf_class.inf"
-  private val HOLSetUnion = "Lattices.sup_class.sup"
 
   /**
    * Extracts conjunctively connected spider diagrams from the list of premises.
@@ -336,17 +332,6 @@ object Translations {
    */
   private def getSpiderWithBoundIndex(boundIndex: Int, spiders: IndexedSeq[Free]): Free = spiders(spiders.length - 1 - boundIndex)
 
-  private def isaSetsToNormalForms(term: Term): Formula[Free] = {
-    term match {
-      case App(App(Const(HOLSetUnion, _), lhs), rhs) => Sup(isaSetsToNormalForms(lhs), isaSetsToNormalForms(rhs))
-      case App(App(Const(HOLSetIntersection, _), lhs), rhs) => Inf(isaSetsToNormalForms(lhs), isaSetsToNormalForms(rhs))
-      case App(Const(HOLSetComplement, _), lhs) => Neg(isaSetsToNormalForms(lhs))
-      case App(App(Const(HOLSetDifference, _), lhs), rhs) => Inf(isaSetsToNormalForms(lhs), Neg(isaSetsToNormalForms(rhs)))
-      case t@Free(_, _) => Atom(t)
-      case _ => null
-    }
-  }
-
   private def addSubsetsFromTo[A](fromSet: Seq[A], mustContain: mutable.HashSet[A], toSet: mutable.HashSet[mutable.HashSet[A]], out: mutable.HashSet[A] = mutable.HashSet[A](), startIndex: Int = 0): Unit = {
     var i = startIndex
     toSet += mustContain ++ out
@@ -370,28 +355,28 @@ object Translations {
     new Region(zones)
   }
 
-  private def isaHabitatSpecifiersToFormulaTerm(spiderIndex: Int, term: Term): Formula[Free] = {
+  private def habitatSpecificationTermToFormula(spiderIndex: Int, term: Term): Formula[Free] = {
     term match {
       case App(App(Const(HOL_CONJUNCTION, _), lhs), rhs) => {
-        val flhs = isaHabitatSpecifiersToFormulaTerm(spiderIndex, lhs)
+        val flhs = habitatSpecificationTermToFormula(spiderIndex, lhs)
         if (flhs == null) return null
-        val frhs = isaHabitatSpecifiersToFormulaTerm(spiderIndex, rhs)
+        val frhs = habitatSpecificationTermToFormula(spiderIndex, rhs)
         if (frhs == null) return null
         Inf(flhs, frhs)
       }
       case App(App(Const(HOL_DISJUNCTION, _), lhs), rhs) => {
-        val flhs = isaHabitatSpecifiersToFormulaTerm(spiderIndex, lhs)
+        val flhs = habitatSpecificationTermToFormula(spiderIndex, lhs)
         if (flhs == null) return null
-        val frhs = isaHabitatSpecifiersToFormulaTerm(spiderIndex, rhs)
+        val frhs = habitatSpecificationTermToFormula(spiderIndex, rhs)
         if (frhs == null) return null
         Sup(flhs, frhs)
       }
       case App(Const(HOL_NOT, _), region) => {
-        val f = isaHabitatSpecifiersToFormulaTerm(spiderIndex, region)
+        val f = habitatSpecificationTermToFormula(spiderIndex, region)
         if (f == null) null else Neg(f)
       }
       case App(App(Const(HOLSetMember, _), Bound(boundIndex)), region) if boundIndex == spiderIndex => {
-        isaSetsToNormalForms(region)
+        HOLSetConversions.holSetSpecToFormula(region)
       }
       case _ => null
     }
@@ -401,7 +386,7 @@ object Translations {
     var formulae = ArrayBuffer[Formula[Free]]()
     var i = conjuncts.length - 1
     while (i >= 0) {
-      val f = isaHabitatSpecifiersToFormulaTerm(spiderIndex, conjuncts(i))
+      val f = habitatSpecificationTermToFormula(spiderIndex, conjuncts(i))
       if (f != null) {
         formulae += f
         conjuncts.remove(i)
@@ -426,7 +411,7 @@ object Translations {
         // There are some habitat-specifying terms. Calculate the disjunctive
         // normal form of the habitat-specifying formula (this makes it then
         // easy to find all zones of the habitat):
-        val disjuncts = extractDistinctDisjuncts(toDNF(habitatTerms)).map(d => NormalForms.extractDistinctConjuncts(d))
+        val disjuncts = extractDistinctDisjuncts(toDNF(habitatTerms)).map(d => extractDistinctConjuncts(d))
         // Remove all self-contradicting disjuncts:
         disjuncts.retain(d => d.forall {
           case Neg(s) => !d.contains(s)
@@ -443,12 +428,8 @@ object Translations {
           //		'd', and 'other' are all contours not mentioned in 'd',
           //		then '{x in P(other) | positive union x}' is the set of all
           //		sub zones of the region specified in clause 'd':
-          val positive = d.filter {
-            case Atom(s) => true
-            case _ => false
-          }.map {
+          val positive = d.collect {
             case Atom(s) => s
-            case _ => throw new RuntimeException("Found an unknown term in a set which should contain only contour atoms.")
           }
           val specified = d.map {
             case Atom(s) => s
@@ -474,13 +455,14 @@ object Translations {
     val (contours, spiderType1) = findContours(conjuncts, spiderType)
 
     // Get spider habitats:
-    val (habitats, spiderType2) = extractHabitats(conjuncts, spiders, contours, spiderType1)
+    val (habitats, _) = extractHabitats(conjuncts, spiders, contours, spiderType1)
 
-    // TODO: Handle shaded zones.
-    val shadedZones: Seq[Zone] = ShadedZoneTranslator(conjuncts, spiders.length, contours.map(_.name)).shadedZones
+    val shadedZoneTranslator = ShadedZoneTranslator(conjuncts, spiders.length, contours.map(_.name))
+    val shadedZones = shadedZoneTranslator.shadedZones
+    val remainingConjunctsAfterShading = shadedZoneTranslator.termsWithoutShading
 
     // Check that no other terms are left in the conjuncts. Otherwise the translation must fail:
-    if (conjuncts.length != 0) throw new ReadingException("The formula is not in the SNF form. There is an unknown term in the specification of a unitary spider diagram: %s".format(conjuncts(0)))
+    if (remainingConjunctsAfterShading.length != 0) throw new ReadingException("The formula is not in the SNF form. There is an unknown term in the specification of a unitary spider diagram: %s".format(conjuncts(0)))
 
     Pair(
       SpiderDiagrams.createPrimarySD(
