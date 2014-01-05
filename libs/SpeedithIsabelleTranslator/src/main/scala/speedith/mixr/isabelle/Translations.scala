@@ -454,15 +454,13 @@ object Translations {
     //		Free(B,Type(fun,List(<spiderType>, Type(HOL.bool,List()))))
     val (contours, spiderType1) = findContours(conjuncts, spiderType)
 
-    // Get spider habitats:
     val (habitats, _) = extractHabitats(conjuncts, spiders, contours, spiderType1)
 
     val shadedZoneTranslator = ShadedZoneTranslator(conjuncts, spiders.length, contours.map(_.name))
     val shadedZones = shadedZoneTranslator.shadedZones
     val remainingConjunctsAfterShading = shadedZoneTranslator.termsWithoutShading
 
-    // Check that no other terms are left in the conjuncts. Otherwise the translation must fail:
-    if (remainingConjunctsAfterShading.length != 0) throw new ReadingException("The formula is not in the SNF form. There is an unknown term in the specification of a unitary spider diagram: %s".format(conjuncts(0)))
+    assertNoExtraneousTerms(remainingConjunctsAfterShading)
 
     Pair(
       SpiderDiagrams.createPrimarySD(
@@ -475,4 +473,10 @@ object Translations {
     )
   }
 
+
+  private def assertNoExtraneousTerms(remainingConjunctsAfterShading: Seq[Term]) {
+    if (remainingConjunctsAfterShading.length != 0) {
+      throw new ReadingException("The formula is not in the SNF form. There is an unknown term in the specification of a unitary spider diagram: %s".format(remainingConjunctsAfterShading.head))
+    }
+  }
 }
