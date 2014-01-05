@@ -91,15 +91,121 @@
                 <package>icircles.recomposition</package>
                 <package>icircles.test</package>
                 <package>icircles.util</package>
+                <package>mixr.logic.normalization</package>
+                <package>org.antlr</package>
+                <package>org.antlr.analysis</package>
+                <package>org.antlr.codegen</package>
+                <package>org.antlr.grammar.v2</package>
+                <package>org.antlr.grammar.v3</package>
+                <package>org.antlr.misc</package>
                 <package>org.antlr.runtime</package>
                 <package>org.antlr.runtime.debug</package>
                 <package>org.antlr.runtime.misc</package>
                 <package>org.antlr.runtime.tree</package>
+                <package>org.antlr.tool</package>
+                <package>org.apache.batik</package>
+                <package>org.apache.batik.bridge</package>
+                <package>org.apache.batik.bridge.svg12</package>
+                <package>org.apache.batik.css.dom</package>
+                <package>org.apache.batik.css.engine</package>
+                <package>org.apache.batik.css.engine.sac</package>
+                <package>org.apache.batik.css.engine.value</package>
+                <package>org.apache.batik.css.engine.value.css2</package>
+                <package>org.apache.batik.css.engine.value.svg</package>
+                <package>org.apache.batik.css.engine.value.svg12</package>
+                <package>org.apache.batik.css.parser</package>
+                <package>org.apache.batik.dom</package>
+                <package>org.apache.batik.dom.events</package>
+                <package>org.apache.batik.dom.svg</package>
+                <package>org.apache.batik.dom.svg12</package>
+                <package>org.apache.batik.dom.traversal</package>
+                <package>org.apache.batik.dom.util</package>
+                <package>org.apache.batik.ext.awt</package>
+                <package>org.apache.batik.ext.awt.color</package>
+                <package>org.apache.batik.ext.awt.font</package>
+                <package>org.apache.batik.ext.awt.g2d</package>
+                <package>org.apache.batik.ext.awt.geom</package>
+                <package>org.apache.batik.ext.awt.image</package>
+                <package>org.apache.batik.ext.awt.image.codec</package>
+                <package>org.apache.batik.ext.awt.image.codec.tiff</package>
+                <package>org.apache.batik.ext.awt.image.renderable</package>
+                <package>org.apache.batik.ext.awt.image.rendered</package>
+                <package>org.apache.batik.ext.awt.image.spi</package>
+                <package>org.apache.batik.ext.swing</package>
+                <package>org.apache.batik.gvt</package>
+                <package>org.apache.batik.gvt.event</package>
+                <package>org.apache.batik.gvt.filter</package>
+                <package>org.apache.batik.gvt.flow</package>
+                <package>org.apache.batik.gvt.font</package>
+                <package>org.apache.batik.gvt.renderer</package>
+                <package>org.apache.batik.gvt.svg12</package>
+                <package>org.apache.batik.gvt.text</package>
+                <package>org.apache.batik.i18n</package>
+                <package>org.apache.batik.parser</package>
+                <package>org.apache.batik.script</package>
+                <package>org.apache.batik.script.rhino</package>
+                <package>org.apache.batik.svggen</package>
+                <package>org.apache.batik.svggen.font</package>
+                <package>org.apache.batik.svggen.font.table</package>
+                <package>org.apache.batik.util</package>
+                <package>org.apache.batik.util.gui</package>
+                <package>org.apache.batik.util.gui.resource</package>
+                <package>org.apache.batik.util.io</package>
+                <package>org.apache.batik.util.resources</package>
+                <package>org.apache.batik.xml</package>
                 <package>org.apache.commons.cli</package>
+                <package>org.apache.log4j</package>
+                <package>org.apache.log4j.chainsaw</package>
+                <package>org.apache.log4j.config</package>
+                <package>org.apache.log4j.helpers</package>
+                <package>org.apache.log4j.jdbc</package>
+                <package>org.apache.log4j.jmx</package>
+                <package>org.apache.log4j.lf5</package>
+                <package>org.apache.log4j.lf5.util</package>
+                <package>org.apache.log4j.lf5.viewer</package>
+                <package>org.apache.log4j.lf5.viewer.categoryexplorer</package>
+                <package>org.apache.log4j.lf5.viewer.configure</package>
+                <package>org.apache.log4j.net</package>
+                <package>org.apache.log4j.nt</package>
+                <package>org.apache.log4j.or</package>
+                <package>org.apache.log4j.or.jms</package>
+                <package>org.apache.log4j.or.sax</package>
+                <package>org.apache.log4j.pattern</package>
+                <package>org.apache.log4j.rewrite</package>
+                <package>org.apache.log4j.spi</package>
+                <package>org.apache.log4j.varia</package>
+                <package>org.apache.log4j.xml</package>
+                <package>org.w3c.css.sac</package>
+                <package>org.w3c.css.sac.helpers</package>
+                <package>org.w3c.dom.smil</package>
+                <package>org.w3c.dom.svg</package>
+                <package>speedith</package>
+                <package>speedith.cli</package>
+                <package>speedith.core.i18n</package>
+                <package>speedith.core.lang</package>
+                <package>speedith.core.lang.export</package>
+                <package>speedith.core.lang.reader</package>
+                <package>speedith.core.reasoning</package>
+                <package>speedith.core.reasoning.args</package>
+                <package>speedith.core.reasoning.args.selection</package>
+                <package>speedith.core.reasoning.rules</package>
+                <package>speedith.core.reasoning.rules.instructions</package>
+                <package>speedith.core.reasoning.rules.transformers</package>
+                <package>speedith.core.reasoning.rules.transformers.util</package>
+                <package>speedith.core.reasoning.util.unitary</package>
+                <package>speedith.i18n</package>
+                <package>speedith.icircles.util</package>
+                <package>speedith.logging</package>
                 <package>speedith.mixr</package>
                 <package>speedith.mixr.isabelle</package>
                 <package>speedith.mixr.logic</package>
                 <package>speedith.mixr.ui</package>
+                <package>speedith.preferences</package>
+                <package>speedith.ui</package>
+                <package>speedith.ui.input</package>
+                <package>speedith.ui.rules</package>
+                <package>speedith.ui.selection</package>
+                <package>speedith.ui.selection.helpers</package>
             </public-packages>
             <class-path-extension>
                 <runtime-relative-path>ext/commons-cli-1.2.jar</runtime-relative-path>

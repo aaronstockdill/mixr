@@ -92,6 +92,7 @@
             <public-packages>
                 <package>isabelle</package>
                 <package>mixr.isabelle</package>
+                <package>mixr.isabelle.hol.util</package>
                 <package>mixr.isabelle.pure.lib</package>
                 <package>mixr.isabelle.terms</package>
                 <package>scala</package>
