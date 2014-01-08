@@ -1,4 +1,3 @@
-
 package speedith.mixr.isabelle
 
 import org.junit.Test
@@ -10,7 +9,6 @@ import speedith.mixr.isabelle.TranslationsTest.parseYXMLFile
 import ShadedZoneTranslatorTest._
 import ShadedZoneTranslator._
 
-// TODO: WIP: Fix ignored tests.
 class ShadedZoneTranslatorTest {
 
   val numberOfSpiders = 2
