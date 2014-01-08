@@ -73,25 +73,23 @@ object Translations {
   private type Recogniser = PartialFunction[RecogniserIn, RecogniserOut]
 
   private val recogniseBinaryHOLOperator: Recogniser = {
-    case (App(App(Const(operator, typ), lhs), rhs), spiderType) if BinaryOperators contains operator => {
+    case (App(App(Const(operator, typ), lhs), rhs), spiderType) if BinaryOperators contains operator =>
       // If this recognises the meta implications, then it will be without
       // quantified spiders. Therefore the LHS and the RHS must be just normal
       // spider diagrams in the SNF form.
       val (lhsSD, spiderType1) = recognise(lhs, spiderType)
       val (rhsSD, spiderType2) = recognise(rhs, spiderType1)
       (SpiderDiagrams.createCompoundSD(operatorsIsaToSD(operator), lhsSD, rhsSD), spiderType2)
-    }
   }
 
   private val recogniseNegation: Recogniser = {
-    case (App(Const(HOL_NOT, typ), body), spiderType) => {
+    case (App(Const(HOL_NOT, typ), body), spiderType) =>
       val (negSD, spiderType1) = recognise(body, spiderType)
       (SpiderDiagrams.createCompoundSD(Negation, negSD), spiderType1)
-    }
   }
 
   private val recogniseExistential: Recogniser = {
-    case (term@App(Const(HOL_EXISTENTIAL, typ), Abs(spider, spiderType1, body)), spiderType) => {
+    case (term@App(Const(HOL_EXISTENTIAL, typ), Abs(spider, spiderType1, body)), spiderType) =>
       if (!checkSpiderType(spiderType1, spiderType)) throw new ReadingException("Not all spiders are of the same type.")
 
       // Extract all spiders and the conjuncts of the body:
@@ -106,7 +104,6 @@ object Translations {
 
       // Now extract the unitary spider diagram out of the data:
       convertToPSD(spiders, spiderType1, conjuncts)
-    }
   }
 
   private val recogniseTrueprop: Recogniser = {
@@ -114,7 +111,7 @@ object Translations {
   }
 
   private val recogniseMetaAll: Recogniser = {
-    case (term@App(Const(ISA_META_ALL, typ), Abs(spider, spiderType1, body)), spiderType) => {
+    case (term@App(Const(ISA_META_ALL, typ), Abs(spider, spiderType1, body)), spiderType) =>
       if (!checkSpiderType(spiderType1, spiderType)) throw new ReadingException("Not all spiders are of the same type.")
 
       // We have to extract all quantified spiders.
@@ -138,7 +135,6 @@ object Translations {
       val (rhsSD, spiderType3) = recognise(conclusion, spiderType2)
 
       (SpiderDiagrams.createCompoundSD(Implication, lhsSD, rhsSD), spiderType3)
-    }
   }
 
   private val recognise: Recogniser = {
@@ -153,7 +149,6 @@ object Translations {
   }
 
   private val BinaryOperators = Set(HOL_CONJUNCTION, HOL_DISJUNCTION, HOL_IMPLICATION, HOL_EQUALITY, ISA_META_IMPLICATION)
-
   private val HOLListDistinct = "List.distinct"
   private val HOLSetMember = "Set.member"
 
@@ -184,8 +179,11 @@ object Translations {
     var i = 0
     while (i < buffer.length) {
       filter(buffer(i)) match {
-        case Some(x) => buffer.remove(i); retVal += x
-        case None => i = i + 1
+        case Some(x) =>
+          buffer.remove(i)
+          retVal += x
+        case None =>
+          i = i + 1
       }
     }
     retVal
@@ -211,10 +209,9 @@ object Translations {
 
   private def extractConjuncts(term: Term, conjuncts: mutable.Buffer[Term]): Unit = {
     term match {
-      case App(App(Const(HOL_CONJUNCTION, _), lhs), rhs) => {
+      case App(App(Const(HOL_CONJUNCTION, _), lhs), rhs) =>
         extractConjuncts(lhs, conjuncts)
         extractConjuncts(rhs, conjuncts)
-      }
       case App(Const(HOL_TRUEPROP, typ), body) => extractConjuncts(body, conjuncts)
       case x => conjuncts += x
     }
@@ -233,10 +230,9 @@ object Translations {
    */
   private def extractSpidersAndBody(t: Term, variables: mutable.Buffer[Free]): Term = {
     t match {
-      case App(Const(HOL_EXISTENTIAL, _), Abs(varName, varType, body)) => {
+      case App(Const(HOL_EXISTENTIAL, _), Abs(varName, varType, body)) =>
         variables += Free(varName, varType)
         extractSpidersAndBody(body, variables)
-      }
       case _ => t
     }
   }
@@ -263,10 +259,9 @@ object Translations {
       val inequalities = new Array[Boolean](spiders.length * spiders.length)
       val spiderType = spiders(0).typ
       rlRemoveWhere(conjuncts, (t: Term) => t match {
-        case App(Const(HOL_NOT, _), App(App(Const(HOL_EQUALITY, Type(_, List(spiderType1, Type(_, List(spiderType2, _))))), Bound(spider1)), Bound(spider2))) if spiderType1.equals(spiderType2) && checkSpiderType(spiderType1, spiderType) => {
+        case App(Const(HOL_NOT, _), App(App(Const(HOL_EQUALITY, Type(_, List(spiderType1, Type(_, List(spiderType2, _))))), Bound(spider1)), Bound(spider2))) if spiderType1.equals(spiderType2) && checkSpiderType(spiderType1, spiderType) =>
           inequalities(scala.math.min(spider1, spider2) * spiders.length + scala.math.max(spider1, spider2)) = true
           true
-        }
         case _ => false
       })
       for (i <- 0 to spiders.length - 1) {
@@ -305,15 +300,13 @@ object Translations {
 
   private def findContoursInTerm(term: Term, spiderType: Typ, outContours: mutable.HashSet[Free] = mutable.HashSet[Free]()): Typ = {
     term match {
-      case t@Free(predicateName, Type(fun, List(spiderType1))) => {
+      case t@Free(predicateName, Type(fun, List(spiderType1))) =>
         if (!checkSpiderType(spiderType1, spiderType)) throw new ReadingException("A contour's type '%s' does not match the spider's type '%s'.".format(spiderType1, spiderType))
         outContours += t
         spiderType1
-      }
       case Abs(_, _, body) => findContoursInTerm(body, spiderType, outContours)
-      case App(lhs, rhs) => {
+      case App(lhs, rhs) =>
         findContours(List(lhs, rhs), spiderType, outContours)._2
-      }
       case _ => spiderType
     }
   }
@@ -357,27 +350,23 @@ object Translations {
 
   private def habitatSpecificationTermToFormula(spiderIndex: Int, term: Term): Formula[Free] = {
     term match {
-      case App(App(Const(HOL_CONJUNCTION, _), lhs), rhs) => {
+      case App(App(Const(HOL_CONJUNCTION, _), lhs), rhs) =>
         val flhs = habitatSpecificationTermToFormula(spiderIndex, lhs)
         if (flhs == null) return null
         val frhs = habitatSpecificationTermToFormula(spiderIndex, rhs)
         if (frhs == null) return null
         Inf(flhs, frhs)
-      }
-      case App(App(Const(HOL_DISJUNCTION, _), lhs), rhs) => {
+      case App(App(Const(HOL_DISJUNCTION, _), lhs), rhs) =>
         val flhs = habitatSpecificationTermToFormula(spiderIndex, lhs)
         if (flhs == null) return null
         val frhs = habitatSpecificationTermToFormula(spiderIndex, rhs)
         if (frhs == null) return null
         Sup(flhs, frhs)
-      }
-      case App(Const(HOL_NOT, _), region) => {
+      case App(Const(HOL_NOT, _), region) =>
         val f = habitatSpecificationTermToFormula(spiderIndex, region)
         if (f == null) null else Neg(f)
-      }
-      case App(App(Const(HOLSetMember, _), Bound(boundIndex)), region) if boundIndex == spiderIndex => {
+      case App(App(Const(HOLSetMember, _), Bound(boundIndex)), region) if boundIndex == spiderIndex =>
         HOLSetConversions.holSetSpecToFormula(region)
-      }
       case _ => null
     }
   }
@@ -472,7 +461,6 @@ object Translations {
       spiderType1
     )
   }
-
 
   private def assertNoExtraneousTerms(remainingConjunctsAfterShading: Seq[Term]) {
     if (remainingConjunctsAfterShading.length != 0) {

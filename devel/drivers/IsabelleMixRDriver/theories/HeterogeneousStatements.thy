@@ -15,6 +15,39 @@ lemma test_shaded_zones: "(\<exists>s1 s2. distinct[s1, s2] \<and> s1 \<in> A \<
   apply(auto)
   oops
 
+(* Unitary diagram with a single spider. *)
+lemma test_single_spider_unitary: "\<exists>s. s \<in> B \<and> s \<in> (A - B) \<union> (B - A) \<and> (A - B) \<union> (B - A) \<subseteq> {s}"
+  apply(auto)
+  oops
+
+(* Compound diagram with a single-spider unitary diagram. *)
+lemma test_single_spider_compound: "(\<exists>s. s \<in> B \<and> s \<in> (A - B) \<union> (B - A) \<and> (A - B) \<union> (B - A) \<subseteq> {s}) \<longrightarrow> (\<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<and> t2 \<in> B \<and> (A \<inter> B) \<subseteq> {t1, t2})"
+  apply(auto)
+  oops
+
+(* Unitary spider diagram with two spiders. *)
+lemma test_two_spiders_unitary: "(\<exists>s1 s2. distinct[s1, s2] \<and> s1 \<in> A \<inter> B \<and> s2 \<in> (A - B) \<union> (B - A) \<and> (A - B) \<union> (B - A) \<subseteq> {s1, s2})"
+  apply(auto)
+  oops
+
+lemma speedith_fig7_d1: "\<exists>s. s \<in> C - (A \<union> B) \<and> (A \<inter> C) \<union> (B \<inter> C) \<union> (B - A) \<subseteq> {s}"
+  apply(auto)
+  oops
+
+lemma speedith_fig7_d2: "\<exists>s1 s2. s1 \<noteq> s2 \<and> s1 \<notin> C \<union> D \<and> s2 \<in> C \<and> (C - D) \<union> (D - C) \<subseteq> {s1, s2}"
+  apply(auto)
+  oops
+
+lemma speedith_fig7_goal: "\<exists>s1 s. s1 \<noteq> s \<and> s1 \<notin> D \<and> s \<notin> B \<and> (B \<inter> D) \<subseteq> {s1, s}"
+  oops
+
+lemma speedith_fig7_compound1: "(\<exists>s. s \<in> C - (A \<union> B) \<and> (A \<inter> C) \<union> (B \<inter> C) \<union> (B - A) \<subseteq> {s}) \<and> (\<exists>s1 s2. s1 \<noteq> s2 \<and> s1 \<notin> C \<union> D \<and> s2 \<in> C \<and> (C - D) \<union> (D - C) \<subseteq> {s1, s2})"
+  apply(auto)
+  oops
+
+lemma speedith_fig7: "(\<exists>s. s \<in> C - (A \<union> B) \<and> (A \<inter> C) \<union> (B \<inter> C) \<union> (B - A) \<subseteq> {s}) \<and> (\<exists>s1 s2. s1 \<noteq> s2 \<and> s1 \<notin> C \<union> D \<and> s2 \<in> C \<and> (C - D) \<union> (D - C) \<subseteq> {s1, s2}) \<Longrightarrow> \<exists>s1 s. s1 \<noteq> s \<and> s1 \<notin> D \<and> s \<notin> B \<and> (B \<inter> D) \<subseteq> {s1, s}"
+  oops
+
 lemma set_parsing_test_emptySet: "{} \<subseteq> {a}"
   oops
 
@@ -24,7 +57,7 @@ lemma set_parsing_test_largeSet: "{a,b} \<subseteq> {a,b,c,d}"
 lemma shaded_zone_test_simple: "\<exists>s1 s2. A \<subseteq> {s1, s2}"
   oops
 
-lemma shaded_zone_test_complex: "\<exists>s1 s2. (A \<setminus> ((B \<union> C) \<inter> D)) \<subseteq> {s1, s2}"
+lemma shaded_zone_test_complex: "\<exists>s1 s2. s1 \<noteq> s2 \<and> s1 \<in> A - B \<and> s2 \<in> C - D \<and> (A - ((B \<union> C) \<inter> D)) \<subseteq> {s1, s2}"
   oops
 
 

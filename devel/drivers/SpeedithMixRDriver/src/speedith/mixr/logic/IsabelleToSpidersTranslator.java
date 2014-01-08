@@ -96,6 +96,7 @@ public class IsabelleToSpidersTranslator extends FormulaTranslator {
             try {
                 SpiderDiagram sd = speedith.mixr.isabelle.Translations.termToSpiderDiagram(term);
                 if (sd == null || !sd.isValid()) {
+                    System.out.println(sd);
                     throw new TranslationException(Bundle.ISAtoSDTrans_translation_error_null_sd_returned());
                 }
                 return new FormulaRepresentation(sd, SpeedithFormatDescriptor.getInstance());
