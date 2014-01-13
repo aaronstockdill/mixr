@@ -46,7 +46,8 @@ lemma speedith_fig7_compound1: "(\<exists>s. s \<in> C - (A \<union> B) \<and> (
   oops
 
 lemma speedith_fig7: "(\<exists>s. s \<in> C - (A \<union> B) \<and> (A \<inter> C) \<union> (B \<inter> C) \<union> (B - A) \<subseteq> {s}) \<and> (\<exists>s1 s2. s1 \<noteq> s2 \<and> s1 \<notin> C \<union> D \<and> s2 \<in> C \<and> (C - D) \<union> (D - C) \<subseteq> {s1, s2}) \<Longrightarrow> \<exists>s1 s. s1 \<noteq> s \<and> s1 \<notin> D \<and> s \<notin> B \<and> (B \<inter> D) \<subseteq> {s1, s}"
-  oops
+  apply (mixrOracle "(EX s1 s2. distinct[s1, s2] & s1 : -(C Un D) & s2 : (C - D) Un (C Int D) & C - D <= {s1, s2} & D - C <= {s1, s2})")
+oops
 
 lemma set_parsing_test_emptySet: "{} \<subseteq> {a}"
   oops
@@ -91,10 +92,15 @@ lemma test6: "(\<exists>s1 s2. distinct[s1, s2] \<and> s1 \<in> A \<inter> B \<a
               \<longrightarrow> (\<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<and> t2 \<in> B) \<and> A \<inter> B \<noteq> {}"
   apply(rule impI)
   apply(rule conjI)
+  apply (mixr "(EX s1 s2. distinct[s1, s2] & s1 : A Int B & s2 : (A - B) Un (B - A)) --> (EX t1 t2. distinct[t1, t2] & t1 : (A - B) Un (A Int B) & t2 : (A Int B) Un (B - A))")
   apply (mixr "(EX s1 s2. distinct[s1, s2] & s1 : A Int B & s2 : A - B) | (EX s1 s2. distinct[s1, s2] & s1 : A Int B & s2 : B - A) --> (EX t1 t2. distinct[t1, t2] & t1 : (A - B) Un (A Int B) & t2 : (A Int B) Un (B - A))")
   apply (mixr "(EX s1 s2. distinct[s1, s2] & s1 : A Int B & s2 : (A - B) Un (A Int B)) | (EX s1 s2. distinct[s1, s2] & s1 : A Int B & s2 : B - A) --> (EX t1 t2. distinct[t1, t2] & t1 : (A - B) Un (A Int B) & t2 : (A Int B) Un (B - A))")
-  apply auto
-  by metis
+  apply (mixr "(EX s1 s2. distinct[s1, s2] & s1 : (A Int B) Un (B - A) & s2 : (A - B) Un (A Int B)) | (EX s1 s2. distinct[s1, s2] & s1 : A Int B & s2 : B - A) --> (EX t1 t2. distinct[t1, t2] & t1 : (A - B) Un (A Int B) & t2 : (A Int B) Un (B - A))")
+  apply (mixr "(EX s1 s2. distinct[s1, s2] & s1 : (A Int B) Un (B - A) & s2 : (A - B) Un (A Int B)) | (EX s1 s2. distinct[s1, s2] & s1 : (A - B) Un (A Int B) & s2 : B - A) --> (EX t1 t2. distinct[t1, t2] & t1 : (A - B) Un (A Int B) & t2 : (A Int B) Un (B - A))")
+  apply (mixr "(EX s1 s2. distinct[s1, s2] & s1 : (A Int B) Un (B - A) & s2 : (A - B) Un (A Int B)) | (EX s1 s2. distinct[s1, s2] & s1 : (A - B) Un (A Int B) & s2 : (A Int B) Un (B - A)) --> (EX t1 t2. distinct[t1, t2] & t1 : (A - B) Un (A Int B) & t2 : (A Int B) Un (B - A))")
+  apply (mixr "(EX s1 s2. distinct[s1, s2] & s1 : (A - B) Un (A Int B) & s2 : (A Int B) Un (B - A)) --> (EX t1 t2. distinct[t1, t2] & t1 : (A - B) Un (A Int B) & t2 : (A Int B) Un (B - A))")
+  apply (mixr "True")
+  by auto
 
 
 subsection {* PicProc test examples *}
