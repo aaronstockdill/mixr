@@ -115,9 +115,6 @@ fun get_goal_terms _ =
 (*==============================================================================
   = I3P Communication Routines
   ============================================================================*)
-  
-val _ = tracing "Something...";
-
 
 val mixr_response_prefix   = "MixRResponse: ";
 val mixr_response_goal     = "Goal: ";
@@ -128,7 +125,6 @@ fun mixr_write_sds_goals _ =
   let
       val (terms, proof_state) = get_goal_terms ();
       val context = Proof.context_of proof_state;
-      (* This YXML shit works... But I have problems making it work for XML. *)
       fun print_yxml_term t = (PolyML.makestring (Term_XML.Decode.term [(YXML.parse (YXML.string_of (hd (Term_XML.Encode.term t))))]))
       fun print_term t = YXML.string_of_body (Term_XML.Encode.term t) |> YXML.embed_controls
       fun print_terms [] = ()
@@ -159,7 +155,7 @@ fun replace_subgoal_tac formula ctxt i st = SUBGOAL (fn (subgoal, _) =>
        val intert = Logic.mk_implies (mk_trueprop_if formulaTerm, subgoal)
        val _ = tracing ("Have " ^ Syntax.string_of_term @{context} intert)
        val intert_cterm = Thm.cterm_of thy intert
-       val interThm = Goal.prove_internal [] intert_cterm (K ((auto_tac ctxt) THEN (ALLGOALS (Intuitionistic.prover_tac ctxt NONE))))
+       val interThm = Goal.prove_internal [] intert_cterm (K ((TRY (safe_tac ctxt)) THEN (TRY (ALLGOALS (Intuitionistic.prover_tac ctxt NONE))) THEN (TRY (auto_tac ctxt)) THEN (TRY (slow_simp_tac ctxt i)) THEN (ALLGOALS (Intuitionistic.prover_tac ctxt NONE))))
        val _ = tracing ("Interm: " ^ Display.string_of_thm @{context} interThm)
    in
        compose_tac (false, interThm, 1) i
