@@ -149,16 +149,20 @@ fun mk_trueprop_if (t as (Const ("HOL.Trueprop", _) $ _)) = t
 
 fun replace_subgoal_tac formula ctxt i st = SUBGOAL (fn (subgoal, _) =>
    let
-
-       val thy = Proof_Context.theory_of ctxt;
-       val formulaTerm = Syntax.read_term_global thy formula
-       val intert = Logic.mk_implies (mk_trueprop_if formulaTerm, subgoal)
-       val _ = tracing ("Have " ^ Syntax.string_of_term @{context} intert)
-       val intert_cterm = Thm.cterm_of thy intert
-       val interThm = Goal.prove_internal [] intert_cterm (K ((TRY (safe_tac ctxt)) THEN (TRY (ALLGOALS (Intuitionistic.prover_tac ctxt NONE))) THEN (TRY (auto_tac ctxt)) THEN (TRY (slow_simp_tac ctxt i)) THEN (ALLGOALS (Intuitionistic.prover_tac ctxt NONE))))
-       val _ = tracing ("Interm: " ^ Display.string_of_thm @{context} interThm)
+       val theoryOfContext = Proof_Context.theory_of ctxt;
+       val newSubGoalTerm = Syntax.read_term_global theoryOfContext formula
+       val inferenceStepAsTerm = Logic.mk_implies (mk_trueprop_if newSubGoalTerm, subgoal)
+       val _ = tracing ("Have " ^ Syntax.string_of_term @{context} inferenceStepAsTerm)
+       val inferenceStepAsCTerm = Thm.cterm_of theoryOfContext inferenceStepAsTerm
+       val provedInferenceStep = Goal.prove_internal [] inferenceStepAsCTerm (K (
+            (TRY (safe_tac ctxt))
+            THEN (TRY (ALLGOALS (Intuitionistic.prover_tac ctxt NONE)))
+            THEN (TRY (auto_tac ctxt))
+            THEN (TRY (slow_simp_tac ctxt i))
+            THEN (ALLGOALS (Intuitionistic.prover_tac ctxt NONE))))
+       val _ = tracing ("Interm: " ^ Display.string_of_thm @{context} provedInferenceStep)
    in
-       compose_tac (false, interThm, 1) i
+       compose_tac (false, provedInferenceStep, 1) i
    end) i st
 
 (*==============================================================================
