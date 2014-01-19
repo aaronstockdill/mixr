@@ -103,7 +103,7 @@ fun get_goal_terms _ =
       
       val _ = Seq.hd (Proof.apply
                          (Method.Basic
-                             (fn ctx =>
+                             (fn ctxt =>
                                 SIMPLE_METHOD (fn thm => let val _ = (terms := Thm.prems_of thm) in all_tac thm end))
                          ) proof)
   in
@@ -138,29 +138,32 @@ fun mixr_write_sds_goals _ =
   in
       case terms of
           [] => tracing (mixr_response_prefix ^ mixr_response_no_goals)
-        | t => print_terms terms
+        | _ => print_terms terms
   end;
 
-fun mk_trueprop_if (t as (Const ("HOL.Trueprop", _) $ _)) = t
-  | mk_trueprop_if (t as (Const ("==>", _) $ _ $ _)) = t
-  | mk_trueprop_if (t as (Const ("all", _) $ _)) = t
-  | mk_trueprop_if (t as (Const ("==", _) $ _ $ _)) = t
-  | mk_trueprop_if t = HOLogic.mk_Trueprop t
+fun convertToTrueprop (t as (Const ("HOL.Trueprop", _) $ _)) = t
+  | convertToTrueprop (t as (Const ("==>", _) $ _ $ _)) = t
+  | convertToTrueprop (t as (Const ("all", _) $ _)) = t
+  | convertToTrueprop (t as (Const ("==", _) $ _ $ _)) = t
+  | convertToTrueprop t = HOLogic.mk_Trueprop t
+
+fun createMFOLETactic ctxt i = K (
+    (TRY (safe_tac ctxt)) THEN
+    (TRY (ALLGOALS (Intuitionistic.prover_tac ctxt NONE))) THEN
+    (TRY (auto_tac ctxt)) THEN
+    (TRY (slow_simp_tac ctxt i)) THEN
+    (ALLGOALS (Intuitionistic.prover_tac ctxt NONE)))
 
 fun replace_subgoal_tac formula ctxt i st = SUBGOAL (fn (subgoal, _) =>
    let
        val theoryOfContext = Proof_Context.theory_of ctxt;
        val newSubGoalTerm = Syntax.read_term_global theoryOfContext formula
-       val inferenceStepAsTerm = Logic.mk_implies (mk_trueprop_if newSubGoalTerm, subgoal)
-       val _ = tracing ("Have " ^ Syntax.string_of_term @{context} inferenceStepAsTerm)
+       val inferenceStepAsTerm = Logic.mk_implies (convertToTrueprop newSubGoalTerm, subgoal)
+       (*val _ = tracing ("Have " ^ Syntax.string_of_term @{context} inferenceStepAsTerm)*)
        val inferenceStepAsCTerm = Thm.cterm_of theoryOfContext inferenceStepAsTerm
-       val provedInferenceStep = Goal.prove_internal [] inferenceStepAsCTerm (K (
-            (TRY (safe_tac ctxt))
-            THEN (TRY (ALLGOALS (Intuitionistic.prover_tac ctxt NONE)))
-            THEN (TRY (auto_tac ctxt))
-            THEN (TRY (slow_simp_tac ctxt i))
-            THEN (ALLGOALS (Intuitionistic.prover_tac ctxt NONE))))
-       val _ = tracing ("Interm: " ^ Display.string_of_thm @{context} provedInferenceStep)
+       val mfoleTactic = createMFOLETactic ctxt i
+       val provedInferenceStep = Goal.prove_internal [] inferenceStepAsCTerm mfoleTactic
+       (*val _ = tracing ("Interm: " ^ Display.string_of_thm @{context} provedInferenceStep)*)
    in
        compose_tac (false, provedInferenceStep, 1) i
    end) i st
@@ -173,7 +176,7 @@ fun make_subgoal_tac formula ctxt i st = SUBGOAL (fn (subgoal, _) =>
    let
      val thy = Proof_Context.theory_of ctxt;
      val formulaTerm = Syntax.read_term_global thy formula
-     val intert = Logic.mk_implies (mk_trueprop_if formulaTerm, subgoal)
+     val intert = Logic.mk_implies (convertToTrueprop formulaTerm, subgoal)
      (*val thy = Thm.theory_of_thm st;*)
      val adhoc_rule = Skip_Proof.make_thm thy intert;
    in
