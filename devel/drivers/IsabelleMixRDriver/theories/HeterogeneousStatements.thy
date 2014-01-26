@@ -66,8 +66,9 @@ lemma shaded_zone_test_complex: "\<exists>s1 s2. s1 \<noteq> s2 \<and> s1 \<in> 
   oops
 
 
-lemma test2: "\<lbrakk> \<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<inter> B \<and> t2 \<in> (A - B) \<union> (B - A) \<rbrakk>
-            \<Longrightarrow> (\<exists>u1 u2. distinct[u1, u2] \<and> u1 \<in> A \<and> u2 \<in> B)"
+lemma speedith_fig1_proof_with_sentential_help:
+  "\<lbrakk> \<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<inter> B \<and> t2 \<in> (A - B) \<union> (B - A) \<rbrakk>
+   \<Longrightarrow> (\<exists>u1 u2. distinct[u1, u2] \<and> u1 \<in> A \<and> u2 \<in> B)"
   apply(auto)
   apply (mixr "(EX t1 t2. distinct[t1, t2] & t1 : (A Int B) Un (B - A) & t2 : A - B) --> (EX u1 u2. distinct[u1, u2] & u1 : (A - B) Un (A Int B) & u2 : (A Int B) Un (B - A))")
   apply (mixr "(EX t1 t2. distinct[t1, t2] & t1 : (A Int B) Un (B - A) & t2 : (A - B) Un (A Int B)) --> (EX u1 u2. distinct[u1, u2] & u1 : (A - B) Un (A Int B) & u2 : (A Int B) Un (B - A))")
@@ -75,25 +76,27 @@ lemma test2: "\<lbrakk> \<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<int
   by (auto)
 
 
-lemma test2: "\<exists>s1 s2 s3. distinct[s1, s2, s3] \<and> s1 \<in> A \<and> s2 \<in> B \<and> s3 \<in> C"
+lemma example_simple_sentential_complex_diagrammatic: "\<exists>s1 s2 s3. distinct[s1, s2, s3] \<and> s1 \<in> A \<and> s2 \<in> B \<and> s3 \<in> C"
   oops
 
 
 
 (* Spider Diagram translation test. *)
-lemma test4: "(\<exists>s1 s2 s3. s1 \<noteq> s2 \<and> s1 \<noteq> s3 \<and> s2 \<noteq> s3
-              \<and> s1 \<in> A \<and> s1 \<in> B \<union> -C \<and> s1 \<notin> D
-              \<and> s3 \<in> (B \<inter> C) - (A \<union> D)
-              \<and> s2 \<in> D \<and> s2 \<in> A)
-              \<longrightarrow> (\<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<and> t2 \<in> B)"
+lemma example_both_sentential_and_diagrammatic_complex:
+  "(\<exists>s1 s2 s3. s1 \<noteq> s2 \<and> s1 \<noteq> s3 \<and> s2 \<noteq> s3
+   \<and> s1 \<in> A \<and> s1 \<in> B \<union> -C \<and> s1 \<notin> D
+   \<and> s3 \<in> (B \<inter> C) - (A \<union> D)
+   \<and> s2 \<in> D \<and> s2 \<in> A)
+   \<longrightarrow> (\<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<and> t2 \<in> B)"
   by(auto)
 
-lemma test5: "(\<exists>s1 s2 s3. distinct[s1, s2, s3] \<and> s1 \<in> A \<and> s1 \<in> B \<union> -C \<and> s1 \<notin> D \<and> s3 \<in> (B \<inter> C) - (A \<union> D) \<and> s2 \<in> D \<and> s2 \<in> A) \<longrightarrow> (\<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<and> t2 \<in> B)"
+lemma test_diagram_with_distinct: "(\<exists>s1 s2 s3. distinct[s1, s2, s3] \<and> s1 \<in> A \<and> s1 \<in> B \<union> -C \<and> s1 \<notin> D \<and> s3 \<in> (B \<inter> C) - (A \<union> D) \<and> s2 \<in> D \<and> s2 \<in> A) \<longrightarrow> (\<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<and> t2 \<in> B)"
   by(auto)
 
 (* Spider Diagram translation test. *)
-lemma test6: "(\<exists>s1 s2. distinct[s1, s2] \<and> s1 \<in> A \<inter> B \<and> s2 \<in> (A - B) \<union> (B - A))
-              \<longrightarrow> (\<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<and> t2 \<in> B) \<and> A \<inter> B \<noteq> {}"
+lemma speedith_fig1_proof_with_unknown_sentential_fragment:
+  "(\<exists>s1 s2. distinct[s1, s2] \<and> s1 \<in> A \<inter> B \<and> s2 \<in> (A - B) \<union> (B - A))
+   \<longrightarrow> (\<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<and> t2 \<in> B) \<and> A \<inter> B \<noteq> {}"
   apply(rule impI)
   apply(rule conjI)
   apply (mixr "(EX s1 s2. distinct[s1, s2] & s1 : A Int B & s2 : (A - B) Un (B - A)) --> (EX t1 t2. distinct[t1, t2] & t1 : (A - B) Un (A Int B) & t2 : (A Int B) Un (B - A))")
