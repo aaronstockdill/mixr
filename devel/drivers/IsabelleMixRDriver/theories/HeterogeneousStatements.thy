@@ -31,6 +31,9 @@ lemma test_two_spiders_unitary: "(\<exists>s1 s2. distinct[s1, s2] \<and> s1 \<i
   apply(auto)
   oops
 
+lemma shaded_zone_test_complex: "\<exists>s1 s2. s1 \<noteq> s2 \<and> s1 \<in> A - B \<and> s2 \<in> C - D \<and> (A - ((B \<union> C) \<inter> D)) \<subseteq> {s1, s2}"
+  oops
+
 lemma speedith_fig7_d1: "\<exists>s. s \<in> C - (A \<union> B) \<and> (A \<inter> C) \<union> (B \<inter> C) \<union> (B - A) \<subseteq> {s}"
   apply(auto)
   oops
@@ -46,6 +49,12 @@ lemma speedith_fig7_compound1: "(\<exists>s. s \<in> C - (A \<union> B) \<and> (
   apply(auto)
   oops
 
+lemma simpleExample1: "(EX s. C <= {s}) \<Longrightarrow> (EX s. A Int C <= {s})"
+  by auto
+lemma simpleExample2: "(EX s. A Int C <= {s})"
+  apply (mixr "(EX s. C <= {s})")
+  by auto
+
 lemma speedith_fig7: "(EX s. s : C - (A Un B) & A Int B Int C <= {s} & (A Int C) - B <= {s} & B - (A Un C) <= {s} & (B Int C) - A <= {s}) & (EX s1 s2. distinct[s1, s2] & s1 : -(C Un D) & s2 : (C - D) Un (C Int D) & C - D <= {s1, s2} & D - C <= {s1, s2}) --> (EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1})"
   apply (mixrOracle "(EX s. s : (C - (A Un B Un D)) Un ((C Int D) - (A Un B)) & (A Int B Int C) - D <= {s} & A Int B Int C Int D <= {s} & (A Int B Int D) - C <= {s} & (A Int C) - (B Un D) <= {s} & (A Int C Int D) - B <= {s} & (A Int D) - (B Un C) <= {s} & B - (A Un C Un D) <= {s} & (B Int C) - (A Un D) <= {s} & (B Int C Int D) - A <= {s} & (B Int D) - (A Un C) <= {s} & D - (A Un B Un C) <= {s}) & (EX s1 s2. distinct[s1, s2] & s1 : -(C Un D) & s2 : (C - D) Un (C Int D) & C - D <= {s1, s2} & D - C <= {s1, s2}) --> (EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1})")
   apply (mixrOracle "(EX s s1. distinct[s, s1] & s : (C - (A Un B Un D)) Un ((C Int D) - (A Un B)) & s1 : (-(A Un B Un C Un D)) Un (A - (B Un C Un D)) Un ((A Int B) - (C Un D)) & (A Int B Int C) - D <= {s, s1} & A Int B Int C Int D <= {s, s1} & (A Int B Int D) - C <= {s, s1} & (A Int C) - (B Un D) <= {s, s1} & (A Int C Int D) - B <= {s, s1} & (A Int D) - (B Un C) <= {s, s1} & B - (A Un C Un D) <= {s, s1} & (B Int C) - (A Un D) <= {s, s1} & (B Int C Int D) - A <= {s, s1} & (B Int D) - (A Un C) <= {s, s1} & D - (A Un B Un C) <= {s, s1}) & (EX s1 s2. distinct[s1, s2] & s1 : -(C Un D) & s2 : (C - D) Un (C Int D) & C - D <= {s1, s2} & D - C <= {s1, s2}) --> (EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1})")
@@ -53,18 +62,6 @@ lemma speedith_fig7: "(EX s. s : C - (A Un B) & A Int B Int C <= {s} & (A Int C)
   apply (mixr "(EX s s1. distinct[s, s1] &       s : (C - (A Un B Un D)) Un ((C Int D) - (A Un B)) & s1 : (-(A Un B Un C Un D)) Un (A - (B Un C Un D)) Un ((A Int B) - (C Un D)) & (A Int B Int C) - D <= {s, s1} & A Int B Int C Int D <= {s, s1} & (A Int B Int D) - C <= {s, s1} & (A Int C) - (B Un D) <= {s, s1} & (A Int C Int D) - B <= {s, s1} & (A Int D) - (B Un C) <= {s, s1} & B - (A Un C Un D) <= {s, s1} & (B Int C) - (A Un D) <= {s, s1} & (B Int C Int D) - A <= {s, s1} & (B Int D) - (A Un C) <= {s, s1} & C - (A Un B Un D) <= {s, s1} & D - (A Un B Un C) <= {s, s1}) --> (EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1})")
   apply (mixrOracle "(EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1}) --> (EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1})")
   by auto
-
-lemma set_parsing_test_emptySet: "{} \<subseteq> {a}"
-  oops
-
-lemma set_parsing_test_largeSet: "{a,b} \<subseteq> {a,b,c,d}"
-  oops
-
-lemma shaded_zone_test_simple: "\<exists>s1 s2. A \<subseteq> {s1, s2}"
-  oops
-
-lemma shaded_zone_test_complex: "\<exists>s1 s2. s1 \<noteq> s2 \<and> s1 \<in> A - B \<and> s2 \<in> C - D \<and> (A - ((B \<union> C) \<inter> D)) \<subseteq> {s1, s2}"
-  oops
 
 
 lemma speedith_fig1_proof_with_sentential_help:

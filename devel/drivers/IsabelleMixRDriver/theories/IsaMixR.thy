@@ -1,6 +1,7 @@
 theory IsaMixR
 imports Main
 uses
+  "~~/src/HOL/Tools/SMT/smt_solver.ML"
   "GoalsExport.ML"
 begin
 

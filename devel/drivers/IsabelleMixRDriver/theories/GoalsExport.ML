@@ -146,8 +146,17 @@ fun convertToTrueprop (t as (Const ("HOL.Trueprop", _) $ _)) = t
   | convertToTrueprop (t as (Const ("all", _) $ _)) = t
   | convertToTrueprop (t as (Const ("==", _) $ _ $ _)) = t
   | convertToTrueprop t = HOLogic.mk_Trueprop t
+  
+fun simp_subset_iff_smt_tac ctxt i =
+    (TRY
+        (print_tac ("before simp:")) THEN
+        (full_simp_tac ((simpset_of ctxt) addsimps [@{thm subset_iff}]) i) THEN
+        (print_tac ("after simp:")) THEN
+        (SMT_Solver.smt_tac ctxt [] i)
+    )
 
 fun createMFOLETactic ctxt i = K (
+    (simp_subset_iff_smt_tac ctxt i) THEN
     (TRY (safe_tac ctxt)) THEN
     (TRY (ALLGOALS (Intuitionistic.prover_tac ctxt NONE))) THEN
     (TRY (auto_tac ctxt)) THEN
