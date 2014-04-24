@@ -1,8 +1,6 @@
-theory "dummy" 
-
+theory "MYSMT" 
 imports 
   Main
-  IsaMixR
 begin 
 
 (* Don't forget to activate Z3 by adding
@@ -12,6 +10,19 @@ to
 $HOME/.isabelle/Isabelle2013-2/etc/settings
 
 *)
+
+
+ML {*
+fun tac ctxt i = 
+    (TRY
+        (full_simp_tac ((simpset_of ctxt) addsimps [@{thm subset_iff}]) i) THEN
+        (SMT_Solver.smt_tac ctxt [] i)
+    )
+*}
+
+lemma shading_only_example_1: "(EX s. C <= {s}) ==> (EX s. A Int C <= {s})"
+  apply (tactic {* HEADGOAL (tac @{context}) *})
+  done
 
 (* SMT works after getting rid of sets, somehow I would have hoped it could handle sets better.
    SMT works well and is fast, but only available for non-commerical use *)

@@ -2,7 +2,7 @@ theory HeterogeneousStatements
 imports IsaMixR
 begin
 
-section {* MixR test examples *}
+section {* MixR examples *}
 
 (* Spider Diagram translation test. *)
 lemma test_sentential_simplification:
@@ -49,9 +49,19 @@ lemma speedith_fig7_compound1: "(\<exists>s. s \<in> C - (A \<union> B) \<and> (
   apply(auto)
   oops
 
-lemma simpleExample1: "(EX s. C <= {s}) \<Longrightarrow> (EX s. A Int C <= {s})"
-  by auto
-lemma simpleExample2: "(EX s. A Int C <= {s})"
+ML {*
+fun tac ctxt i = 
+    (TRY
+        (full_simp_tac ((simpset_of ctxt) addsimps [@{thm subset_iff}]) i) THEN
+        (SMT_Solver.smt_tac ctxt [] i)
+    )
+*}
+
+lemma shading_only_example_1: "(EX s. C <= {s}) ==> (EX s. A Int C <= {s})"
+  apply (tactic {* HEADGOAL (tac @{context}) *})
+  done
+
+lemma smt_solver_example_1: "(EX s. A Int C <= {s})"
   apply (mixr "(EX s. C <= {s})")
   by auto
 
