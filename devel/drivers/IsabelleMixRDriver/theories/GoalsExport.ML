@@ -149,11 +149,8 @@ fun convertToTrueprop (t as (Const ("HOL.Trueprop", _) $ _)) = t
   
 fun simp_subset_iff_smt_tac ctxt i =
     (TRY
-        (print_tac ("before simp:")) THEN
         (full_simp_tac ((simpset_of ctxt) addsimps [@{thm subset_iff}]) i) THEN
-        (print_tac ("after simp:")) THEN
-        (SMT_Solver.smt_tac ctxt [] i)
-    )
+        (SMT_Solver.smt_tac ctxt [] i))
 
 fun createMFOLETactic ctxt i = K (
     (simp_subset_iff_smt_tac ctxt i) THEN
