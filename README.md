@@ -33,7 +33,7 @@ Both of the examples above use the novel concept of _placeholders_ to insert nat
 
 4.  Download and unpack Isabelle 2012  into the `~/bin/Isabelle2012` folder. Isabelle 2012 can be downloaded from:
 
-        https://bitbucket.org/urbas/i3p
+        hg clone ssh://hg@bitbucket.org/urbas/i3p
 
 5.  Install Maven:
 
