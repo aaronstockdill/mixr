@@ -21,27 +21,27 @@ Both of the examples above use the novel concept of _placeholders_ to insert nat
 
     https://netbeans.org/downloads/
 
-2.  Clone this repository repository:
+2.  Install Maven:
+
+    http://maven.apache.org/download.cgi
+
+3.  Clone this repository repository:
 
         git clone https://github.com/urbas/mixr.git
 
-3.  This is enough just to build the MixR framework (without any plugins!). This means that none of the examples (Isabelle, Speedith, NatLang, PicProc, and TPTP will work).
+4.  This is enough just to build the MixR framework (without any plugins!). This means that none of the examples (Isabelle, Speedith, NatLang, PicProc, and TPTP will work).
 
     To build MixR framework (MixR core), open the `devel/MixRFramework` project in NetBeans.
 
     To build Diabelli (with Isabelle, Speedith, NatLang, PicProc, and TPTP support), proceed as follows:
 
-4.  Download and unpack Isabelle 2012  into the `~/bin/Isabelle2012` folder. Isabelle 2012 can be downloaded from:
+5.  Download and unpack Isabelle 2012  into the `~/bin/Isabelle2012` folder. Isabelle 2012 can be downloaded from:
 
     http://isabelle.in.tum.de/website-Isabelle2012/index.html
     
-    Isabelle might need Java. You can get it from here: http://www.oracle.com/technetwork/java/javase/archive-139210.html
+    On Mac Isabelle might need Java 6. You can get it from here: http://www.oracle.com/technetwork/java/javase/archive-139210.html
     
     or here: http://support.apple.com/kb/dl1573
-
-5.  Install Maven:
-
-    http://maven.apache.org/download.cgi
 
 6.  Clone the Speedith and iCircles repositories (follow their installation instructions from README.md):
 
