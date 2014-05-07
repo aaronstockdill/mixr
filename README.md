@@ -56,7 +56,7 @@ Both of the examples above use the novel concept of _placeholders_ to insert nat
 
 8.  Clone I3P from here (you'll need [Mercurial](http://mercurial.selenic.com/downloads) for this):
 
-        hg clone ssh://hg@bitbucket.org/urbas/i3p
+        hg clone https://urbas@bitbucket.org/urbas/i3p
 
 9.  Open the `Diabelli` project (`devel/Diabelli`) within NetBeans and make sure all dependencies are resolved. Try to build and run.
 
