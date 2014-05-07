@@ -36,6 +36,8 @@ Both of the examples above use the novel concept of _placeholders_ to insert nat
     http://isabelle.in.tum.de/website-Isabelle2012/index.html
     
     Isabelle might need Java. You can get it from here: http://www.oracle.com/technetwork/java/javase/archive-139210.html
+    
+    or here: http://support.apple.com/kb/dl1573
 
 5.  Install Maven:
 
