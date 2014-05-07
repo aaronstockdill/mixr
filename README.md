@@ -19,7 +19,7 @@ Both of the examples above use the novel concept of _placeholders_ to insert nat
 
 1.  Download the NetBeans IDE with Java SE support from this location (currently we support NetBeans 7.3):
 
-        https://netbeans.org/downloads/
+    https://netbeans.org/downloads/
 
 2.  Clone this repository repository:
 
@@ -37,7 +37,7 @@ Both of the examples above use the novel concept of _placeholders_ to insert nat
 
 5.  Install Maven:
 
-        http://maven.apache.org/download.cgi
+    http://maven.apache.org/download.cgi
 
 6.  Clone the Speedith and iCircles repositories (follow their installation instructions from README.md):
 
