@@ -150,11 +150,11 @@ public class AreaInference implements InferenceRuleDescriptor, InferenceRule, Au
         return insidePixels + outlinePixels;
     }
 
-    private String getFreeVariableName(ImageUrlFormula imageUrlFormula) {
+    public static String getFreeVariableName(ImageUrlFormula imageUrlFormula) {
         return imageUrlFormula.getName();
     }
 
-    private String getFreeVariableName(FormulaRepresentation imageRepresentation, ImageUrlFormula imageUrlFormula) {
+    public static String getFreeVariableName(FormulaRepresentation imageRepresentation, ImageUrlFormula imageUrlFormula) {
         if (imageRepresentation.getFreeVariables() == null || imageRepresentation.getFreeVariables().isEmpty())
             return getFreeVariableName(imageUrlFormula);
         else
