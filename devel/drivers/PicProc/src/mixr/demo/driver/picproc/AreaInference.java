@@ -119,7 +119,7 @@ public class AreaInference implements InferenceRuleDescriptor, InferenceRule, Au
                     if (imageRepresentation != null && imageRepresentation.getFormula() instanceof ImageUrlFormula) {
                         ImageUrlFormula imageUrlFormula = (ImageUrlFormula) imageRepresentation.getFormula();
                         int area = extractArea(imageUrlFormula);
-                        Formula inferedFormula = new Formula(StringFormat.createFormula("AreaOf " + imageUrlFormula.getName() + " = " + area), f.getRole());
+                        Formula inferedFormula = new Formula(StringFormat.createFormula("AreaOf " + getFreeVariableName(imageRepresentation, imageUrlFormula) + " = " + area), f.getRole());
                         transformedSentences[i] = Arrays.asList((Sentence) inferedFormula);
                         transformedTargets[i] = targets.getInferenceTargets().get(i);
                     }
@@ -148,5 +148,16 @@ public class AreaInference implements InferenceRuleDescriptor, InferenceRule, Au
             }
         }
         return insidePixels + outlinePixels;
+    }
+
+    private String getFreeVariableName(ImageUrlFormula imageUrlFormula) {
+        return imageUrlFormula.getName();
+    }
+
+    private String getFreeVariableName(FormulaRepresentation imageRepresentation, ImageUrlFormula imageUrlFormula) {
+        if (imageRepresentation.getFreeVariables() == null || imageRepresentation.getFreeVariables().isEmpty())
+            return getFreeVariableName(imageUrlFormula);
+        else
+            return imageRepresentation.getFreeVariables().iterator().next().getName();
     }
 }

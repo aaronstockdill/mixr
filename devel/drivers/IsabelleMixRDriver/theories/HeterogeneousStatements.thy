@@ -2,7 +2,44 @@ theory HeterogeneousStatements
 imports IsaMixR
 begin
 
-section {* MixR examples *}
+(* The Isabelle Driver parses the goal and converts it to a MixR HR goal. *)
+lemma generic_goal: "\<lbrakk> P_1; P_2; P_3 \<rbrakk> \<Longrightarrow> C"
+  oops
+
+lemma multiple_goals: "\<lbrakk> P_1; P_2; P_3 \<rbrakk> \<Longrightarrow> C"
+  oops
+
+(* Individual goals can contain placeholders (foreign formulae).
+   This example shows a premise with a TPTP formula in a placeholder. *)
+lemma goal_with_placeholder: "\<lbrakk>
+    P_1;
+    MixRNoVars ''TPTP:fof(empty_is_sorted, axiom, sorted(nil)).'';
+    P_3 \<rbrakk> \<Longrightarrow>
+    C"
+  oops
+
+
+subsection {* PicProc *}
+
+(* To reason about a foreign domain, we must introduce at least some of the
+   constant concepts. Note that we do not have to define the 'nat' type. *)
+typedecl PicProcImage
+typedecl ShapeType
+consts   AreaOf :: "PicProcImage \<Rightarrow> nat"
+         ShapeOf :: "PicProcImage \<Rightarrow> ShapeType"
+         Triangle :: "ShapeType" Square :: "ShapeType" Circle :: "ShapeType"
+         ShapeA :: "PicProcImage"
+
+lemma "MixRNoVars ''ImgUrl:/home/matej/Pictures/ShapeA.png'' \<Longrightarrow> ShapeOf ShapeA = Square"
+  apply (mixrOracle "[| ShapeOf ShapeA = Square |] ==> ShapeOf ShapeA = Square")
+  by (auto)
+
+lemma "MixR [About [ShapeB]] ''ImgUrl:/home/matej/Pictures/ShapeA.png'' \<Longrightarrow> AreaOf ShapeB > 5000"
+  apply (mixrOracle "[| AreaOf ShapeB = 5733 |] ==> 5000 < AreaOf ShapeB")
+  by (auto)
+
+
+(* Formal heterogeneous reasoning with Spider diagrams *)
 
 (* Spider Diagram translation test. *)
 lemma test_sentential_simplification:
@@ -99,22 +136,6 @@ lemma speedith_fig1_proof_with_unknown_sentential_fragment:
   apply (mixr "(EX s1 s2. distinct[s1, s2] & s1 : (A Int B) Un (B - A) & s2 : (A - B) Un (A Int B)) | (EX s1 s2. distinct[s1, s2] & s1 : (A - B) Un (A Int B) & s2 : (A Int B) Un (B - A)) --> (EX t1 t2. distinct[t1, t2] & t1 : (A - B) Un (A Int B) & t2 : (A Int B) Un (B - A))")
   apply (mixr "(EX s1 s2. distinct[s1, s2] & s1 : (A - B) Un (A Int B) & s2 : (A Int B) Un (B - A)) --> (EX t1 t2. distinct[t1, t2] & t1 : (A - B) Un (A Int B) & t2 : (A Int B) Un (B - A))")
   by auto
-
-
-subsection {* PicProc test examples *}
-
-typedecl PicProcImage
-typedecl ShapeType
-consts   AreaOf :: "PicProcImage \<Rightarrow> nat" ShapeOf :: "PicProcImage \<Rightarrow> ShapeType"
-         Triangle :: "ShapeType" Square :: "ShapeType" Circle :: "ShapeType"
-         (*ShapeA :: "PicProcImage"*)
-lemma "MixRNoVars ''ImgUrl:/home/matej/Pictures/ShapeA.png'' \<Longrightarrow> ShapeOf ShapeA = Square"
-  apply (mixrOracle "[| ShapeOf ShapeA = Square |] ==> ShapeOf ShapeA = Square")
-  by (auto)
-
-lemma "MixR [About [ShapeA]] ''ImgUrl:/home/matej/Pictures/ShapeA.png'' \<Longrightarrow> AreaOf ShapeA > 5000"
-  apply (mixrOracle "[| AreaOf ShapeA = 5733 |] ==> 5000 < AreaOf ShapeA")
-  by (auto)
 
 
 
