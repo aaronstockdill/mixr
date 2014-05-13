@@ -2,12 +2,20 @@ theory HeterogeneousStatements
 imports IsaMixR
 begin
 
+
+
+
+
 (* The Isabelle Driver parses the goal and converts it to a MixR HR goal. *)
 lemma generic_goal: "\<lbrakk> P_1; P_2; P_3 \<rbrakk> \<Longrightarrow> C"
   oops
 
 lemma multiple_goals: "\<lbrakk> P_1; P_2; P_3 \<rbrakk> \<Longrightarrow> C"
   oops
+
+
+
+
 
 (* Individual goals can contain placeholders (foreign formulae).
    This example shows a premise with a TPTP formula in a placeholder. *)
@@ -39,12 +47,61 @@ lemma "MixR [About [ShapeB]] ''ImgUrl:/home/matej/Pictures/ShapeA.png'' \<Longri
   by (auto)
 
 
-(* Formal heterogeneous reasoning with Spider diagrams *)
+
+
+
+
+(* Formal heterogeneous reasoning with Spider diagrams (Speedith) *)
+
+lemma sd_proof:
+  "(EX s. s : C - (A Un B) & A Int B Int C <= {s} & (A Int C) - B <= {s} & B - (A Un C) <= {s} & (B Int C) - A <= {s}) & (EX s1 s2. distinct[s1, s2] & s1 : -(C Un D) & s2 : (C - D) Un (C Int D) & C - D <= {s1, s2} & D - C <= {s1, s2}) --> (EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1})"
+  oops
+
+lemma hr_proof:
+  "(\<exists>s1 s2. distinct[s1, s2] \<and> s1 \<in> A \<inter> B \<and> s2 \<in> (A - B) \<union> (B - A))
+   \<longrightarrow> (\<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<and> t2 \<in> B) \<and> A \<inter> B \<noteq> {}"
+  oops
+
+
+
+
+
+lemma simple_sentence_complex_diagram:
+  "\<exists>s1 s2 s3. distinct[s1, s2, s3] \<and> s1 \<in> A \<and> s2 \<in> B \<and> s3 \<in> C"
+  oops
+
+
+
+
+
+(* Placeholder caveat *)
+
+axiomatization where
+  ErrInference1: "MixRNoVars ''x is greater than y'' \<Longrightarrow> x > y" and
+  OkayInference1: "MixR [About[x, y]] ''x is greater than y'' \<Longrightarrow> x > y"
+
+lemma err1: "MixRNoVars ''x is greater than y'' \<Longrightarrow> (0::int) > 1"
+  by(fast intro: ErrInference1)
+
+lemma "MixRNoVars ''x is greater than y'' = False"
+  apply(insert err1)
+  by(fastforce)
+
+lemma "MixR [About[x, y]] ''x is greater than y'' \<Longrightarrow> (0::int) > 1"
+  apply(auto simp add: OkayInference1)
+  oops
+
+lemma "MixR [About[(0::int), 1]] ''x is greater than y'' \<Longrightarrow> (0::int) > 1"
+  apply(insert OkayInference1 [of "0::int" "1::int"])
+  by fast
+
+
+
+
 
 (* Spider Diagram translation test. *)
 lemma test_sentential_simplification:
   "(\<exists>s1 s2. distinct[s1, s2] \<and> s1 \<in> A \<inter> B \<and> s2 \<in> (A - B) \<union> (B - A)) \<longrightarrow> (\<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<and> t2 \<in> B) \<and> (A \<inter> B) \<noteq> {}"
-(*  ML_prf {* GoalsExport.mixr_write_sds_goals () *} *)
   apply(auto)
   oops
 
@@ -171,10 +228,6 @@ lemma assumes p1: "B' \<Longrightarrow> B" and p2: "A \<Longrightarrow> B' \<or>
   shows "A \<Longrightarrow> B \<or> C"
   by (metis p1 p2)
 
-
-section {* Placeholders Theory *}
-
-text {* These are all the definitions that are needed for supporting placeholders: *}
 
 typedecl person
 consts
@@ -309,19 +362,12 @@ text {* The above statement is true because we @{text "Inference4"}
 and @{text "Inference5"} are merely schematic axioms which establishes
 a relation between three variables---regardless of what their names are. *}
 
-subsection {* Example 4: Blocksworld *}
-consts LeftOf :: "'a \<Rightarrow> 'a \<Rightarrow> bool"
-  RightOf :: "'a \<Rightarrow> 'a \<Rightarrow> bool"
-  Dodec :: "'a \<Rightarrow> bool"
-  Tet :: "'a \<Rightarrow> bool"
-  Box :: "'a \<Rightarrow> bool"
-
 
 
 
 section {* Placeholders---caveats  *}
 
-axiomatization where
+(*axiomatization where
   ErrInference1: "MixRNoVars ''x is greater than y'' \<Longrightarrow> x > y" and
   OkayInference1: "MixR [About[x, y]] ''x is greater than y'' \<Longrightarrow> x > y"
 
@@ -338,7 +384,7 @@ lemma "MixR [About[x, y]] ''x is greater than y'' \<Longrightarrow> (0::int) > 1
 
 lemma "MixR [About[(0::int), 1]] ''x is greater than y'' \<Longrightarrow> (0::int) > 1"
   apply(insert OkayInference1 [of "0::int" "1::int"])
-  by fast
+  by fast*)
 
 
 
