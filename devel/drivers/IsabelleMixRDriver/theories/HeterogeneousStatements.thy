@@ -10,7 +10,7 @@ begin
 lemma generic_goal: "\<lbrakk> P_1; P_2; P_3 \<rbrakk> \<Longrightarrow> C"
   oops
 
-lemma multiple_goals: "\<lbrakk> P_1; P_2; P_3 \<rbrakk> \<Longrightarrow> C"
+lemma multiple_goals: "\<lbrakk> P_1; P_2; P_3 \<rbrakk> \<Longrightarrow> C" and "\<lbrakk> P_1; P_2; P_3 \<rbrakk> \<Longrightarrow> C"
   oops
 
 
@@ -19,11 +19,7 @@ lemma multiple_goals: "\<lbrakk> P_1; P_2; P_3 \<rbrakk> \<Longrightarrow> C"
 
 (* Individual goals can contain placeholders (foreign formulae).
    This example shows a premise with a TPTP formula in a placeholder. *)
-lemma goal_with_placeholder: "\<lbrakk>
-    P_1;
-    MixRNoVars ''TPTP:fof(empty_is_sorted, axiom, sorted(nil)).'';
-    P_3 \<rbrakk> \<Longrightarrow>
-    C"
+lemma goal_with_placeholder: "\<lbrakk> A; MixRNoVars ''TPTP:fof(empty_is_sorted, axiom, sorted(nil)).''; P_3 \<rbrakk> \<Longrightarrow> C"
   oops
 
 
@@ -55,11 +51,19 @@ lemma "MixR [About [ShapeB]] ''ImgUrl:/home/matej/Pictures/ShapeA.png'' \<Longri
 
 lemma sd_proof:
   "(EX s. s : C - (A Un B) & A Int B Int C <= {s} & (A Int C) - B <= {s} & B - (A Un C) <= {s} & (B Int C) - A <= {s}) & (EX s1 s2. distinct[s1, s2] & s1 : -(C Un D) & s2 : (C - D) Un (C Int D) & C - D <= {s1, s2} & D - C <= {s1, s2}) --> (EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1})"
-  oops
+apply (mixr "(EX s. s : (C - (A Un B Un D)) Un ((C Int D) - (A Un B)) & (A Int B Int C) - D <= {s} & A Int B Int C Int D <= {s} & (A Int B Int D) - C <= {s} & (A Int C) - (B Un D) <= {s} & (A Int C Int D) - B <= {s} & (A Int D) - (B Un C) <= {s} & B - (A Un C Un D) <= {s} & (B Int C) - (A Un D) <= {s} & (B Int C Int D) - A <= {s} & (B Int D) - (A Un C) <= {s} & D - (A Un B Un C) <= {s}) & (EX s1 s2. distinct[s1, s2] & s1 : -(C Un D) & s2 : (C - D) Un (C Int D) & C - D <= {s1, s2} & D - C <= {s1, s2}) --> (EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1})")
+  apply (mixr "(EX s. s : (C - (A Un B Un D)) Un ((C Int D) - (A Un B)) & (A Int B Int C) - D <= {s} & A Int B Int C Int D <= {s} & (A Int B Int D) - C <= {s} & (A Int C) - (B Un D) <= {s} & (A Int C Int D) - B <= {s} & (A Int D) - (B Un C) <= {s} & B - (A Un C Un D) <= {s} & (B Int C) - (A Un D) <= {s} & (B Int C Int D) - A <= {s} & (B Int D) - (A Un C) <= {s} & C - (A Un B Un D) <= {s} & D - (A Un B Un C) <= {s}) & (EX s1 s2. distinct[s1, s2] & s1 : -(C Un D) & s2 : (C - D) Un (C Int D) & C - D <= {s1, s2} & D - C <= {s1, s2}) --> (EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1})")
+  apply (mixr "(EX s s1. distinct[s, s1] & s : (C - (A Un B Un D)) Un ((C Int D) - (A Un B)) & s1 : (-(A Un B Un C Un D)) Un (A - (B Un C Un D)) Un ((A Int B) - (C Un D)) & (A Int B Int C) - D <= {s, s1} & A Int B Int C Int D <= {s, s1} & (A Int B Int D) - C <= {s, s1} & (A Int C) - (B Un D) <= {s, s1} & (A Int C Int D) - B <= {s, s1} & (A Int D) - (B Un C) <= {s, s1} & B - (A Un C Un D) <= {s, s1} & (B Int C) - (A Un D) <= {s, s1} & (B Int C Int D) - A <= {s, s1} & (B Int D) - (A Un C) <= {s, s1} & C - (A Un B Un D) <= {s, s1} & D - (A Un B Un C) <= {s, s1}) & (EX s1 s2. distinct[s1, s2] & s1 : -(C Un D) & s2 : (C - D) Un (C Int D) & C - D <= {s1, s2} & D - C <= {s1, s2}) --> (EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1})")
+  apply (mixr "(EX s s1. distinct[s, s1] & s : (C - (A Un B Un D)) Un ((C Int D) - (A Un B)) & s1 : (-(A Un B Un C Un D)) Un (A - (B Un C Un D)) Un ((A Int B) - (C Un D)) & (A Int B Int C) - D <= {s, s1} & A Int B Int C Int D <= {s, s1} & (A Int B Int D) - C <= {s, s1} & (A Int C) - (B Un D) <= {s, s1} & (A Int C Int D) - B <= {s, s1} & (A Int D) - (B Un C) <= {s, s1} & B - (A Un C Un D) <= {s, s1} & (B Int C) - (A Un D) <= {s, s1} & (B Int C Int D) - A <= {s, s1} & (B Int D) - (A Un C) <= {s, s1} & C - (A Un B Un D) <= {s, s1} & D - (A Un B Un C) <= {s, s1}) --> (EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1})")
+  apply (mixr "(EX s s1. distinct[s, s1] & s : (-(A Un B Un D)) Un (D - (A Un B)) & s1 : (-(A Un B Un D)) Un (A - (B Un D)) Un ((A Int B) - D) & A Int B Int D <= {s, s1} & (A Int D) - B <= {s, s1} & B - (A Un D) <= {s, s1} & (B Int D) - A <= {s, s1}) --> (EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1})")
+  apply (mixr "(EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1}) --> (EX s s1. distinct[s, s1] & s : (-(B Un D)) Un (D - B) & s1 : (-(B Un D)) Un (B - D) & B Int D <= {s, s1})")
+  by(auto)
 
 lemma hr_proof:
   "(\<exists>s1 s2. distinct[s1, s2] \<and> s1 \<in> A \<inter> B \<and> s2 \<in> (A - B) \<union> (B - A))
    \<longrightarrow> (\<exists>t1 t2. distinct[t1, t2] \<and> t1 \<in> A \<and> t2 \<in> B) \<and> A \<inter> B \<noteq> {}"
+  apply(rule impI)
+  apply(rule conjI)
   oops
 
 

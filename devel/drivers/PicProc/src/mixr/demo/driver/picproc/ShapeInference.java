@@ -119,7 +119,7 @@ public class ShapeInference implements InferenceRuleDescriptor, InferenceRule, A
                     if (imageRepresentation != null && imageRepresentation.getFormula() instanceof ImageUrlFormula) {
                         ImageUrlFormula imageUrlFormula = (ImageUrlFormula) imageRepresentation.getFormula();
                         String shape = extractShape(imageUrlFormula);
-                        Formula inferedFormula = new Formula(StringFormat.createFormula("ShapeOf " + AreaInference.getFreeVariableName(imageRepresentation, imageUrlFormula) + " " + shape), f.getRole());
+                        Formula inferedFormula = new Formula(StringFormat.createFormula("ShapeOf " + AreaInference.getFreeVariableName(imageRepresentation, imageUrlFormula) + " = " + shape), f.getRole());
                         transformedSentences[i] = Arrays.asList((Sentence) inferedFormula);
                         transformedTargets[i] = targets.getInferenceTargets().get(i);
                     }
