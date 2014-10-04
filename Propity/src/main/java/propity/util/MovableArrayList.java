@@ -149,8 +149,6 @@ public final class MovableArrayList<E> implements List<E>, RandomAccess {
      *
      * <p><span style="font-weight:bold">Important</span>: this method is not
      * thread-safe.</p>
-     *
-     * @param destination
      */
     public void moveTo(MovableArrayList<? super E> destination) {
         move(this, destination);

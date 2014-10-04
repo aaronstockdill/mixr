@@ -185,7 +185,6 @@ public final class Sets {
      * <p><span style="font-weight:bold">Note 2</span>: this method will throw
      * an exception if the any of the two sets have a {@link SortedSet#comparator()
      * comparator}.</p>
-     * @param <E>
      * @param A the first set.
      * @param B the second set.
      * @return {@code true} iff the set <span style="font-style:italic;">A</span>
@@ -253,7 +252,6 @@ public final class Sets {
      * Comparable#compareTo(java.lang.Object)} methods).</p>
      * <p><span style="font-weight:bold">Note 2</span>: this method will throw
      * an exception if the two sets do not share the same comparator.</p>
-     * @param <E>
      * @param A the first set.
      * @param B the second set.
      * @return {@code true} iff the set <span style="font-style:italic;">A</span>
@@ -481,10 +479,6 @@ public final class Sets {
      *          isn't, and</li>
      *      <li>{@code 2} if both sets are neither null nor empty.</li>
      *  </ul>
-     * @param <E>
-     * @param s1
-     * @param s2
-     * @return
      */
     private static <E> int nullOrEmptyCompare(SortedSet<E> s1, SortedSet<? extends E> s2) {
         if (s1 == s2) {
@@ -530,10 +524,6 @@ public final class Sets {
      *      <li>{@code 1} if el1 is larger than el2, and</li>
      *      <li>{@code -1} if el1 is smaller than el2.</li>
      *  </ul>
-     * @param <E>
-     * @param el1
-     * @param el2
-     * @return
      */
     private static <E extends Comparable<? super E>> int compare(E el1, E el2) {
         // Compare the current two elements. If exactly one of them is
@@ -554,9 +544,6 @@ public final class Sets {
      * Checks whether the given sets are ordered naturally and throws an
      * exception if they are not.
      * <p>Note: This method expects that both sets are not {@code null}.</p>
-     * @param <E>
-     * @param s1
-     * @param s2
      * @throws IllegalArgumentException
      */
     private static <E> void checkSetsOrderedNaturally(SortedSet<E> s1, SortedSet<? extends E> s2) throws IllegalArgumentException {

@@ -37,76 +37,82 @@ import java.util.Locale;
  * {@code i18n("STRING_RESOURCE_KEY"); }
  * <p>Additional strings can be added to the {@code "propity/i18n/strings"}
  * bundle (see {@link propity.i18n.Translations#StringsBundle}).</p>
+ *
  * @author Matej Urbas [matej.urbas@gmail.com]
  */
 public final class Translations {
 
-    // <editor-fold defaultstate="collapsed" desc="Disabled Constructor">
-    private Translations() {
-    }
-    // </editor-fold>
-    // <editor-fold defaultstate="collapsed" desc="Constants">
-    /**
-     * The path to the bundle which contains translations for Propity.
-     */
-    public static final String StringsBundle = "propity/i18n/strings";
-    // </editor-fold>
+  // <editor-fold defaultstate="collapsed" desc="Disabled Constructor">
+  private Translations() {
+  }
+  // </editor-fold>
+  // <editor-fold defaultstate="collapsed" desc="Constants">
+  /**
+   * The path to the bundle which contains translations for Propity.
+   */
+  public static final String StringsBundle = "propity/i18n/strings";
+  // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="Translated Strings">
-    /**
-     * Returns a string in the language of the current locale.
-     * <p>It looks up the internationalised string based on the provided
-     * key.</p>
-     * @param key the key of the string to fetch.
-     * @return a string in the language of the current locale.
-     */
-    public static String i18n(String key) {
-        return java.util.ResourceBundle.getBundle(StringsBundle).getString(key);
-    }
+  // <editor-fold defaultstate="collapsed" desc="Translated Strings">
 
-    /**
-     * Returns a formatted string in the language of the current locale.
-     * <p>It looks up the internationalised string based on the provided
-     * key.</p>
-     * @param key the key of the <a href="http://download.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax">format specification string</a> to fetch.
-     * @param args the arguments to the formatted string (the same as arguments to {@link String#format(java.lang.String, java.lang.Object[])}).
-     * @return a string in the language of the current locale.
-     */
-    public static String i18n(String key, Object... args) {
-        return String.format(java.util.ResourceBundle.getBundle(StringsBundle).getString(key), args);
-    }
+  /**
+   * Returns a string in the language of the current locale.
+   * <p>It looks up the internationalised string based on the provided
+   * key.</p>
+   *
+   * @param key the key of the string to fetch.
+   * @return a string in the language of the current locale.
+   */
+  public static String i18n(String key) {
+    return java.util.ResourceBundle.getBundle(StringsBundle).getString(key);
+  }
 
-    /**
-     * Returns a string in the language of the current locale.
-     * <p>It looks up the internationalised string based on the provided
-     * key.</p>
-     * @param locale the locale for which to return the internationalised string.
-     * @param key the key of the string to fetch.
-     * @return a string in the language of the current locale.
-     */
-    public static String i18n(Locale locale, String key) {
-        if (locale == null) {
-            return i18n(key);
-        } else {
-            return java.util.ResourceBundle.getBundle(StringsBundle, locale).getString(key);
-        }
-    }
+  /**
+   * Returns a formatted string in the language of the current locale.
+   * <p>It looks up the internationalised string based on the provided
+   * key.</p>
+   *
+   * @param key  the key of the <a href="http://download.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax">format specification string</a> to fetch.
+   * @param args the arguments to the formatted string (the same as arguments to {@link String#format(java.lang.String, java.lang.Object[])}).
+   * @return a string in the language of the current locale.
+   */
+  public static String i18n(String key, Object... args) {
+    return String.format(java.util.ResourceBundle.getBundle(StringsBundle).getString(key), args);
+  }
 
-    /**
-     * Returns a formatted string in the language of the current locale.
-     * <p>It looks up the internationalised string based on the provided
-     * key.</p>
-     * @param locale the locale for which to return the internationalised string.
-     * @param key the key of the <a href="http://download.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax">format specification string</a> to fetch.
-     * @param args the arguments to the formatted string (the same as arguments to {@link String#format(java.lang.String, java.lang.Object[])}).
-     * @return a string in the language of the current locale.
-     */
-    public static String i18n(Locale locale, String key, Object... args) {
-        if (locale == null) {
-            return i18n(key, args);
-        } else {
-            return String.format(java.util.ResourceBundle.getBundle(StringsBundle, locale).getString(key), args);
-        }
+  /**
+   * Returns a string in the language of the current locale.
+   * <p>It looks up the internationalised string based on the provided
+   * key.</p>
+   *
+   * @param locale the locale for which to return the internationalised string.
+   * @param key    the key of the string to fetch.
+   * @return a string in the language of the current locale.
+   */
+  public static String i18n(Locale locale, String key) {
+    if (locale == null) {
+      return i18n(key);
+    } else {
+      return java.util.ResourceBundle.getBundle(StringsBundle, locale).getString(key);
     }
-    // </editor-fold>
+  }
+
+  /**
+   * Returns a formatted string in the language of the current locale.
+   * <p>It looks up the internationalised string based on the provided
+   * key.</p>
+   *
+   * @param locale the locale for which to return the internationalised string.
+   * @param key    the key of the <a href="http://download.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax">format specification string</a> to fetch.
+   * @param args   the arguments to the formatted string (the same as arguments to {@link String#format(java.lang.String, java.lang.Object[])}).
+   * @return a string in the language of the current locale.
+   */
+  public static String i18n(Locale locale, String key, Object... args) {
+    if (locale == null) {
+      return i18n(key, args);
+    } else {
+      return String.format(java.util.ResourceBundle.getBundle(StringsBundle, locale).getString(key), args);
+    }
+  }
+  // </editor-fold>
 }
