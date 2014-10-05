@@ -11,9 +11,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>propity</groupId>
+            <groupId>si.urbas</groupId>
             <artifactId>propity</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <version>0.0.1</version>
         </dependency>
     </dependencies>
 
